@@ -1,0 +1,21 @@
+{
+    "name": "TechDivision/PBC",
+    "type": "library",
+    "description": "A lightweight Design-by-Contract framework for PHP",
+    "keywords": ["Design-by-Contract", "framework", "DbC"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bernhard Wick",
+            "email": "b.wick@techdivision.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/class-loader": ">=2.0"
+    },
+    "autoload": {
+        "psr-0": { "TechDivision\\PCB": "" }
+    },
+    "minimum-stability": "dev"
+}
