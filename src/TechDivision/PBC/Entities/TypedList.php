@@ -9,7 +9,7 @@
 
 namespace TechDivision\PBC\Entities;
 
-abstract class TypedList implements ArrayAccess, IteratorAggregate
+abstract class TypedList implements \ArrayAccess, \IteratorAggregate
 {
     protected $itemType;
 
@@ -54,7 +54,7 @@ abstract class TypedList implements ArrayAccess, IteratorAggregate
     public function offsetSet($offset, $value)
     {
         if (!is_a($value, $this->itemType)) {
-            throw new UnexpectedValueException();
+            throw new \UnexpectedValueException();
         }
         if (is_null($offset)) {
             $this->container[] = $value;

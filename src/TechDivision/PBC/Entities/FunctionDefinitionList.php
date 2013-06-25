@@ -11,11 +11,8 @@ namespace TechDivision\PBC\Entities;
 
 class FunctionDefinitionList extends TypedList
 {
-    /**
-     *
-     */
-    public function __constructor()
+    public function __construct()
     {
-        $this->itemType = 'FunctionDefinition';
+        $this->itemType = 'TechDivision\PBC\Entities\FunctionDefinition';
     }
 }

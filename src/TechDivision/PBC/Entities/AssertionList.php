@@ -11,11 +11,9 @@ namespace TechDivision\PBC\Entities;
 
 class AssertionList extends TypedList
 {
-    /**
-     *
-     */
-    public function __constructor()
+
+    public function __construct()
     {
-        $this->itemType = 'Assertion';
+        $this->itemType = 'TechDivision\PBC\Entities\Assertion';
     }
 }

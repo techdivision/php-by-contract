@@ -52,11 +52,11 @@ class AnnotationParser
 
             // We seem to have gotten a simple script file, duh!
             $definition = new ScriptDefinition();
-            $definition->name = $fileName;
+            $definition->name = basename($fileName);
         }
 
         // The filePath attribute is needed by whatever we got
-        $definition->filePath = fullpath($fileName);
+        $definition->filePath = realpath($fileName);
 
         // Get all the functions/methods
         $functionList = new FunctionDefinitionList();
@@ -119,7 +119,7 @@ class AnnotationParser
 
         // Lets build up the result array
         $result = new AssertionList();
-        foreach ($rawConditions as $condition) {
+        foreach ($rawConditions[0] as $condition) {
 
             $result->offsetSet(null, $this->parseAssertion($condition));
         }
@@ -133,12 +133,12 @@ class AnnotationParser
     private function parseAssertion($docString)
     {
         // We have to differ between several types of assertions, so lets check which one we got
-        $annotations = array('@param', '@return', PBC_KEYWORD_POST, PBC_KEYWORD_PRE);
+        $annotations = array('@param', '@return', PBC_KEYWORD_POST, PBC_KEYWORD_PRE, PBC_KEYWORD_INVARIANT);
 
         $usedAnnotation = '';
         foreach ($annotations as $annotation) {
 
-            if (str_pos($docString, $annotation) !== false) {
+            if (strpos($docString, $annotation) !== false) {
 
                 $usedAnnotation = $annotation;
                 break;
@@ -173,8 +173,9 @@ class AnnotationParser
                 break;
 
             // We got our own definitions. Could be a bit more complex here
+            case PBC_KEYWORD_PRE:
             case PBC_KEYWORD_POST:
-            case PBC_KEYWORD_POST:
+            case PBC_KEYWORD_INVARIANT:
 
                 $explodedDocString = explode(' ', preg_replace('/\s+|\t+/', ' ', $docString));
 
@@ -223,7 +224,7 @@ class AnnotationParser
      */
     private function usesKeyword($docBlock, $keyword)
     {
-        if (str_pos($docBlock, $keyword) === false) {
+        if (strpos($docBlock, $keyword) === false) {
 
             return false;
         } else {
