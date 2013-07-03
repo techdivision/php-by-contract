@@ -2,7 +2,7 @@
     "name": "TechDivision/php-by-contract",
     "type": "library",
     "description": "A lightweight Design-by-Contract library for PHP",
-    "keywords": ["Design-by-Contract", "framework", "DbC"],
+    "keywords": ["Design-by-Contract", "library", "DbC"],
     "license": "MIT",
     "authors": [
         {
