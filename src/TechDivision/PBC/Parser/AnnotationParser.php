@@ -284,6 +284,8 @@ class AnnotationParser
      */
     public function getClassDefinition($tokens, $className)
     {
+        //TODO We still miss the attributes!!!!
+
         for ($i = 0; $i < count($tokens); $i++) {
 
             // Only makes sense to check for arrays
