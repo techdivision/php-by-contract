@@ -9,6 +9,8 @@
 
 namespace TechDivision\PBC;
 
+require "../../src/TechDivision/PBC/Bootstrap.php";
+
 class BasicTest extends PHPUnit_Framework_TestCase
 {
 

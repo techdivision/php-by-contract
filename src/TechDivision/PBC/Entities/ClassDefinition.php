@@ -24,17 +24,29 @@ class ClassDefinition
     public $namespace;
 
     /**
-     * @var string
+     * @var array
      */
-    public $filePath;
-
-    /**
-     * @var FunctionDefinitionList
-     */
-    public $functionDefinitions;
+    public $attributes;
 
     /**
      * @var AssertionList
      */
     public $invariantConditions;
+
+    /**
+     * @var string
+     */
+    public $docBlock;
+
+    /**
+     * Default constructor
+     */
+    public function __construct()
+    {
+        $this->name = '';
+        $this->namespace = '';
+        $this->attributes = array();
+        $this->invariantConditions = new AssertionList();
+        $this->docBlock = '';
+    }
 }

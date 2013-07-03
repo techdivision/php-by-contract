@@ -9,11 +9,19 @@
 
 namespace TechDivision\PBC\Parser;
 
+require_once __DIR__ . "/../Entities/Assertion.php";
+require_once __DIR__ . "/../Entities/AssertionList.php";
+require_once __DIR__ . "/../Entities/ClassDefinition.php";
+require_once __DIR__ . "/../Entities/FunctionDefinition.php";
+require_once __DIR__ . "/../Entities/FunctionDefinitionList.php";
+require_once __DIR__ . "/../Entities/ScriptDefinition.php";
+
 use TechDivision\PBC\Entities\Assertion;
 use TechDivision\PBC\Entities\AssertionList;
 use TechDivision\PBC\Entities\ClassDefinition;
 use TechDivision\PBC\Entities\FunctionDefinition;
 use TechDivision\PBC\Entities\FunctionDefinitionList;
+use TechDivision\PBC\Entities\MetaDefinition;
 use TechDivision\PBC\Entities\ScriptDefinition;
 
 /**
@@ -21,6 +29,17 @@ use TechDivision\PBC\Entities\ScriptDefinition;
  */
 class AnnotationParser
 {
+    /**
+     * @var
+     */
+    private $config;
+
+    public function __construct()
+    {
+        $config = new \Config();
+        $this->config = $config->getConfig('Parser');
+    }
+
     /**
      * @param $fileName
      */
@@ -60,27 +79,43 @@ class AnnotationParser
 
         // Get all the functions/methods
         $functionList = new FunctionDefinitionList();
-        foreach ($docBlocks[1] as $docBlock) {
 
-            // Create our definition of this function/method
-            $functionDefinition = new FunctionDefinition();
+        $tokens = token_get_all($fileContent);
+        var_dump($tokens);
+        die();
+        for ($i = 0; $i < count($tokens); $i++) {
 
-            // We should get a name
-            $functionDefinition->name = $this->parseFunctionName($docBlock);
+            if (is_array($tokens[$i]) === true) {
 
-            // Lets check if we use any of our self defined keywords.
-            $functionDefinition->usesOld = $this->usesKeyword($docBlock, PBC_KEYWORD_OLD);
-            $functionDefinition->usesResult = $this->usesKeyword($docBlock, PBC_KEYWORD_RESULT);
+                if ($tokens[$i][0] === T_FUNCTION) {
 
-            // Lets get our pre- and postconditions
-            $functionDefinition->preConditions = $this->getConditions($docBlock, PBC_KEYWORD_PRE);
-            $functionDefinition->postConditions = $this->getConditions($docBlock, PBC_KEYWORD_POST);
+                    // Create our definition of this function/method
+                    $functionDefinition = new FunctionDefinition();
 
-            // Add the definition to the list
-            $functionList->offsetSet($functionDefinition->name, $functionDefinition);
+                    // We should get a name
+                    if ($tokens[$i + 2][0] === T_STRING) {
 
-            // Clean the variable as it might be reused
-            $functionDefinition = null;
+                        $functionDefinition->name = $tokens[$i + 2][1];
+                    }
+
+                    if ($tokens[$i - 2][0] === T_DOC_COMMENT) {
+
+                        // Lets check if we use any of our self defined keywords.
+                        $functionDefinition->usesOld = $this->usesKeyword($tokens[$i - 2][1], PBC_KEYWORD_OLD);
+                        $functionDefinition->usesResult = $this->usesKeyword($tokens[$i - 2][1], PBC_KEYWORD_RESULT);
+
+                        // Lets get our pre- and postconditions
+                        $functionDefinition->preConditions = $this->getConditions($tokens[$i - 2][1], PBC_KEYWORD_PRE);
+                        $functionDefinition->postConditions = $this->getConditions($tokens[$i - 2][1], PBC_KEYWORD_POST);
+                    }
+
+                    // Add the definition to the list
+                    $functionList->offsetSet($functionDefinition->name, $functionDefinition);
+
+                    // Clean the variable as it might be reused
+                    $functionDefinition = null;
+                }
+            }
         }
 
         // Add the list of function definitions to our overall definition
@@ -90,15 +125,210 @@ class AnnotationParser
     }
 
     /**
+     *
+     */
+    public function getFunctionDefinition($tokens, $functionName)
+    {
+        for ($i = 0; $i < count($tokens); $i++) {
+
+            // Only makes sense to check for arrays
+            if (is_array($tokens[$i])) {
+
+                // did we find the function we are looking for?
+                if ($tokens[$i][0] === T_FUNCTION && $tokens[$i + 2][1] === $functionName) {
+
+                    // Create our definition of this function/method
+                    $functionDefinition = new FunctionDefinition();
+
+                    // We should get a name
+                    if ($tokens[$i + 2][0] === T_STRING) {
+
+                        $functionDefinition->name = $tokens[$i + 2][1];
+                    }
+
+                    if ($tokens[$i - 2][0] === T_DOC_COMMENT) {
+
+                        $functionDefinition->docBlock = $tokens[$i - 2][1];
+
+                        // There is nothing between the function token and the doc comment, so the function has to be public
+                        $functionDefinition->access = 'public';
+
+                        // Lets check if we use any of our self defined keywords.
+                        $functionDefinition->usesOld = $this->usesKeyword($tokens[$i - 2][1], PBC_KEYWORD_OLD);
+                        $functionDefinition->usesResult = $this->usesKeyword($tokens[$i - 2][1], PBC_KEYWORD_RESULT);
+
+                        // Lets get our pre- and postconditions
+                        $functionDefinition->preConditions = $this->getConditions($tokens[$i - 2][1], PBC_KEYWORD_PRE);
+                        $functionDefinition->postConditions = $this->getConditions($tokens[$i - 2][1], PBC_KEYWORD_POST);
+
+                    } elseif ($tokens[$i - 2][0] === (T_PRIVATE | T_PROTECTED | T_PUBLIC)) {
+
+                        $functionDefinition->access = $tokens[$i - 2][1];
+
+                        if ($tokens[$i - 4][0] === T_DOC_COMMENT) {
+
+                            $functionDefinition->docBlock = $tokens[$i - 4][1];
+
+                            // Lets check if we use any of our self defined keywords.
+                            $functionDefinition->usesOld = $this->usesKeyword($tokens[$i - 4][1], PBC_KEYWORD_OLD);
+                            $functionDefinition->usesResult = $this->usesKeyword($tokens[$i - 4][1], PBC_KEYWORD_RESULT);
+
+                            // Lets get our pre- and postconditions
+                            $functionDefinition->preConditions = $this->getConditions($tokens[$i - 4][1], PBC_KEYWORD_PRE);
+                            $functionDefinition->postConditions = $this->getConditions($tokens[$i - 4][1], PBC_KEYWORD_POST);
+
+                        }
+
+                    }
+
+                    // Check if we got parameters
+                    if ($tokens[$i + 3] === '(' && $tokens[$i + 4] !== ')') {
+
+                        // Gotta get them all
+                        for ($j = $i + 3; $j < count($tokens); $j++) {
+
+                            if (is_array($tokens[$j]) && $tokens[$j][0] === T_VARIABLE) {
+
+                                $functionDefinition->parameters[] = $tokens[$j][1];
+
+                            } elseif ($tokens[$j] === ')') {
+
+                                break;
+                            }
+                        }
+                    }
+
+                    return $functionDefinition;
+                }
+            }
+        }
+
+        // We did not find anything
+        return false;
+    }
+
+    /**
+     *
+     */
+    public function getMetaDefinition($tokens, $path)
+    {
+        // The path is something we already know
+        $metaDefinition = new MetaDefinition();
+        $metaDefinition->filePath = $path;
+
+        for ($i = 0; $i < count($tokens); $i++) {
+
+            // Only makes sense to check for arrays
+            if (is_array($tokens[$i])) {
+
+                // Get all the use statements and include/require statements here.
+                // Make sure to only use include/requires which do not load class names.
+                // Classes should rather be loaded by our AutorLoader class.
+                switch ($tokens[$i][0]) {
+
+                    case T_USE:
+
+                        $metaDefinition->uses[] = $tokens[$i + 2][1];
+
+                        break;
+
+                    case T_INCLUDE:
+
+                        if ($this->getClassName($tokens[$i + 2][1] === '')) {
+
+                            $metaDefinition->includes[] = $tokens[$i + 2][1];
+                        }
+
+                        break;
+
+                    case T_INCLUDE_ONCE:
+
+                        if ($this->getClassName($tokens[$i + 2][1] === '')) {
+
+                            $metaDefinition->includeOnces[] = $tokens[$i + 2][1];
+                        }
+
+                        break;
+
+                    case T_REQUIRE:
+
+                        if ($this->getClassName($tokens[$i + 2][1] === '')) {
+
+                            $metaDefinition->requires[] = $tokens[$i + 2][1];
+                        }
+
+                        break;
+
+                    case T_REQUIRE_ONCE:
+
+                        if ($this->getClassName($tokens[$i + 2][1] === '')) {
+
+                            $metaDefinition->requireOnces[] = $tokens[$i + 2][1];
+                        }
+
+                        break;
+
+                    default:
+
+                        break;
+                }
+            }
+        }
+
+        // We did not find anything
+        return $metaDefinition;
+    }
+
+    /**
+     *
+     */
+    public function getClassDefinition($tokens, $className)
+    {
+        for ($i = 0; $i < count($tokens); $i++) {
+
+            // Only makes sense to check for arrays
+            if (is_array($tokens[$i])) {
+
+                // did we find the function we are looking for?
+                if ($tokens[$i][0] === T_CLASS && $tokens[$i + 2][1] === $className) {
+
+                    // Create our definition of this function/method
+                    $classDefinition = new ClassDefinition();
+
+                    // We should get a name
+                    if ($tokens[$i + 2][0] === T_STRING) {
+
+                        $classDefinition->name = $tokens[$i + 2][1];
+                    }
+
+                    if ($tokens[$i - 2][0] === T_DOC_COMMENT) {
+
+                        $classDefinition->docBlock = $tokens[$i -2][1];
+
+                        // Lets get our invariant conditions
+                        $classDefinition->invariantConditions = $this->getConditions($tokens[$i - 2][1], PBC_KEYWORD_INVARIANT);
+                    }
+
+                    return $classDefinition;
+                }
+            }
+        }
+
+        // We did not find anything
+        return false;
+    }
+
+    /**
      * @param $docBlock
      *
      * @return mixed
      */
     private function getConditions($docBlock, $conditionKeyword)
     {
-        // There are only 2 valid condition types
+        // There are only 3 valid condition types
         if ($conditionKeyword !== PBC_KEYWORD_PRE && $conditionKeyword !== PBC_KEYWORD_POST
-            && $conditionKeyword !== PBC_KEYWORD_INVARIANT) {
+            && $conditionKeyword !== PBC_KEYWORD_INVARIANT
+        ) {
 
             return false;
         }
@@ -107,21 +337,24 @@ class AnnotationParser
         $rawConditions = array();
         if ($conditionKeyword === PBC_KEYWORD_POST) {
 
-            preg_match_all('/' . $conditionKeyword . '.+?\n|' . '@return' . '.+?\n/s', $docBlock, $rawConditions);
+            preg_match_all('/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n|' . '@return' . '.+?\n/s', $docBlock, $rawConditions);
+
         } elseif ($conditionKeyword === PBC_KEYWORD_PRE) {
 
-            preg_match_all('/' . $conditionKeyword . '.+?\n|' . '@param' . '.+?\n/s', $docBlock, $rawConditions);
+            preg_match_all('/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n|' . '@param' . '.+?\n/s', $docBlock, $rawConditions);
 
         } else {
 
-            preg_match_all('/' . $conditionKeyword . '.+?\n/s', $docBlock, $rawConditions);
+            preg_match_all('/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n/s', $docBlock, $rawConditions);
         }
 
         // Lets build up the result array
         $result = new AssertionList();
-        foreach ($rawConditions[0] as $condition) {
+        if (empty($rawConditions) === false) {
+            foreach ($rawConditions[0] as $condition) {
 
-            $result->offsetSet(null, $this->parseAssertion($condition));
+                $result->offsetSet(null, $this->parseAssertion($condition));
+            }
         }
 
         return $result;
@@ -151,24 +384,32 @@ class AnnotationParser
             // We got something which can only contain type information
             case '@param':
             case '@return':
+                if ($this->config['enforceDefaultTypeSafety'] === true) {
+                    $explodedDocString = explode(' ', preg_replace('/\s+|\t+/', ' ', $docString));
 
-                $explodedDocString = explode(' ', preg_replace('/\s+|\t+/', ' ', $docString));
+                    // The first operand is different for both options
+                    if ($usedAnnotation === '@param') {
 
-                // The first operand should be clear now
-                $assertion->firstOperand = $explodedDocString[2];
+                        $assertion->firstOperand = $explodedDocString[2];
 
-                // For the operator we either have an is_x or an is_a function.
-                // This also determines which secondOperator we have
-                if (function_exists('is_' . $explodedDocString[1]) === true) {
+                    } else {
 
-                    $assertion->operator = 'is_' . $explodedDocString[1];
-                    // There is no second operand needed
-                    $assertion->secondOperand = null;
+                        $assertion->firstOperand = PBC_KEYWORD_RESULT;
+                    }
 
-                } elseif (class_exists($explodedDocString[1]) === true) {
+                    // For the operator we either have an is_x or an is_a function.
+                    // This also determines which secondOperator we have
+                    if (function_exists('is_' . $explodedDocString[1]) === true) {
 
-                    $assertion->operator = 'is_a';
-                    $assertion->secondOperand = $explodedDocString[1];
+                        $assertion->operator = 'is_' . $explodedDocString[1];
+                        // There is no second operand needed
+                        $assertion->secondOperand = null;
+
+                    } elseif (class_exists($explodedDocString[1]) === true) {
+
+                        $assertion->operator = 'is_a';
+                        $assertion->secondOperand = $explodedDocString[1];
+                    }
                 }
                 break;
 
@@ -309,7 +550,7 @@ class AnnotationParser
 
         // Declaring the iterator here, to not check the start of the file again and again
         $i = 0;
-        while (isset($className) === false) {
+        while (empty($className) === true) {
 
             // Is the file over already?
             if (feof($fileResource)) {

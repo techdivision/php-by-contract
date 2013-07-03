@@ -68,6 +68,6 @@ abstract class TypedList implements \ArrayAccess, \IteratorAggregate
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->container);
+        return new \ArrayIterator($this->container);
     }
 }

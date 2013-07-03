@@ -17,12 +17,17 @@ class FunctionDefinition
     /**
      * @var string
      */
-    public $class;
+    public $name;
 
     /**
      * @var string
      */
-    public $name;
+    public $access;
+
+    /**
+     * @var array
+     */
+    public $parameters;
 
     /**
      * @var AssertionList
@@ -40,7 +45,21 @@ class FunctionDefinition
     public $usesOld;
 
     /**
-     * @var boolean
+     * @var string
      */
-    public $usesResult;
+    public $docBlock;
+
+    /**
+     * Default constructor
+     */
+    public function __construct()
+    {
+        $this->name = '';
+        $this->access = '';
+        $this->parameters = array();
+        $this->postConditions = new AssertionList();
+        $this->preConditions = new AssertionList();
+        $this->usesOld = false;
+        $this->docBlock = '';
+    }
 }
