@@ -330,6 +330,9 @@ class ProxyFactory
                 for ($k = 0;$k < $assertionIterator->count(); $k++) {
 
                     $fileContent .= $this->createAroundAdviceCode($assertionIterator->current(), $functionDefinition->name);
+
+                    // Next assertion please
+                    $assertionIterator->next();
                 }
 
                 // Do we have to keep an instance of $this to compare with old later?
@@ -350,6 +353,9 @@ class ProxyFactory
                 for ($k = 0;$k < $assertionIterator->count(); $k++) {
 
                     $fileContent .= $this->createAroundAdviceCode($assertionIterator->current(), $functionDefinition->name);
+
+                    // Next assertion please
+                    $assertionIterator->next();
                 }
 
                 // If we passed every check we can return the result

@@ -451,7 +451,7 @@ class AnnotationParser
 
                 $operand = $this->filterOperand($docString);
                 $operators = $this->filterOperators($docString, $operand);
-
+            //var_dump($variable, $type, $class, $operand, $operators, '----------------------------------');
                 // Now we have to check what we got
                 // First of all handle if we got a simple type
                 if ($type !== false) {
@@ -519,7 +519,7 @@ class AnnotationParser
             // Check if we got a variable
             if (strpos($stringPiece, '$') === 0 || $stringPiece === PBC_KEYWORD_RESULT || $stringPiece === PBC_KEYWORD_OLD) {
 
-                return $stringPiece;
+                return trim($stringPiece);
             }
         }
 
@@ -541,9 +541,9 @@ class AnnotationParser
         foreach ($explodedString as $stringPiece) {
 
             // Check if we got a variable
-            if (function_exists('is_' . $stringPiece) && $stringPiece === 'a') {
+            if (function_exists('is_' . $stringPiece) && $stringPiece !== 'a') {
 
-                return $stringPiece;
+                return trim($stringPiece);
             }
         }
 
@@ -567,7 +567,7 @@ class AnnotationParser
             // Check if we got a variable
             if (class_exists($stringPiece) || interface_exists($stringPiece)) {
 
-                return $stringPiece;
+                return trim($stringPiece);
             }
         }
 
@@ -592,11 +592,23 @@ class AnnotationParser
                 // There is a special case, as we could use $this
                 if ($tokens[$i - 4][1] === '$this') {
 
-                    return array('$this->' . $tokens[$i - 2][1], $tokens[$i + 2][1]);
+                    return array(trim('$this->' . $tokens[$i - 2][1]), trim($tokens[$i + 2][1]));
 
                 } else {
 
-                    return array($tokens[$i - 2][1], $tokens[$i + 2][1]);
+                    return array(trim($tokens[$i - 2][1]), trim($tokens[$i + 2][1]));
+                }
+
+            } else if ($tokens[$i] === $operand && is_array($tokens[$i - 2]) && is_array($tokens[$i + 2])) {
+
+                // There is a special case, as we could use $this
+                if ($tokens[$i - 4][1] === '$this') {
+
+                    return array(trim('$this->' . $tokens[$i - 2][1]), trim($tokens[$i + 2][1]));
+
+                } else {
+
+                    return array(trim($tokens[$i - 2][1]), trim($tokens[$i + 2][1]));
                 }
             }
         }

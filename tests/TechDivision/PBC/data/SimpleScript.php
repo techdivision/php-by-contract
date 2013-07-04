@@ -10,6 +10,6 @@
 require "../../../../src/TechDivision/PBC/Bootstrap.php";
 
 $test = new \TestBert();
-$test->stringToArray('null');
+$test->stringToArray("null");
 $test->concatSomeStuff(27, 'test', new \Exception());
 //$test->iBreakTheInvariant();

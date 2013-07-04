@@ -42,7 +42,7 @@ class TestBert
     }
 
     /**
-     * @requires $param1 == "null"
+     * @requires $param1 == 'null'
      *
      * @param string $param1
      *
