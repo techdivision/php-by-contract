@@ -43,7 +43,7 @@ class TestAnnotationParserPBCProxied
      *
      * @post array $result
      *
-     * @return string
+     * @return array
      */
     function testFest2($param1)
     {
