@@ -9,5 +9,7 @@
 
 require "../../../../src/TechDivision/PBC/Bootstrap.php";
 
-$test = new \TestAnnotationParser();
-$test->testFest2('test');
+$test = new \TestBert();
+$test->stringToArray('null');
+$test->concatSomeStuff(27, 'test', new \Exception());
+//$test->iBreakTheInvariant();

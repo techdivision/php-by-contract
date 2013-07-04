@@ -7,9 +7,9 @@
  * To change this template use File | Settings | File Templates.
  */
 
-define('PBC_KEYWORD_PRE', '@PBC\pre');
-define('PBC_KEYWORD_POST', '@PBC\post');
-define('PBC_KEYWORD_INVARIANT', '@PBC\invariant');
+define('PBC_KEYWORD_PRE', '@requires');
+define('PBC_KEYWORD_POST', '@ensures');
+define('PBC_KEYWORD_INVARIANT', '@invariant');
 define('PBC_KEYWORD_OLD', '$pbcOld');
 define('PBC_KEYWORD_RESULT', '$pbcResult');
 define('PBC_PROXY_SUFFIX', 'PBCProxied');

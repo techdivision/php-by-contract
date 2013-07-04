@@ -18,4 +18,3 @@ $config = new Config();
 $autoLoader = new AutoLoader($config->getConfig('AutoLoader'));
 $autoLoader->register();
 
-

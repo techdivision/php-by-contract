@@ -9,20 +9,20 @@
 
 namespace TechDivision\PBC\Parser;
 
-require_once __DIR__ . "/../Entities/Assertion.php";
-require_once __DIR__ . "/../Entities/AssertionList.php";
-require_once __DIR__ . "/../Entities/ClassDefinition.php";
-require_once __DIR__ . "/../Entities/FunctionDefinition.php";
-require_once __DIR__ . "/../Entities/FunctionDefinitionList.php";
-require_once __DIR__ . "/../Entities/ScriptDefinition.php";
+require_once __DIR__ . "/../Entities/Lists/AssertionList.php";
+require_once __DIR__ . "/../Entities/Definitions/ClassDefinition.php";
+require_once __DIR__ . "/../Entities/Definitions/FunctionDefinition.php";
+require_once __DIR__ . "/../Entities/Lists/FunctionDefinitionList.php";
+require_once __DIR__ . "/../Entities/Assertions/BasicAssertion.php";
+require_once __DIR__ . "/../Entities/Assertions/InstanceAssertion.php";
+require_once __DIR__ . "/../Entities/Assertions/TypeAssertion.php";
 
-use TechDivision\PBC\Entities\Assertion;
-use TechDivision\PBC\Entities\AssertionList;
-use TechDivision\PBC\Entities\ClassDefinition;
-use TechDivision\PBC\Entities\FunctionDefinition;
-use TechDivision\PBC\Entities\FunctionDefinitionList;
-use TechDivision\PBC\Entities\MetaDefinition;
-use TechDivision\PBC\Entities\ScriptDefinition;
+use TechDivision\PBC\Entities\Lists\AssertionList;
+use TechDivision\PBC\Entities\Definitions\ClassDefinition;
+use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
+use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
+use TechDivision\PBC\Entities\Definitions\MetaDefinition;
+use TechDivision\PBC\Entities\Definitions\ScriptDefinition;
 
 /**
  * Class AnnotationParser
@@ -81,8 +81,7 @@ class AnnotationParser
         $functionList = new FunctionDefinitionList();
 
         $tokens = token_get_all($fileContent);
-        var_dump($tokens);
-        die();
+
         for ($i = 0; $i < count($tokens); $i++) {
 
             if (is_array($tokens[$i]) === true) {
@@ -161,7 +160,7 @@ class AnnotationParser
                         $functionDefinition->preConditions = $this->getConditions($tokens[$i - 2][1], PBC_KEYWORD_PRE);
                         $functionDefinition->postConditions = $this->getConditions($tokens[$i - 2][1], PBC_KEYWORD_POST);
 
-                    } elseif ($tokens[$i - 2][0] === (T_PRIVATE | T_PROTECTED | T_PUBLIC)) {
+                    } elseif ($tokens[$i - 2][0] === T_PRIVATE || $tokens[$i - 2][0] === T_PROTECTED || $tokens[$i - 2][0] === T_PUBLIC) {
 
                         $functionDefinition->access = $tokens[$i - 2][1];
 
@@ -305,7 +304,7 @@ class AnnotationParser
 
                     if ($tokens[$i - 2][0] === T_DOC_COMMENT) {
 
-                        $classDefinition->docBlock = $tokens[$i -2][1];
+                        $classDefinition->docBlock = $tokens[$i - 2][1];
 
                         // Lets get our invariant conditions
                         $classDefinition->invariantConditions = $this->getConditions($tokens[$i - 2][1], PBC_KEYWORD_INVARIANT);
@@ -339,11 +338,31 @@ class AnnotationParser
         $rawConditions = array();
         if ($conditionKeyword === PBC_KEYWORD_POST) {
 
-            preg_match_all('/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n|' . '@return' . '.+?\n/s', $docBlock, $rawConditions);
+            // Check if we need @return as well
+            if ($this->config['enforceDefaultTypeSafety'] === true) {
+
+                $regex = '/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n|' . '@return' . '.+?\n/s';
+
+            } else {
+
+                $regex = '/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n';
+            }
+
+            preg_match_all($regex, $docBlock, $rawConditions);
 
         } elseif ($conditionKeyword === PBC_KEYWORD_PRE) {
 
-            preg_match_all('/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n|' . '@param' . '.+?\n/s', $docBlock, $rawConditions);
+            // Check if we need @return as well
+            if ($this->config['enforceDefaultTypeSafety'] === true) {
+
+                $regex = '/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n|' . '@param' . '.+?\n/s';
+
+            } else {
+
+                $regex = '/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n';
+            }
+
+            preg_match_all($regex, $docBlock, $rawConditions);
 
         } else {
 
@@ -355,7 +374,11 @@ class AnnotationParser
         if (empty($rawConditions) === false) {
             foreach ($rawConditions[0] as $condition) {
 
-                $result->offsetSet(null, $this->parseAssertion($condition));
+                $assertion = $this->parseAssertion($condition);
+                if ($assertion !== false) {
+
+                    $result->offsetSet(null, $assertion);
+                }
             }
         }
 
@@ -380,39 +403,45 @@ class AnnotationParser
             }
         }
 
-        // Handle the used annotation types differently
-        $assertion = new Assertion();
+        $variable = $this->filterVariable($docString);
+        $type = $this->filterType($docString);
+        $class = $this->filterClass($docString);
+
         switch ($usedAnnotation) {
             // We got something which can only contain type information
             case '@param':
             case '@return':
-                if ($this->config['enforceDefaultTypeSafety'] === true) {
-                    $explodedDocString = explode(' ', preg_replace('/\s+|\t+/', ' ', $docString));
 
-                    // The first operand is different for both options
-                    if ($usedAnnotation === '@param') {
+                // Now we have to check what we got
+                // First of all handle if we got a simple type
+                if ($type !== false) {
 
-                        $assertion->firstOperand = $explodedDocString[2];
+                    $assertionType = 'TechDivision\PBC\Entities\Assertions\TypeAssertion';
 
-                    } else {
+                } elseif ($class !== false) {
 
-                        $assertion->firstOperand = PBC_KEYWORD_RESULT;
-                    }
+                    $type = $class;
+                    $assertionType = 'TechDivision\PBC\Entities\Assertions\InstanceAssertion';
 
-                    // For the operator we either have an is_x or an is_a function.
-                    // This also determines which secondOperator we have
-                    if (function_exists('is_' . $explodedDocString[1]) === true) {
+                } else {
 
-                        $assertion->operator = 'is_' . $explodedDocString[1];
-                        // There is no second operand needed
-                        $assertion->secondOperand = null;
-
-                    } elseif (class_exists($explodedDocString[1]) === true) {
-
-                        $assertion->operator = 'is_a';
-                        $assertion->secondOperand = $explodedDocString[1];
-                    }
+                    return false;
                 }
+
+                // We handled what kind of assertion we need, now check what we will assert
+                if ($variable !== false) {
+
+                    $assertion = new $assertionType($variable, $type);
+
+                } elseif ($usedAnnotation === '@return') {
+
+                    $assertion = new $assertionType(PBC_KEYWORD_RESULT, $type);
+
+                } else {
+
+                    return false;
+                }
+
                 break;
 
             // We got our own definitions. Could be a bit more complex here
@@ -420,15 +449,49 @@ class AnnotationParser
             case PBC_KEYWORD_POST:
             case PBC_KEYWORD_INVARIANT:
 
-                $explodedDocString = explode(' ', preg_replace('/\s+|\t+/', ' ', $docString));
+                $operand = $this->filterOperand($docString);
+                $operators = $this->filterOperators($docString, $operand);
 
-                // By rules of the syntax of an assertion {P} A {Q} the operator must be in the middle
-                $assertion->operator = $explodedDocString[2];
+                // Now we have to check what we got
+                // First of all handle if we got a simple type
+                if ($type !== false) {
 
-                // First and second operand can be taken by the schema {P} A {Q} as well
-                $assertion->firstOperand = $explodedDocString[1];
-                $assertion->secondOperand = $explodedDocString[3];
+                    $assertionType = 'TechDivision\PBC\Entities\Assertions\TypeAssertion';
 
+                } elseif ($class !== false) {
+
+                    $assertionType = 'TechDivision\PBC\Entities\Assertions\InstanceAssertion';
+
+                } elseif ($operand !== false && $operators !== false) {
+
+                    $assertionType = 'TechDivision\PBC\Entities\Assertions\BasicAssertion';
+
+                } else {
+
+                    return false;
+                }
+
+                // We handled what kind of assertion we need, now check what we will assert
+                if ($assertionType === 'TechDivision\PBC\Entities\Assertions\BasicAssertion') {
+
+                    $assertion = new $assertionType($operators[0], $operators[1], $operand);
+
+                } else {
+
+                    if ($variable !== false) {
+
+                        $assertion = new $assertionType($variable, $type);
+
+                    } elseif ($usedAnnotation === '@return') {
+
+                        $assertion = new $assertionType(PBC_KEYWORD_RESULT, $type);
+
+                    } else {
+
+                        return false;
+                    }
+
+                }
                 break;
 
             default:
@@ -441,22 +504,141 @@ class AnnotationParser
     }
 
     /**
+     * @param $docString
      *
+     * @return bool
      */
-    private function parseFunctionName($docBlock)
+    private function filterVariable($docString)
     {
-        // Check for matches of a standard function name
-        $matches = array();
-        $success = (boolean)preg_match('/function(.*)/s', $docBlock, $matches);
+        // Explode the string to get the different pieces
+        $explodedString = explode(' ', $docString);
 
-        // Did we find anything?
-        if ($success === false) {
+        // Filter for the first variable. The first as there might be a variable name in any following description
+        foreach ($explodedString as $stringPiece) {
 
-            return false;
+            // Check if we got a variable
+            if (strpos($stringPiece, '$') === 0 || $stringPiece === PBC_KEYWORD_RESULT || $stringPiece === PBC_KEYWORD_OLD) {
+
+                return $stringPiece;
+            }
         }
 
-        // Trim before return
-        return trim($matches[1]);
+        // We found nothing; tell them.
+        return false;
+    }
+
+    /**
+     * @param $docString
+     *
+     * @return bool
+     */
+    private function filterType($docString)
+    {
+        // Explode the string to get the different pieces
+        $explodedString = explode(' ', $docString);
+
+        // Filter for the first variable. The first as there might be a variable name in any following description
+        foreach ($explodedString as $stringPiece) {
+
+            // Check if we got a variable
+            if (function_exists('is_' . $stringPiece) && $stringPiece === 'a') {
+
+                return $stringPiece;
+            }
+        }
+
+        // We found nothing; tell them.
+        return false;
+    }
+
+    /**
+     * @param $docString
+     *
+     * @return bool
+     */
+    private function filterClass($docString)
+    {
+        // Explode the string to get the different pieces
+        $explodedString = explode(' ', $docString);
+
+        // Filter for the first variable. The first as there might be a variable name in any following description
+        foreach ($explodedString as $stringPiece) {
+
+            // Check if we got a variable
+            if (class_exists($stringPiece) || interface_exists($stringPiece)) {
+
+                return $stringPiece;
+            }
+        }
+
+        // We found nothing; tell them.
+        return false;
+    }
+
+    /**
+     * @param $docString
+     *
+     * @return bool
+     */
+    private function filterOperators($docString, $operand)
+    {
+        // To savely get everything we will trust in the PHP tokens
+        $tokens = token_get_all('<?php ' . $docString);
+
+        for ($i = 0; $i < count($tokens); $i++) {
+
+            if (is_array($tokens[$i]) && $tokens[$i][1] === $operand && is_array($tokens[$i - 2]) && is_array($tokens[$i + 2])) {
+
+                // There is a special case, as we could use $this
+                if ($tokens[$i - 4][1] === '$this') {
+
+                    return array('$this->' . $tokens[$i - 2][1], $tokens[$i + 2][1]);
+
+                } else {
+
+                    return array($tokens[$i - 2][1], $tokens[$i + 2][1]);
+                }
+            }
+        }
+
+        // We found nothing; tell them.
+        return false;
+    }
+
+    /**
+     * @param $docString
+     *
+     * @return bool
+     */
+    private function filterOperand($docString)
+    {
+        $validOperands = array(
+            '==' => '!=',
+            '===' => '!==',
+            '<>' => '==',
+            '<' => '>=',
+            '>' => '<=',
+            '<=' => '>',
+            '>=' => '<',
+            '!=' => '==',
+            '!==' => '==='
+        );
+
+        // Explode the string to get the different pieces
+        $explodedString = explode(' ', $docString);
+
+        // Filter for the first variable. The first as there might be a variable name in any following description
+        foreach ($explodedString as $stringPiece) {
+
+            // Check if we got a valid operand
+            if (isset($validOperands[$stringPiece])) {
+
+                return $stringPiece;
+            }
+        }
+
+        // We found nothing; tell them.
+        return false;
     }
 
     /**

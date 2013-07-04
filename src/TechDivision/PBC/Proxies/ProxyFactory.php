@@ -11,10 +11,10 @@ namespace TechDivision\PBC\Proxies;
 
 require_once __DIR__ . "/../Parser/AnnotationParser.php";
 
-use TechDivision\PBC\Entities\Assertion;
-use TechDivision\PBC\Entities\ClassDefinition;
-use TechDivision\PBC\Entities\FunctionDefinition;
-use TechDivision\PBC\Entities\FunctionDefinitionList;
+use TechDivision\PBC\Interfaces\Assertion;
+use TechDivision\PBC\Entities\Definitions\ClassDefinition;
+use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
+use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Parser\AnnotationParser;
 
 /**
@@ -55,7 +55,11 @@ class ProxyFactory
     private function getCacheMap()
     {
         // We might already have a serialized map
-        $mapFile = file_get_contents(__DIR__ . '/cacheMap');
+        $mapFile = false;
+        if (is_readable(__DIR__ . '/cacheMap') === true) {
+
+            $mapFile = file_get_contents(__DIR__ . '/cacheMap');
+        }
 
         if (is_string($mapFile)) {
             // We got the file unserialize it
@@ -301,7 +305,7 @@ class ProxyFactory
         $iterator = $classDefinition->invariantConditions->getIterator();
         for ($i = 0;$i < $iterator->count(); $i++) {
 
-            $fileContent .= $this->createAroundAdviceCode($iterator->current());
+            $fileContent .= $this->createAroundAdviceCode($iterator->current(), PBC_CLASS_INVARIANT_NAME);
 
             // Move the iterator
             $iterator->next();
@@ -325,13 +329,13 @@ class ProxyFactory
                 $assertionIterator = $functionDefinition->preConditions->getIterator();
                 for ($k = 0;$k < $assertionIterator->count(); $k++) {
 
-                    $fileContent .= $this->createAroundAdviceCode($assertionIterator->current());
+                    $fileContent .= $this->createAroundAdviceCode($assertionIterator->current(), $functionDefinition->name);
                 }
 
                 // Do we have to keep an instance of $this to compare with old later?
                 if ($functionDefinition->usesOld === true) {
 
-                    $fileContent .= '$this->' . PBC_KEYWORD_OLD . ' = $this;';
+                    $fileContent .= '$this->' . PBC_KEYWORD_OLD . ' = clone $this;';
                 }
 
                 // Now call the parent method itself
@@ -345,7 +349,7 @@ class ProxyFactory
                 $assertionIterator = $functionDefinition->postConditions->getIterator();
                 for ($k = 0;$k < $assertionIterator->count(); $k++) {
 
-                    $fileContent .= $this->createAroundAdviceCode($assertionIterator->current());
+                    $fileContent .= $this->createAroundAdviceCode($assertionIterator->current(), $functionDefinition->name);
                 }
 
                 // If we passed every check we can return the result
@@ -368,32 +372,15 @@ class ProxyFactory
      *
      * @return string
      */
-    private function createAroundAdviceCode(Assertion $assertion, $exceptionType = 'Exception')
+    private function createAroundAdviceCode(Assertion $assertion, $functionName, $exceptionType = 'Exception')
     {
         $result = '';
+
         // The beginning is always the same
-        $result .= 'if (';
-        // We have different Assertion types, so handle them differently
-        if (strpos($assertion->operator, 'is_') === false) {
-
-            $result .= $assertion->firstOperand . ' ' . $assertion->operator . ' ' . $assertion->secondOperand;
-        } else {
-
-            // Do we have an is_a or a simple type check?
-            if ($assertion->operator === 'is_a') {
-
-                $result .= $message = $assertion->operator . '(' . $assertion->firstOperand . ', ' . $assertion->secondOperand . ')';
-                $result .= '=== false';
-
-            } elseif ($assertion->secondOperand === NULL) {
-
-                $result .= $message = $assertion->operator . '(' . $assertion->firstOperand . ')';
-                $result .= '=== false';
-            }
-        }
-
+        $result .= 'if (' . $assertion->getInvertString();
         $result .= '){';
-        $result .= '    throw new ' . $exceptionType . '("Assertion '. $message .' failed.");';
+        $result .= '    throw new ' . $exceptionType . '(\'Assertion ' . str_replace('\'', '"', $assertion->getString()) .
+            ' failed in ' . $functionName . '.\');';
         $result .= '}';
 
         return $result;

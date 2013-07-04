@@ -32,6 +32,10 @@ class AutoLoader
      */
     const OUR_LOADER = 'loadClass';
 
+
+    /**
+     * @param $config
+     */
     public function __construct($config)
     {
         $this->config = $config;
@@ -39,6 +43,8 @@ class AutoLoader
 
     /**
      * @param $className
+     *
+     * @return bool
      */
     public function loadClass($className)
     {
@@ -75,8 +81,11 @@ class AutoLoader
             if (is_readable($proxyFile) === true) {
 
                 require $proxyFile;
+                return true;
             }
         }
+
+        return false;
     }
 
     /**
@@ -91,8 +100,8 @@ class AutoLoader
         // Also register "our" Symfony ClassLoader so we have a PSR-0 compatible loader at hand.
         // Register this one to append to the autoloader stack.
         $loader = new UniversalClassLoader();
-        $loader->registerNamespace("Symfony 2.2.3 2.1.11.3.1\\Component", "../vendor/symfony/class-loader/Symfony 2.2.3 2.1.11.3.1/Component/");
-        $loader->registerNamespace("TechDivision\\PBC", realpath('../../'));
+        $loader->registerNamespace("Symfony\\Component", realpath(__DIR__ . "/../../vendor/symfony/class-loader/Symfony/Component/"));
+        $loader->registerNamespace("TechDivision\\PBC", realpath(__DIR__ . '/'));
         $loader->register(false);
     }
 }
