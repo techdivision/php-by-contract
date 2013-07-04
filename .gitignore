@@ -1,2 +1,5 @@
 # vendor folder
 src/vendor/
+
+# proxy classes cache folder
+#src/TechDivision/PBC/Proxies/cache/
