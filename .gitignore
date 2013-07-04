@@ -5,4 +5,7 @@ src/vendor/
 src/TechDivision/PBC/Proxies/cache/
 
 # map of cached files
-#src/TechDivision/PBC/Proxies/cacheMap
+src/TechDivision/PBC/Proxies/cacheMap
+
+# the apple directory description
+.DS_Store
