@@ -143,6 +143,10 @@ class AnnotationParser
                     if ($tokens[$i + 2][0] === T_STRING) {
 
                         $functionDefinition->name = $tokens[$i + 2][1];
+
+                    } else {
+
+                        return false;
                     }
 
                     if ($tokens[$i - 2][0] === T_DOC_COMMENT) {
@@ -188,7 +192,16 @@ class AnnotationParser
 
                             if (is_array($tokens[$j]) && $tokens[$j][0] === T_VARIABLE) {
 
-                                $functionDefinition->parameters[] = $tokens[$j][1];
+                                // We might have gotten a type with it, if so, preserve it
+                                if ((is_array($tokens[$j - 2]) && $tokens[$j -2 ][0] === T_STRING) &&
+                                    $tokens[$j - 2][1] !== $functionDefinition->name) {
+
+                                    $functionDefinition->parameters[] = $tokens[$j -2 ][1] . ' ' . $tokens[$j][1];
+
+                                } else {
+
+                                    $functionDefinition->parameters[] = $tokens[$j][1];
+                                }
 
                             } elseif ($tokens[$j] === ')') {
 

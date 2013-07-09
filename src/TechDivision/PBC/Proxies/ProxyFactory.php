@@ -341,6 +341,12 @@ class ProxyFactory
                     $fileContent .= '$this->' . PBC_KEYWORD_OLD . ' = clone $this;';
                 }
 
+                // We do not need typing for the parameters anymore, so omit it
+                foreach ($functionDefinition->parameters as $key => $parameter) {
+
+                    $functionDefinition->parameters[$key] = strstr($parameter, '$');
+                }
+
                 // Now call the parent method itself
                 $fileContent .= PBC_KEYWORD_RESULT . ' = parent::' . $functionDefinition->name .
                     '(' . implode(', ', $functionDefinition->parameters) . ');';
