@@ -13,7 +13,7 @@ class Config
     {
         $this->config = array(
             'AutoLoader' => array(
-                'omit' => array('TechDivision\PBC'),
+                'omit' => array('TechDivision\PBC', 'PHPUnit'),
                 'projectRoot' => realpath('../../')
             ),
             'Parser' => array(

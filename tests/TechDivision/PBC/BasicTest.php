@@ -7,11 +7,102 @@
  * To change this template use File | Settings | File Templates.
  */
 
-namespace TechDivision\PBC;
-
-require "../../src/TechDivision/PBC/Bootstrap.php";
+// Do the bootstrapping, so we will use our library
+require __DIR__ . "/../../../src/TechDivision/PBC/Bootstrap.php";
 
 class BasicTest extends PHPUnit_Framework_TestCase
 {
 
+    /**
+     *
+     */
+    public function testInvariantBreaks()
+    {
+        // Get the object to test
+        $test = new BasicTestClass();
+
+        // This one should not break
+        $test->iDontBreakTheInvariant();
+
+        $e = null;
+        try {
+
+            $test->iBreakTheInvariant();
+
+        } catch (Exception $e) {}
+
+        // Did we get the right $e?
+        $this->assertInstanceOf("Exception", $e);
+    }
+
+    /**
+     *
+     */
+    public function testParamTyping()
+    {
+        // Get the object to test
+        $test = new BasicTestClass();
+
+        // These tests should all be successful
+        $test->stringToArray("null");
+        $test->concatSomeStuff(26, 'test', new \Exception());
+        $test->stringToWelcome('stranger');
+
+
+        // These should all fail
+        $e = null;
+        try {
+
+            $test->stringToArray(13);
+
+        } catch (Exception $e) {}
+
+        // Did we get the right $e?
+        $this->assertInstanceOf("Exception", $e);
+
+        $e = null;
+        try {
+
+            $test->concatSomeStuff("26", array(), $this);
+
+        } catch (Exception $e) {}
+
+        // Did we get the right $e?
+        $this->assertInstanceOf("Exception", $e);
+
+        $e = null;
+        try {
+
+            $test->stringToWelcome(34);
+
+        } catch (Exception $e) {}
+
+        // Did we get the right $e?
+        $this->assertInstanceOf("Exception", $e);
+    }
+
+    /**
+     *
+     */
+    public function testResultTyping()
+    {
+
+    }
+
+    /**
+     *
+     */
+    public function testParamContent()
+    {
+
+    }
+
+    /**
+     *
+     */
+    public function testResultContent()
+    {
+
+
+    }
 }
