@@ -9,7 +9,21 @@
 
 namespace TechDivision\PBC;
 
-require_once __DIR__ . "/../../vendor/symfony/class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php";
+// I don't know how to handle that better, forgive me (or better: explain me how!) TODO
+if (is_dir(__DIR__ . "/../../vendor")) {
+
+    require_once __DIR__ . "/../../vendor/symfony/class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php";
+
+} elseif (is_dir(__DIR__ . "/../../../vendor")) {
+
+    require_once __DIR__ . "/../../../vendor/symfony/class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php";
+
+} elseif (is_dir(__DIR__ . "/../../../../../symfony")) {
+
+    require_once __DIR__ . "/../../../../../symfony/class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php";
+
+}
+
 require_once __DIR__ . "/Proxies/ProxyFactory.php";
 
 use Symfony\Component\ClassLoader\UniversalClassLoader;

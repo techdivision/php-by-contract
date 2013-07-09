@@ -2,7 +2,7 @@
 src/vendor/
 
 # proxy classes cache folder
-src/TechDivision/PBC/Proxies/cache/
+src/TechDivision/PBC/Proxies/cache/*
 
 # map of cached files
 src/TechDivision/PBC/Proxies/cacheMap
