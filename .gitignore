@@ -1,11 +1,13 @@
 # vendor folder
 src/vendor/
 
-# proxy classes cache folder
-src/TechDivision/PBC/Proxies/cache/*
+# proxy classes within the cache folder are ignored with a local .gitignore file
 
 # map of cached files
 src/TechDivision/PBC/Proxies/cacheMap
 
 # the apple directory description
 .DS_Store
+
+# but don't ignore this file
+!.gitignore
