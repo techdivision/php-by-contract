@@ -7,7 +7,10 @@
  * To change this template use File | Settings | File Templates.
  */
 
-namespace TechDivision\PBC\Interfaces;
+namespace TechDivision\PBC\Exceptions;
 
-interface PBCException
-{}
+use TechDivision\PBC\Interfaces;
+
+class BrokenPostConditionException extends \Exception implements PBCException {
+
+}

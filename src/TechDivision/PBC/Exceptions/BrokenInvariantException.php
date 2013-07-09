@@ -11,6 +11,6 @@ namespace TechDivision\PBC\Exceptions;
 
 use TechDivision\PBC\Interfaces;
 
-class BrokenInvariantException implements PBCException {
+class BrokenInvariantException extends \Exception implements PBCException {
 
 }

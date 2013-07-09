@@ -10,11 +10,7 @@
 namespace TechDivision\PBC;
 
 // I don't know how to handle that better, forgive me (or better: explain me how!) TODO
-if (is_dir(__DIR__ . "/../../vendor")) {
-
-    require_once __DIR__ . "/../../vendor/symfony/class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php";
-
-} elseif (is_dir(__DIR__ . "/../../../vendor")) {
+if (is_dir(__DIR__ . "/../../../vendor")) {
 
     require_once __DIR__ . "/../../../vendor/symfony/class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php";
 

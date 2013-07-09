@@ -1,5 +1,5 @@
 # vendor folder
-src/vendor/
+vendor/
 
 # proxy classes within the cache folder are ignored with a local .gitignore file
 
