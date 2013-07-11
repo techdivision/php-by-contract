@@ -17,9 +17,11 @@ require_once __DIR__ . "/../Entities/Assertions/BasicAssertion.php";
 require_once __DIR__ . "/../Entities/Assertions/InstanceAssertion.php";
 require_once __DIR__ . "/../Entities/Assertions/TypeAssertion.php";
 
+use TechDivision\PBC\Entities\Definitions\AttributeDefinition;
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
+use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Entities\Definitions\MetaDefinition;
 use TechDivision\PBC\Entities\Definitions\ScriptDefinition;
@@ -42,6 +44,7 @@ class AnnotationParser
 
     /**
      * @param $fileName
+     * @return ClassDefinition|ScriptDefinition
      */
     public function parseFile($fileName)
     {
@@ -63,6 +66,9 @@ class AnnotationParser
             $definition = new ClassDefinition();
             $definition->name = $className;
             $definition->namespace = $this->getClassNamespace($fileName);
+
+            $tokens = token_get_all($fileContent);
+            $definition->attributes = $this->getAttributes($tokens);
 
             // As we are handling a class right now we might check for invariant annotations as well
             $definition->invariantConditions = $this->getConditions($docBlocks[0], PBC_KEYWORD_INVARIANT);
@@ -124,7 +130,9 @@ class AnnotationParser
     }
 
     /**
-     *
+     * @param $tokens
+     * @param $functionName
+     * @return bool|FunctionDefinition
      */
     public function getFunctionDefinition($tokens, $functionName)
     {
@@ -334,8 +342,8 @@ class AnnotationParser
 
     /**
      * @param $docBlock
-     *
-     * @return mixed
+     * @param $conditionKeyword
+     * @return bool|AssertionList
      */
     private function getConditions($docBlock, $conditionKeyword)
     {
@@ -400,6 +408,7 @@ class AnnotationParser
 
     /**
      * @param $docString
+     * @return bool
      */
     private function parseAssertion($docString)
     {
@@ -590,8 +599,8 @@ class AnnotationParser
 
     /**
      * @param $docString
-     *
-     * @return bool
+     * @param $operand
+     * @return array|bool
      */
     private function filterOperators($docString, $operand)
     {
@@ -741,6 +750,98 @@ class AnnotationParser
 
         // Return what we did or did not found
         return $namespace;
+    }
+
+    /**
+     * @param array $tokens
+     * @return AttributeDefinitionList
+     */
+    private function getAttributes(array $tokens)
+    {
+        // Check the tokens
+        $attributes = new AttributeDefinitionList();
+        for ($i = 0; $i < count($tokens); $i++) {
+
+            // If we got a variable we will check if there is any function definition above it.
+            // If not, we got an attribute, if so we will check if the is an even number of closing and opening brackets,
+            // which would mean we are not in the function.
+            if ($tokens[$i][0] === T_VARIABLE) {
+
+                for ($j = $i - 1; $j >= 0; $j--) {
+
+                    if (is_array($tokens[$j]) && $tokens[$j][0] === T_FUNCTION) {
+
+                        // Initialize our counter
+                        $bracketCounter = 0;
+
+                        // We got something, lets count the brackets between it and our variable's position
+                        for ($k = $j + 1; $k < $i; $k++) {
+
+                            if ($tokens[$j] === '{') {
+
+                                $bracketCounter ++;
+
+                            } elseif ($tokens[$j] === '}') {
+
+                                $bracketCounter --;
+                            }
+                        }
+
+                        // If we got an even number of brackets (the counter is 0), we got an attribute
+                        if ($bracketCounter === 0) {
+
+                            $attributes->offsetSet($tokens[$i][1], $this->getAttributeProperties($tokens, $i));
+                        }
+
+                    } elseif (is_array($tokens[$j]) && $tokens[$j][0] === T_CLASS) {
+                        // If we reach the class definition without passing a function we definitely got an attribute
+
+                        $attributes->offsetSet($tokens[$i][1], $this->getAttributeProperties($tokens, $i));
+                    }
+                }
+            }
+        }
+
+        return $attributes;
+    }
+
+
+    /**
+     * @param array $tokens
+     * @param $attributePosition
+     * @return AttributeDefinition
+     */
+    private function getAttributeProperties(array $tokens, $attributePosition)
+    {
+        // We got the tokens and the position of the attribute, so look in front of it for visibility and a
+        // possible static keyword
+        $attribute = new AttributeDefinition();
+        $attribute->name = $tokens[$attributePosition][1];
+        for ($i = $attributePosition; $i > $i - 6; $i--) {
+
+            // Search for the visibility
+            if (is_array($tokens) && ($tokens[$i][0] === T_PRIVATE || $tokens[$i][0] === T_PROTECTED)) {
+
+                // Got it!
+                $attribute->visibility = $tokens[$i][1];
+            }
+
+            // Do we get a static keyword?
+            if (is_array($tokens) && $tokens[$i][0] === T_STATIC) {
+
+                // Class default is false, so set it to true
+                $attribute->is_static = true;
+            }
+        }
+
+        // Last but not least we have to check if got the visibility, if not, set it public.
+        // This is necessary, as missing visibility in the definition will also default to public
+        if ($attribute->visibility === '') {
+
+            $attribute->visibility = 'public';
+        }
+
+        return $attribute;
     }
 
     /**

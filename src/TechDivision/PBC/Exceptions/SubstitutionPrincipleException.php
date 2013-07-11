@@ -12,12 +12,12 @@ namespace TechDivision\PBC\Exceptions;
 use TechDivision\PBC\Interfaces\PBCException;
 
 /**
- * Class BrokenPreConditionException
+ * Class SubstitutionPrincipleException
  *
- * This exception might be thrown if a certain precondition gets broken during runtime.
+ * This exception may be thrown, if a defined contract breaks the Liskov's substitution principle.
  *
  * @package TechDivision\PBC\Exceptions
  */
-class BrokenPreConditionException extends \Exception implements PBCException {
+class SubstitutionPrincipleException extends \Exception implements PBCException {
 
 }

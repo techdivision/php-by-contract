@@ -9,8 +9,15 @@
 
 namespace TechDivision\PBC\Exceptions;
 
-use TechDivision\PBC\Interfaces;
+use TechDivision\PBC\Interfaces\PBCException;
 
+/**
+ * Class BrokenPreConditionException
+ *
+ * This exception might be thrown if a certain invariant gets broken during runtime.
+ *
+ * @package TechDivision\PBC\Exceptions
+ */
 class BrokenInvariantException extends \Exception implements PBCException {
 
 }

@@ -111,7 +111,7 @@ class AutoLoader
         // Register this one to append to the autoloader stack.
         $loader = new UniversalClassLoader();
         $loader->registerNamespace("Symfony\\Component", realpath(__DIR__ . "/../../vendor/symfony/class-loader/Symfony/Component/"));
-        $loader->registerNamespace("TechDivision\\PBC", realpath(__DIR__ . '/'));
+        $loader->registerNamespace("TechDivision\\PBC", realpath(__DIR__ . '/../../'));
         $loader->register(false);
     }
 }

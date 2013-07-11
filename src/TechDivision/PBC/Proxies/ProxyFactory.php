@@ -38,7 +38,7 @@ class ProxyFactory
     const GLOB_CACHE_PATTERN = '/cache/*';
 
     /**
-     *
+     * @param $projectRoot
      */
     public function __construct($projectRoot)
     {
@@ -50,7 +50,7 @@ class ProxyFactory
     }
 
     /**
-     *
+     * @return array|mixed
      */
     private function getCacheMap()
     {
@@ -127,20 +127,12 @@ class ProxyFactory
 
     /**
      * @param $className
+     * @return bool
      */
     public function createProxy($className)
     {
         // If we do not know the file we can forget it
         if (isset($this->fileMap[$className]['path']) === false) {
-
-            return false;
-        }
-
-        // First of all lets create the new proxied parent class
-        $tmp = $this->createProxyParent($this->fileMap[$className]['path']);
-
-        // Only continue if successful before
-        if ($tmp === false) {
 
             return false;
         }
@@ -179,6 +171,15 @@ class ProxyFactory
             }
         }
 
+        // First of all lets create the new proxied parent class
+        $tmp = $this->createProxyParent($this->fileMap[$className]['path'], $classDefinition);
+
+        // Only continue if successful before
+        if ($tmp === false) {
+
+            return false;
+        }
+
         // Create the proxy file from the token array
         $tmpFileName = str_replace(DIRECTORY_SEPARATOR, '_', $this->fileMap[$className]['path']);
         $targetFileName = __DIR__ . '/cache/' . $tmpFileName;
@@ -213,9 +214,11 @@ class ProxyFactory
     }
 
     /**
-     *
+     * @param $fileName
+     * @param ClassDefinition $classDefinition
+     * @return bool
      */
-    private function createProxyParent($fileName)
+    private function createProxyParent($fileName, ClassDefinition $classDefinition)
     {
         // Get the class tokens
         $tokens = token_get_all(file_get_contents($fileName));
@@ -224,19 +227,11 @@ class ProxyFactory
         // Check the tokens
         for ($i = 0; $i < count($tokens); $i++) {
 
-            // If we got the keyword private, we have to set it to protected, otherwise we will not be able to
-            // inherit everything correctly
-            if ($tokens[$i][0] === T_PRIVATE) {
 
-                // Set to protected
-                $tokens[$i][0] = T_PROTECTED;
-                $tokens[$i][1] = 'protected';
 
-                continue;
-
-            } elseif ($tokens[$i][0] === T_FINAL) {
-                // If we got the keyword final, we have to erase this token, otherwise we would get problems with our
-                // proxy inheritance
+            // If we got the keyword final, we have to erase this token, otherwise we would get problems with our
+            // proxy inheritance
+            if ($tokens[$i][0] === T_FINAL) {
 
                 // Just unset this part of the array
                 unset($tokens[$i]);
@@ -259,6 +254,104 @@ class ProxyFactory
             }
         }
 
+        // We worked ourselves through the class, now we might add invariant and some magic.
+        // We can add them to the end of the class.
+        array_pop($tokens);
+
+        // Something to buffer
+        $fileContent = '';
+
+        // Create the invariant
+        $fileContent .= 'private function ' . PBC_CLASS_INVARIANT_NAME . '() {';
+        $iterator = $classDefinition->invariantConditions->getIterator();
+        for ($i = 0; $i < $iterator->count(); $i++) {
+
+            $fileContent .= $this->createAroundAdviceCode($iterator->current(), PBC_CLASS_INVARIANT_NAME);
+
+            // Move the iterator
+            $iterator->next();
+        }
+        $fileContent .= '}';
+
+        // Now we need our magic __call method to catch any call to the invariant.
+        $fileContent .= '
+        /**
+         * Magic function to forward calls of the proxy to our invariant.
+         *
+         * @throws BadMethodCallException
+         */
+        public function __call($name, $arguments)
+        {
+            // If we got called from our proxy class we will forward the call to the invariant.
+            if ($name === "' . PBC_CLASS_INVARIANT_NAME . '" && get_called_class() === "'. $classDefinition->name .'") {
+
+                $this->' . PBC_CLASS_INVARIANT_NAME . '();
+
+            } else {
+
+                throw new \BadMethodCallException;
+            }
+        }
+        ';
+
+        // Now we need our magic __set method to catch anybody who wants to change the attributes.
+        // If we would not do so a client could break the class without triggering the invariant.
+        $fileContent .= '
+        /**
+         * Magic function to forward writing property access calls if within visibility boundaries.
+         *
+         * @throws InvalidArgumentException
+         */
+        public function __set($name, $value)
+        {
+            // Does this property even exist? If not, throw an exception
+            if ($this->attributes->offsetExists($name)) {
+
+                throw new \InvalidArgumentException;
+
+            }
+
+            // Check if the invariant holds
+            $this->' . PBC_CLASS_INVARIANT_NAME . '();
+
+            // Now check what kind of visibility we would have
+            $attribute = $this->attributes->offsetGet($name);
+            switch ($attribute->visibility) {
+
+                case "protected" :
+
+                    if (is_subclass_of(get_called_class(), "'. $classDefinition->name .'")) {
+
+                        $this->$name = $value;
+
+                    } else {
+
+                        throw new \InvalidArgumentException;
+                    }
+                    break;
+
+                case "public" :
+
+                    $this->$name = $value;
+                    break;
+
+                default :
+
+                    throw new \InvalidArgumentException;
+                    break;
+            }
+
+            // Check if the invariant holds
+            $this->' . PBC_CLASS_INVARIANT_NAME . '();
+        }
+        ';
+
+        // Add to token list as string
+        $tokens[] = $fileContent;
+
+        // Finally add the closing bracket we popped before
+        $tokens[] = '}';
+
         // Create the proxy file from the token array
         $tmpFileName = str_replace(DIRECTORY_SEPARATOR, '_', $fileName);
         $targetFileName = __DIR__ . '/cache/' . str_replace('.php', '', $tmpFileName) . PBC_PROXY_SUFFIX . '.php';
@@ -267,10 +360,9 @@ class ProxyFactory
     }
 
     /**
-     * @param string $targetFileName
+     * @param $targetFileName
      * @param ClassDefinition $classDefinition
-     * @param FunctionDefinition $functionDefinition
-     *
+     * @param FunctionDefinitionList $functionDefinitionList
      * @return bool
      */
     private function createFileFromDefinitions($targetFileName, ClassDefinition $classDefinition, FunctionDefinitionList $functionDefinitionList)
@@ -280,7 +372,7 @@ class ProxyFactory
         $fileContent = '<?php ';
 
         // Lets begin with the namespace
-        if (! empty($classDefinition->namespace)) {
+        if (!empty($classDefinition->namespace)) {
 
             $fileContent .= 'namespace ' . $classDefinition->namespace . ';';
         }
@@ -288,6 +380,10 @@ class ProxyFactory
         // Also don't forget to require the parent class
         $tmpFile = str_replace('.php', '', $targetFileName);
         $fileContent .= 'require "' . $tmpFile . PBC_PROXY_SUFFIX . '.php";';
+
+        // Tell them to use our exception namespaces
+        $fileContent .= 'use TechDivision\PBC\Exceptions\BrokenPreConditionException;
+        use TechDivision\PBC\Exceptions\BrokenPostConditionException;';
 
         // Next build up the class header
         $fileContent .= $classDefinition->docBlock;
@@ -300,72 +396,60 @@ class ProxyFactory
             */
             private ' . PBC_KEYWORD_OLD . ';';
 
-        // Create the invariant
-        $fileContent .= 'private function ' . PBC_CLASS_INVARIANT_NAME . '() {';
-        $iterator = $classDefinition->invariantConditions->getIterator();
-        for ($i = 0;$i < $iterator->count(); $i++) {
-
-            $fileContent .= $this->createAroundAdviceCode($iterator->current(), PBC_CLASS_INVARIANT_NAME);
-
-            // Move the iterator
-            $iterator->next();
-        }
-        $fileContent .= '}';
-
         // Create all the methods
         $functionIterator = $functionDefinitionList->getIterator();
-        for ($i = 0;$i < $functionIterator->count(); $i++) {
+        for ($i = 0; $i < $functionIterator->count(); $i++) {
 
-                $functionDefinition = $functionIterator->current();
+            $functionDefinition = $functionIterator->current();
 
-                // Create the method header
-                $fileContent .= $functionDefinition->access . ' function ' . $functionDefinition->name . '(';
-                $fileContent .= implode(', ', $functionDefinition->parameters) . ') {';
+            // Create the method header
+            $fileContent .= $functionDefinition->access . ' function ' . $functionDefinition->name . '(';
+            $fileContent .= implode(', ', $functionDefinition->parameters) . ') {';
 
-                // First of all check if our invariant holds
-                $fileContent .= '$this->' . PBC_CLASS_INVARIANT_NAME . '();';
+            // First of all check if our invariant holds
+            $fileContent .= '$this->' . PBC_CLASS_INVARIANT_NAME . '();';
 
-                // Iterate over all preconditions
-                $assertionIterator = $functionDefinition->preConditions->getIterator();
-                for ($k = 0;$k < $assertionIterator->count(); $k++) {
+            // Iterate over all preconditions
+            $assertionIterator = $functionDefinition->preConditions->getIterator();
+            for ($k = 0; $k < $assertionIterator->count(); $k++) {
 
-                    $fileContent .= $this->createAroundAdviceCode($assertionIterator->current(), $functionDefinition->name);
+                $fileContent .= $this->createAroundAdviceCode($assertionIterator->current(), $functionDefinition->name, 'BrokenPreConditionException');
 
-                    // Next assertion please
-                    $assertionIterator->next();
-                }
+                // Next assertion please
+                $assertionIterator->next();
+            }
 
-                // Do we have to keep an instance of $this to compare with old later?
-                if ($functionDefinition->usesOld === true) {
+            // Do we have to keep an instance of $this to compare with old later?
+            if ($functionDefinition->usesOld === true) {
 
-                    $fileContent .= '$this->' . PBC_KEYWORD_OLD . ' = clone $this;';
-                }
+                $fileContent .= '$this->' . PBC_KEYWORD_OLD . ' = clone $this;';
+            }
 
-                // We do not need typing for the parameters anymore, so omit it
-                foreach ($functionDefinition->parameters as $key => $parameter) {
+            // We do not need typing for the parameters anymore, so omit it
+            foreach ($functionDefinition->parameters as $key => $parameter) {
 
-                    $functionDefinition->parameters[$key] = strstr($parameter, '$');
-                }
+                $functionDefinition->parameters[$key] = strstr($parameter, '$');
+            }
 
-                // Now call the parent method itself
-                $fileContent .= PBC_KEYWORD_RESULT . ' = parent::' . $functionDefinition->name .
-                    '(' . implode(', ', $functionDefinition->parameters) . ');';
+            // Now call the parent method itself
+            $fileContent .= PBC_KEYWORD_RESULT . ' = parent::' . $functionDefinition->name .
+                '(' . implode(', ', $functionDefinition->parameters) . ');';
 
-                // First of all check if our invariant holds
-                $fileContent .= '$this->' . PBC_CLASS_INVARIANT_NAME . '();';
+            // Iterate over all postconditions
+            $assertionIterator = $functionDefinition->postConditions->getIterator();
+            for ($k = 0; $k < $assertionIterator->count(); $k++) {
 
-                // Iterate over all postconditions
-                $assertionIterator = $functionDefinition->postConditions->getIterator();
-                for ($k = 0;$k < $assertionIterator->count(); $k++) {
+                $fileContent .= $this->createAroundAdviceCode($assertionIterator->current(), $functionDefinition->name, 'BrokenPostConditionException');
 
-                    $fileContent .= $this->createAroundAdviceCode($assertionIterator->current(), $functionDefinition->name);
+                // Next assertion please
+                $assertionIterator->next();
+            }
 
-                    // Next assertion please
-                    $assertionIterator->next();
-                }
+            // Last of all check if our invariant holds
+            $fileContent .= '$this->' . PBC_CLASS_INVARIANT_NAME . '();';
 
-                // If we passed every check we can return the result
-                $fileContent .= 'return ' . PBC_KEYWORD_RESULT . ';}';
+            // If we passed every check we can return the result
+            $fileContent .= 'return ' . PBC_KEYWORD_RESULT . ';}';
 
             // Move the iterator
             $functionIterator->next();
@@ -380,8 +464,8 @@ class ProxyFactory
 
     /**
      * @param Assertion $assertion
+     * @param $functionName
      * @param string $exceptionType
-     *
      * @return string
      */
     private function createAroundAdviceCode(Assertion $assertion, $functionName, $exceptionType = 'Exception')
