@@ -403,7 +403,7 @@ class ProxyFactory
             $functionDefinition = $functionIterator->current();
 
             // Create the method header
-            $fileContent .= $functionDefinition->access . ' function ' . $functionDefinition->name . '(';
+            $fileContent .= $functionDefinition->visibility . ' function ' . $functionDefinition->name . '(';
             $fileContent .= implode(', ', $functionDefinition->parameters) . ') {';
 
             // First of all check if our invariant holds

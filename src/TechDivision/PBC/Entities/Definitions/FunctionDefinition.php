@@ -19,12 +19,27 @@ class FunctionDefinition
     /**
      * @var string
      */
-    public $name;
+    public $docBlock;
+
+    /**
+     * @var boolean
+     */
+    public $isFinal;
 
     /**
      * @var string
      */
-    public $access;
+    public $visibility;
+
+    /**
+     * @var boolean
+     */
+    public $isStatic;
+
+    /**
+     * @var string
+     */
+    public $name;
 
     /**
      * @var array
@@ -37,11 +52,6 @@ class FunctionDefinition
     public $preConditions;
 
     /**
-     * @var AssertionList
-     */
-    public $postConditions;
-
-    /**
      * @var boolean
      */
     public $usesOld;
@@ -49,19 +59,27 @@ class FunctionDefinition
     /**
      * @var string
      */
-    public $docBlock;
+    public $body;
+
+    /**
+     * @var AssertionList
+     */
+    public $postConditions;
 
     /**
      * Default constructor
      */
     public function __construct()
     {
+        $this->docBlock = '';
+        $this->isFinal = false;
+        $this->visibility = '';
+        $this->isStatic = false;
         $this->name = '';
-        $this->access = '';
         $this->parameters = array();
-        $this->postConditions = new AssertionList();
         $this->preConditions = new AssertionList();
         $this->usesOld = false;
-        $this->docBlock = '';
+        $this->body = '';
+        $this->postConditions = new AssertionList();
     }
 }

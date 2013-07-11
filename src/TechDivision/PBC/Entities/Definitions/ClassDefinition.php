@@ -9,6 +9,8 @@
 namespace TechDivision\PBC\Entities\Definitions;
 
 use TechDivision\PBC\Entities\Lists\AssertionList;
+use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
+use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 
 /**
  * Class ClassDefinition
@@ -18,15 +20,35 @@ class ClassDefinition
     /**
      * @var string
      */
-    public $name;
-
-    /**
-     * @var string
-     */
     public $namespace;
 
     /**
      * @var array
+     */
+    public $usedNamespaces;
+
+    /**
+     * @var string
+     */
+    public $docBlock;
+
+    /**
+     * @var boolean
+     */
+    public $isFinal;
+
+    /**
+     * @var boolean
+     */
+    public $isAbstract;
+
+    /**
+     * @var string
+     */
+    public $name;
+
+    /**
+     * @var AttributeDefinitionList
      */
     public $attributes;
 
@@ -36,19 +58,23 @@ class ClassDefinition
     public $invariantConditions;
 
     /**
-     * @var string
+     * @var FunctionDefinitionList
      */
-    public $docBlock;
+    public $functionDefinitions;
 
     /**
      * Default constructor
      */
     public function __construct()
     {
-        $this->name = '';
         $this->namespace = '';
-        $this->attributes = array();
-        $this->invariantConditions = new AssertionList();
+        $this->usedNamespaces = array();
         $this->docBlock = '';
+        $this->isFinal = false;
+        $this->isAbstract = false;
+        $this->name = '';
+        $this->attributes = new AttributeDefinitionList();
+        $this->invariantConditions = new AssertionList();
+        $this->functionDefinitions = new FunctionDefinitionList();
     }
 }

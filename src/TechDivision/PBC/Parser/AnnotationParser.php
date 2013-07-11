@@ -162,7 +162,7 @@ class AnnotationParser
                         $functionDefinition->docBlock = $tokens[$i - 2][1];
 
                         // There is nothing between the function token and the doc comment, so the function has to be public
-                        $functionDefinition->access = 'public';
+                        $functionDefinition->visibility = 'public';
 
                         // Lets check if we use any of our self defined keywords.
                         $functionDefinition->usesOld = $this->usesKeyword($tokens[$i - 2][1], PBC_KEYWORD_OLD);
@@ -174,7 +174,7 @@ class AnnotationParser
 
                     } elseif ($tokens[$i - 2][0] === T_PRIVATE || $tokens[$i - 2][0] === T_PROTECTED || $tokens[$i - 2][0] === T_PUBLIC) {
 
-                        $functionDefinition->access = $tokens[$i - 2][1];
+                        $functionDefinition->visibility = $tokens[$i - 2][1];
 
                         if ($tokens[$i - 4][0] === T_DOC_COMMENT) {
 
