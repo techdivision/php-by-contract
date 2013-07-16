@@ -9,27 +9,17 @@
 
 namespace TechDivision\PBC\Parser;
 
-require_once __DIR__ . "/../Entities/Lists/AssertionList.php";
-require_once __DIR__ . "/../Entities/Definitions/ClassDefinition.php";
-require_once __DIR__ . "/../Entities/Definitions/FunctionDefinition.php";
-require_once __DIR__ . "/../Entities/Lists/FunctionDefinitionList.php";
-require_once __DIR__ . "/../Entities/Assertions/BasicAssertion.php";
-require_once __DIR__ . "/../Entities/Assertions/InstanceAssertion.php";
-require_once __DIR__ . "/../Entities/Assertions/TypeAssertion.php";
-
 use TechDivision\PBC\Entities\Definitions\AttributeDefinition;
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
-use TechDivision\PBC\Entities\Definitions\MetaDefinition;
-use TechDivision\PBC\Entities\Definitions\ScriptDefinition;
 
 /**
  * Class AnnotationParser
  */
-class AnnotationParser
+class AnnotationParser extends AbstractParser
 {
     /**
      * @var
@@ -68,7 +58,7 @@ class AnnotationParser
             $definition->namespace = $this->getClassNamespace($fileName);
 
             $tokens = token_get_all($fileContent);
-            $definition->attributes = $this->getAttributes($tokens);
+            $definition->attributeDefinitions = $this->getAttributes($tokens);
 
             // As we are handling a class right now we might check for invariant annotations as well
             $definition->invariantConditions = $this->getConditions($docBlocks[0], PBC_KEYWORD_INVARIANT);
@@ -204,11 +194,11 @@ class AnnotationParser
                                 if ((is_array($tokens[$j - 2]) && $tokens[$j -2 ][0] === T_STRING) &&
                                     $tokens[$j - 2][1] !== $functionDefinition->name) {
 
-                                    $functionDefinition->parameters[] = $tokens[$j -2 ][1] . ' ' . $tokens[$j][1];
+                                    $functionDefinition->parameterDefinitions[] = $tokens[$j -2 ][1] . ' ' . $tokens[$j][1];
 
                                 } else {
 
-                                    $functionDefinition->parameters[] = $tokens[$j][1];
+                                    $functionDefinition->parameterDefinitions[] = $tokens[$j][1];
                                 }
 
                             } elseif ($tokens[$j] === ')') {
@@ -228,124 +218,11 @@ class AnnotationParser
     }
 
     /**
-     *
-     */
-    public function getMetaDefinition($tokens, $path)
-    {
-        // The path is something we already know
-        $metaDefinition = new MetaDefinition();
-        $metaDefinition->filePath = $path;
-
-        for ($i = 0; $i < count($tokens); $i++) {
-
-            // Only makes sense to check for arrays
-            if (is_array($tokens[$i])) {
-
-                // Get all the use statements and include/require statements here.
-                // Make sure to only use include/requires which do not load class names.
-                // Classes should rather be loaded by our AutorLoader class.
-                switch ($tokens[$i][0]) {
-
-                    case T_USE:
-
-                        $metaDefinition->uses[] = $tokens[$i + 2][1];
-
-                        break;
-
-                    case T_INCLUDE:
-
-                        if ($this->getClassName($tokens[$i + 2][1] === '')) {
-
-                            $metaDefinition->includes[] = $tokens[$i + 2][1];
-                        }
-
-                        break;
-
-                    case T_INCLUDE_ONCE:
-
-                        if ($this->getClassName($tokens[$i + 2][1] === '')) {
-
-                            $metaDefinition->includeOnces[] = $tokens[$i + 2][1];
-                        }
-
-                        break;
-
-                    case T_REQUIRE:
-
-                        if ($this->getClassName($tokens[$i + 2][1] === '')) {
-
-                            $metaDefinition->requires[] = $tokens[$i + 2][1];
-                        }
-
-                        break;
-
-                    case T_REQUIRE_ONCE:
-
-                        if ($this->getClassName($tokens[$i + 2][1] === '')) {
-
-                            $metaDefinition->requireOnces[] = $tokens[$i + 2][1];
-                        }
-
-                        break;
-
-                    default:
-
-                        break;
-                }
-            }
-        }
-
-        // We did not find anything
-        return $metaDefinition;
-    }
-
-    /**
-     *
-     */
-    public function getClassDefinition($tokens, $className)
-    {
-        //TODO We still miss the attributes!!!!
-
-        for ($i = 0; $i < count($tokens); $i++) {
-
-            // Only makes sense to check for arrays
-            if (is_array($tokens[$i])) {
-
-                // did we find the function we are looking for?
-                if ($tokens[$i][0] === T_CLASS && $tokens[$i + 2][1] === $className) {
-
-                    // Create our definition of this function/method
-                    $classDefinition = new ClassDefinition();
-
-                    // We should get a name
-                    if ($tokens[$i + 2][0] === T_STRING) {
-
-                        $classDefinition->name = $tokens[$i + 2][1];
-                    }
-
-                    if ($tokens[$i - 2][0] === T_DOC_COMMENT) {
-
-                        $classDefinition->docBlock = $tokens[$i - 2][1];
-
-                        // Lets get our invariant conditions
-                        $classDefinition->invariantConditions = $this->getConditions($tokens[$i - 2][1], PBC_KEYWORD_INVARIANT);
-                    }
-
-                    return $classDefinition;
-                }
-            }
-        }
-
-        // We did not find anything
-        return false;
-    }
-
-    /**
      * @param $docBlock
      * @param $conditionKeyword
      * @return bool|AssertionList
      */
-    private function getConditions($docBlock, $conditionKeyword)
+    public function getConditions($docBlock, $conditionKeyword)
     {
         // There are only 3 valid condition types
         if ($conditionKeyword !== PBC_KEYWORD_PRE && $conditionKeyword !== PBC_KEYWORD_POST
@@ -398,7 +275,7 @@ class AnnotationParser
                 $assertion = $this->parseAssertion($condition);
                 if ($assertion !== false) {
 
-                    $result->offsetSet(null, $assertion);
+                    $result->set(null, $assertion);
                 }
             }
         }
@@ -524,7 +401,6 @@ class AnnotationParser
 
         return $assertion;
     }
-
     /**
      * @param $docString
      *
@@ -673,230 +549,5 @@ class AnnotationParser
 
         // We found nothing; tell them.
         return false;
-    }
-
-    /**
-     * @param $docBlock
-     * @param $keyword
-     *
-     * @return bool
-     */
-    private function usesKeyword($docBlock, $keyword)
-    {
-        if (strpos($docBlock, $keyword) === false) {
-
-            return false;
-        } else {
-
-            return true;
-        }
-    }
-
-    /**
-     * @param $fileName
-     *
-     * @return string
-     */
-    private function getClassNamespace($fileName)
-    {
-        // Lets open the file readonly
-        $fileResource = fopen($fileName, 'r');
-
-        // Prepare some variables we will need
-        $namespace = '';
-        $buffer = '';
-
-        // Declaring the iterator here, to not check the start of the file again and again
-        $i = 0;
-        while (isset($namespace) === false) {
-
-            // Is the file over already?
-            if (feof($fileResource)) {
-
-                break;
-            }
-
-            // We only read a small portion of the file, as we should find the namespace declaration up front
-            $buffer .= fread($fileResource, 512);
-            // Get all the tokens in the read buffer
-            $tokens = token_get_all($buffer);
-
-            // If we did not reach anything of value yet we will continue reading
-            if (strpos($buffer, '{') === false) {
-
-                continue;
-            }
-
-            // Check the tokens
-            for (; $i < count($tokens); $i++) {
-
-                // If we got the namespace
-                if ($tokens[$i][0] === T_NAMESPACE) {
-
-                    for ($j = $i + 1; $j < count($tokens); $j++) {
-
-                        if ($tokens[$j][0] === T_STRING) {
-
-                            $namespace .= '\\' . $tokens[$j][1];
-
-                        } elseif ($tokens[$j] === '{' || $tokens[$j] === ';') {
-
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Return what we did or did not found
-        return $namespace;
-    }
-
-    /**
-     * @param array $tokens
-     * @return AttributeDefinitionList
-     */
-    private function getAttributes(array $tokens)
-    {
-        // Check the tokens
-        $attributes = new AttributeDefinitionList();
-        for ($i = 0; $i < count($tokens); $i++) {
-
-            // If we got a variable we will check if there is any function definition above it.
-            // If not, we got an attribute, if so we will check if the is an even number of closing and opening brackets,
-            // which would mean we are not in the function.
-            if ($tokens[$i][0] === T_VARIABLE) {
-
-                for ($j = $i - 1; $j >= 0; $j--) {
-
-                    if (is_array($tokens[$j]) && $tokens[$j][0] === T_FUNCTION) {
-
-                        // Initialize our counter
-                        $bracketCounter = 0;
-
-                        // We got something, lets count the brackets between it and our variable's position
-                        for ($k = $j + 1; $k < $i; $k++) {
-
-                            if ($tokens[$j] === '{') {
-
-                                $bracketCounter ++;
-
-                            } elseif ($tokens[$j] === '}') {
-
-                                $bracketCounter --;
-                            }
-                        }
-
-                        // If we got an even number of brackets (the counter is 0), we got an attribute
-                        if ($bracketCounter === 0) {
-
-                            $attributes->offsetSet($tokens[$i][1], $this->getAttributeProperties($tokens, $i));
-                        }
-
-                    } elseif (is_array($tokens[$j]) && $tokens[$j][0] === T_CLASS) {
-                        // If we reach the class definition without passing a function we definitely got an attribute
-
-                        $attributes->offsetSet($tokens[$i][1], $this->getAttributeProperties($tokens, $i));
-                    }
-                }
-            }
-        }
-
-        return $attributes;
-    }
-
-
-    /**
-     * @param array $tokens
-     * @param $attributePosition
-     * @return AttributeDefinition
-     */
-    private function getAttributeProperties(array $tokens, $attributePosition)
-    {
-        // We got the tokens and the position of the attribute, so look in front of it for visibility and a
-        // possible static keyword
-        $attribute = new AttributeDefinition();
-        $attribute->name = $tokens[$attributePosition][1];
-        for ($i = $attributePosition; $i > $i - 6; $i--) {
-
-            // Search for the visibility
-            if (is_array($tokens) && ($tokens[$i][0] === T_PRIVATE || $tokens[$i][0] === T_PROTECTED)) {
-
-                // Got it!
-                $attribute->visibility = $tokens[$i][1];
-            }
-
-            // Do we get a static keyword?
-            if (is_array($tokens) && $tokens[$i][0] === T_STATIC) {
-
-                // Class default is false, so set it to true
-                $attribute->is_static = true;
-            }
-        }
-
-        // Last but not least we have to check if got the visibility, if not, set it public.
-        // This is necessary, as missing visibility in the definition will also default to public
-        if ($attribute->visibility === '') {
-
-            $attribute->visibility = 'public';
-        }
-
-        return $attribute;
-    }
-
-    /**
-     * @param $fileName
-     *
-     * @return string
-     */
-    private function getClassName($fileName)
-    {
-        // Lets open the file readonly
-        $fileResource = fopen($fileName, 'r');
-
-        // Prepare some variables we will need
-        $className = '';
-        $buffer = '';
-
-        // Declaring the iterator here, to not check the start of the file again and again
-        $i = 0;
-        while (empty($className) === true) {
-
-            // Is the file over already?
-            if (feof($fileResource)) {
-
-                break;
-            }
-
-            // We only read a small portion of the file, as we should find the class declaration up front
-            $buffer .= fread($fileResource, 512);
-            // Get all the tokens in the read buffer
-            $tokens = token_get_all($buffer);
-
-            // If we did not reach anything of value yet we will continue reading
-            if (strpos($buffer, '{') === false) {
-
-                continue;
-            }
-
-            // Check the tokens
-            for (; $i < count($tokens); $i++) {
-
-                // If we got the class name
-                if ($tokens[$i][0] === T_CLASS) {
-
-                    for ($j = $i + 1; $j < count($tokens); $j++) {
-
-                        if ($tokens[$j] === '{') {
-
-                            $className = $tokens[$i + 2][1];
-                        }
-                    }
-                }
-            }
-        }
-
-        // Return what we did or did not found
-        return $className;
     }
 }

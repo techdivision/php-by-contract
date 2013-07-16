@@ -9,13 +9,10 @@
 
 namespace TechDivision\PBC\Proxies;
 
-require_once __DIR__ . "/../Parser/AnnotationParser.php";
-
 use TechDivision\PBC\Interfaces\Assertion;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
-use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
-use TechDivision\PBC\Parser\AnnotationParser;
+use TechDivision\PBC\Parser\FileParser;
 
 /**
  * Class ProxyFactory
@@ -137,54 +134,15 @@ class ProxyFactory
             return false;
         }
 
-        // Get a parser for our annotations
-        $parser = new AnnotationParser();
-
-        // Get the class tokens
-        $tokens = token_get_all(file_get_contents($this->fileMap[$className]['path']));
-
-        // Traverse over all tokens and build up the class body
-        $functionDefinitionList = new FunctionDefinitionList();
-        for ($i = 0; $i < count($tokens); $i++) {
-
-            // If we got the keyword private, we have to set it to protected, otherwise we will not be able to
-            // inherit everything correctly
-            if (is_array($tokens[$i])) {
-                switch ($tokens[$i][0]) {
-
-                    case T_FUNCTION:
-
-                        $functionDefinitionList->offsetSet(NULL, $parser->getFunctionDefinition($tokens, $tokens[$i + 2][1]));
-
-                        break;
-
-                    case T_CLASS:
-
-                        $classDefinition = $parser->getClassDefinition($tokens, $tokens[$i + 2][1]);
-
-                        break;
-
-                    default:
-
-                        break;
-                }
-            }
-        }
-
-        // First of all lets create the new proxied parent class
-        $tmp = $this->createProxyParent($this->fileMap[$className]['path'], $classDefinition);
-
-        // Only continue if successful before
-        if ($tmp === false) {
-
-            return false;
-        }
+        // We know the class and we know the file it is in, so get our FileParser and have a blast
+        $fileParser = new FileParser();
+        $fileDefinition = $fileParser->getDefinitionFromFile($this->fileMap[$className]['path']);
 
         // Create the proxy file from the token array
-        $tmpFileName = str_replace(DIRECTORY_SEPARATOR, '_', $this->fileMap[$className]['path']);
-        $targetFileName = __DIR__ . '/cache/' . $tmpFileName;
+        //$tmpFileName = str_replace(DIRECTORY_SEPARATOR, '_', $this->fileMap[$className]['path']);
+        //$targetFileName = __DIR__ . '/cache/' . $tmpFileName;
 
-        $tmp = $this->createFileFromDefinitions($targetFileName, $classDefinition, $functionDefinitionList);
+        $tmp = true;//$this->createFromDefinition($classDefinition);
 
         // Only continue if successful before
         if ($tmp === false) {

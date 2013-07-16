@@ -9,9 +9,9 @@
 
 namespace TechDivision\PBC\Entities\Lists;
 
-require_once __DIR__ . "/TypedList.php";
+require_once __DIR__ . "/AbstractTypedList.php";
 
-class AssertionList extends TypedList
+class AssertionList extends AbstractTypedList
 {
 
     public function __construct()

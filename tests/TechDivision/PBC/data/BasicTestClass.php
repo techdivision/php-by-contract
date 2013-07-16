@@ -20,7 +20,7 @@ use TechDivision\PBC\Entities\ScriptDefinition;
  *
  * @invariant $this->motd === 'Welcome stranger!'
  */
-class BasicTestClass
+final class BasicTestClass
 {
     /**
      * @var string

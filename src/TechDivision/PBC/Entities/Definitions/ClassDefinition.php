@@ -20,16 +20,6 @@ class ClassDefinition
     /**
      * @var string
      */
-    public $namespace;
-
-    /**
-     * @var array
-     */
-    public $usedNamespaces;
-
-    /**
-     * @var string
-     */
     public $docBlock;
 
     /**
@@ -50,7 +40,7 @@ class ClassDefinition
     /**
      * @var AttributeDefinitionList
      */
-    public $attributes;
+    public $attributeDefinitions;
 
     /**
      * @var AssertionList
@@ -67,13 +57,11 @@ class ClassDefinition
      */
     public function __construct()
     {
-        $this->namespace = '';
-        $this->usedNamespaces = array();
         $this->docBlock = '';
         $this->isFinal = false;
         $this->isAbstract = false;
         $this->name = '';
-        $this->attributes = new AttributeDefinitionList();
+        $this->attributeDefinitions = new AttributeDefinitionList();
         $this->invariantConditions = new AssertionList();
         $this->functionDefinitions = new FunctionDefinitionList();
     }

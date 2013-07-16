@@ -42,9 +42,9 @@ class FunctionDefinition
     public $name;
 
     /**
-     * @var array
+     * @var ParameterDefinitionList
      */
-    public $parameters;
+    public $parameterDefinitions;
 
     /**
      * @var AssertionList
@@ -76,7 +76,7 @@ class FunctionDefinition
         $this->visibility = '';
         $this->isStatic = false;
         $this->name = '';
-        $this->parameters = array();
+        $this->parameterDefinitions = array();
         $this->preConditions = new AssertionList();
         $this->usesOld = false;
         $this->body = '';

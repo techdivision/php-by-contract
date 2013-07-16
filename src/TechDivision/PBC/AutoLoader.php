@@ -20,8 +20,6 @@ if (is_dir(__DIR__ . "/../../../vendor")) {
 
 }
 
-require_once __DIR__ . "/Proxies/ProxyFactory.php";
-
 use Symfony\Component\ClassLoader\UniversalClassLoader;
 use TechDivision\PBC\Proxies\ProxyFactory;
 

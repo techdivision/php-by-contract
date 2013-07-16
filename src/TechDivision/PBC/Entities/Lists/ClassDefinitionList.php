@@ -2,19 +2,19 @@
 /**
  * Created by JetBrains PhpStorm.
  * User: wickb
- * Date: 20.06.13
- * Time: 14:46
+ * Date: 11.07.13
+ * Time: 15:12
  * To change this template use File | Settings | File Templates.
  */
-
 namespace TechDivision\PBC\Entities\Lists;
 
 require_once __DIR__ . "/AbstractTypedList.php";
 
-class FunctionDefinitionList extends AbstractTypedList
+class ClassDefinitionList extends AbstractTypedList
 {
+
     public function __construct()
     {
-        $this->itemType = 'TechDivision\PBC\Entities\Definitions\FunctionDefinition';
+        $this->itemType = 'TechDivision\PBC\Entities\Definitions\ClassDefinition';
     }
 }
