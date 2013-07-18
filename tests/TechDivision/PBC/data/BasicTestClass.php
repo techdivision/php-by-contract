@@ -80,6 +80,32 @@ final class BasicTestClass
      */
     public function iDontBreakTheInvariant()
     {
+        // We will break the invariant here
+        $this->invariantBreaker();
+
+        // and do some stuff here
+        $iAmUseless = $this->motd;
+
+        // now we repair the invariant again
+        $this->invariantRepair();
+
+        // We return something just for the hell of it
+        return $iAmUseless;
+    }
+
+    /**
+     * Will break the invariant
+     */
+    private function invariantBreaker()
+    {
+        $this->motd = 'We are doomed!';
+    }
+
+    /**
+     * Will repair the invariant
+     */
+    private function invariantRepair()
+    {
         $this->motd = 'Welcome stranger!';
     }
 }

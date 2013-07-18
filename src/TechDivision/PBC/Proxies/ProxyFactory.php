@@ -308,8 +308,6 @@ class ProxyFactory
             $iterator->next();
         }
 
-
-
         // Create the invariant
         $fileContent .= 'private function ' . PBC_CLASS_INVARIANT_NAME . '() {';
         $iterator = $classDefinition->invariantConditions->getIterator();
@@ -339,7 +337,7 @@ class ProxyFactory
             }
 
             // Check if the invariant holds
-            $this->' . PBC_CLASS_INVARIANT_NAME . '();
+            '. $this->createInvariantCall() .'
 
             // Now check what kind of visibility we would have
             $attribute = $this->attributes[$name];
@@ -369,7 +367,7 @@ class ProxyFactory
             }
 
             // Check if the invariant holds
-            $this->' . PBC_CLASS_INVARIANT_NAME . '();
+            '. $this->createInvariantCall() .'
         }';
 
 
@@ -411,8 +409,11 @@ class ProxyFactory
 
             $fileContent .= $parameterDefineString . '{';
 
-            // First of all check if our invariant holds
-            $fileContent .= '$this->' . PBC_CLASS_INVARIANT_NAME . '();';
+            // First of all check if our invariant holds, but only if we need it
+            if ($functionDefinition->visibility !== 'private') {
+
+                $fileContent .= $this->createInvariantCall();
+            }
 
             // Iterate over all preconditions
             $assertionIterator = $functionDefinition->preConditions->getIterator();
@@ -452,8 +453,11 @@ class ProxyFactory
                 $assertionIterator->next();
             }
 
-            // Last of all check if our invariant holds
-            $fileContent .= '$this->' . PBC_CLASS_INVARIANT_NAME . '();';
+            // Last of all check if our invariant holds, but only if we need it
+            if ($functionDefinition->visibility !== 'private') {
+
+                $fileContent .= $this->createInvariantCall();
+            }
 
             // If we passed every check we can return the result
             $fileContent .= 'return ' . PBC_KEYWORD_RESULT . ';}';
@@ -479,6 +483,20 @@ class ProxyFactory
 
         // Return if we succeeded or not
         return (boolean)file_put_contents($targetFileName, $fileContent);
+    }
+
+    /**
+     * @return string
+     */
+    private function createInvariantCall()
+    {
+        $code = 'list(, $caller) = debug_backtrace(false);
+        if (isset($caller["class"]) && $caller["class"] !== __CLASS__) {
+
+            $this->' . PBC_CLASS_INVARIANT_NAME . '();
+        }';
+
+        return $code;
     }
 
     /**
