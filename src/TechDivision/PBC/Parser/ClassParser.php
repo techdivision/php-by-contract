@@ -446,6 +446,38 @@ class ClassParser
             }
         }
 
+        // Now check if there is any default value for this attribute, if so we have to get it
+        $defaultValue = null;
+        for ($i = $attributePosition; $i < count($tokens); $i++) {
+
+            // If we reach the semicolon we do not have anything here.
+            if ($tokens[$i] === ';') {
+
+                break;
+            }
+
+            if ($defaultValue !== null) {
+                // Do we get a static keyword?
+                if (is_array($tokens[$i])) {
+
+                    $defaultValue .= $tokens[$i][1];
+
+                } else {
+
+                    $defaultValue .= $tokens[$i];
+                }
+            }
+
+            // If we pass a = we have to get ready to make notes
+            if ($tokens[$i] === '=') {
+
+                $defaultValue = '';
+            }
+        }
+
+        // Set the default Value
+        $attribute->defaultValue = $defaultValue;
+
         // Last but not least we have to check if got the visibility, if not, set it public.
         // This is necessary, as missing visibility in the definition will also default to public
         if ($attribute->visibility === '') {

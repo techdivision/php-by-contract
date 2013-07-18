@@ -9,6 +9,7 @@
 
 namespace TechDivision\PBC\Proxies;
 
+use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Interfaces\Assertion;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
@@ -138,20 +139,28 @@ class ProxyFactory
         $fileParser = new FileParser();
         $fileDefinition = $fileParser->getDefinitionFromFile($this->fileMap[$className]['path']);
 
-        // Create the proxy file from the token array
-        //$tmpFileName = str_replace(DIRECTORY_SEPARATOR, '_', $this->fileMap[$className]['path']);
-        //$targetFileName = __DIR__ . '/cache/' . $tmpFileName;
+        // So we got our FileDefinition, now lets check if there are multiple classes in there.
+        // Iterate over all classes within the FileDefinition and create a file for each of them
+        $classIterator = $fileDefinition->classDefinitions->getIterator();
+        for ($k = 0; $k < $classIterator->count(); $k++) {
 
-        $tmp = true;//$this->createFromDefinition($classDefinition);
+            $classDefinition = $classIterator->current();
+            $filePath = $this->createProxyFilePath($this->fileMap[$className]['path'], $classDefinition->name);
 
-        // Only continue if successful before
-        if ($tmp === false) {
+            $tmp = $this->createFileFromDefinitions($filePath, $fileDefinition, $classDefinition);
 
-            return false;
+            if ($tmp === true) {
+
+                // Now get our new file into the cacheMap
+                $this->pushCacheMap($classDefinition->name, $filePath);
+            }
+
+            // Next assertion please
+            $classIterator->next();
         }
 
-        // Add the proxy class to our cache map
-        return $this->pushCacheMap($className, $this->fileMap[$className]['path']);
+        // Still here? Than everything worked out great.
+        return true;
     }
 
     /**
@@ -173,89 +182,149 @@ class ProxyFactory
 
     /**
      * @param $fileName
+     * @param $className
+     * @return string
+     */
+    private function createProxyFilePath($fileName, $className)
+    {
+        // As a file can contain multiple classes we will substitute the filename with the class name
+        $tmpFileName = dirname($fileName);
+        $tmpFileName .= '_' . $className;
+        $tmpFileName = str_replace(DIRECTORY_SEPARATOR, '_', $tmpFileName);
+        return __DIR__ . '/cache/' . $tmpFileName . '.php';
+    }
+
+    /**
+     * @param $targetFileName
+     * @param FileDefinition $fileDefinition
      * @param ClassDefinition $classDefinition
      * @return bool
      */
-    private function createProxyParent($fileName, ClassDefinition $classDefinition)
+    private function createFileFromDefinitions($targetFileName, FileDefinition $fileDefinition, ClassDefinition $classDefinition)
     {
-        // Get the class tokens
-        $tokens = token_get_all(file_get_contents($fileName));
+        // Simply create the file content by traversing over the definitions and build a string from the
+        // multiple parts of them.
+        $fileContent = '<?php ';
 
-        // There are certain parts of a class definition we have to exchange to be able to use it as a proxy's parent
-        // Check the tokens
-        for ($i = 0; $i < count($tokens); $i++) {
+        // Lets begin with the namespace
+        if (!empty($classDefinition->namespace)) {
 
-
-
-            // If we got the keyword final, we have to erase this token, otherwise we would get problems with our
-            // proxy inheritance
-            if ($tokens[$i][0] === T_FINAL) {
-
-                // Just unset this part of the array
-                unset($tokens[$i]);
-
-                continue;
-
-            } elseif ($tokens[$i][0] === T_CLASS) {
-                // If we got the class name we have to add the proxied suffix
-
-                for ($j = $i + 1; $j < count($tokens); $j++) {
-
-                    if ($tokens[$j] === '{') {
-
-                        $tokens[$i + 2][1] .= PBC_PROXY_SUFFIX;
-                        break;
-                    }
-                }
-
-                continue;
-            }
+            $fileContent .= 'namespace ' . $classDefinition->namespace . ';';
         }
 
-        // We worked ourselves through the class, now we might add invariant and some magic.
-        // We can add them to the end of the class.
-        array_pop($tokens);
+        // Tell them to use our exception namespaces
+        $fileContent .= 'use TechDivision\PBC\Exceptions\BrokenPreConditionException;
+        use TechDivision\PBC\Exceptions\BrokenPostConditionException;
+        use TechDivision\PBC\Exceptions\BrokenInvariantException;
+        use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;';
 
-        // Something to buffer
-        $fileContent = '';
+        // Also include the use statements that where already present in the source file
+        foreach ($fileDefinition->usedNamespaces as $usedNamespace) {
+
+            $fileContent .= 'use ' . $usedNamespace . ';';
+        }
+
+        // Next build up the class header
+        $fileContent .= $classDefinition->docBlock;
+
+        // Now check if we need any keywords for the class identity
+        if ($classDefinition->isFinal) {
+
+            $fileContent .= 'final ';
+        }
+        if ($classDefinition->isAbstract) {
+
+            $fileContent .= 'abstract ';
+        }
+
+        $fileContent .= 'class ' . $classDefinition->name . ' {';
+
+        // We should create attributes to save old instance state
+        $fileContent .=
+            '/**
+            * @var mixed
+            */
+            private ' . PBC_KEYWORD_OLD . ';';
+
+        // We should create attributes to store our attribute types
+        $fileContent .=
+            '/**
+            * @var array
+            */
+            private $attributes = array(';
+
+        // After iterate over the attributes and build up our array
+        $iterator = $classDefinition->attributeDefinitions->getIterator();
+        for ($i = 0; $i < $iterator->count(); $i++) {
+
+            // Get the current attribute for more easy access
+            $attribute = $iterator->current();
+
+            $fileContent .= '"' . substr($attribute->name, 1) . '"';
+            $fileContent .= ' => array("visibility" => "' . $attribute->visibility . '", ';
+
+            // Now check if we need any keywords for the variable identity
+            if ($attribute->isStatic) {
+
+                $fileContent .= '"static" => true';
+
+            } else {
+
+                $fileContent .= '"static" => false';
+            }
+            $fileContent .= '),';
+
+            // Move the iterator
+            $iterator->next();
+        }
+        $fileContent .= ');';
+
+        // After that we should enter all the other attributes
+        $iterator = $classDefinition->attributeDefinitions->getIterator();
+        for ($i = 0; $i < $iterator->count(); $i++) {
+
+            // Get the current attribute for more easy access
+            $attribute = $iterator->current();
+
+            $fileContent .= 'private ';
+
+            // Now check if we need any keywords for the variable identity
+            if ($attribute->isStatic) {
+
+                $fileContent .= 'static ';
+            }
+
+            $fileContent .= $attribute->name;
+
+            // Do we have a default value
+            if ($attribute->defaultValue !== null) {
+
+                $fileContent .= ' = ' . $attribute->defaultValue;
+            }
+
+            $fileContent .= ';';
+
+            // Move the iterator
+            $iterator->next();
+        }
+
+
 
         // Create the invariant
         $fileContent .= 'private function ' . PBC_CLASS_INVARIANT_NAME . '() {';
         $iterator = $classDefinition->invariantConditions->getIterator();
         for ($i = 0; $i < $iterator->count(); $i++) {
 
-            $fileContent .= $this->createAroundAdviceCode($iterator->current(), PBC_CLASS_INVARIANT_NAME);
+            $fileContent .= $this->createAroundAdviceCode($iterator->current(), PBC_CLASS_INVARIANT_NAME, 'BrokenInvariantException');
 
             // Move the iterator
             $iterator->next();
         }
         $fileContent .= '}';
 
-        // Now we need our magic __call method to catch any call to the invariant.
-        $fileContent .= '
-        /**
-         * Magic function to forward calls of the proxy to our invariant.
-         *
-         * @throws BadMethodCallException
-         */
-        public function __call($name, $arguments)
-        {
-            // If we got called from our proxy class we will forward the call to the invariant.
-            if ($name === "' . PBC_CLASS_INVARIANT_NAME . '" && get_called_class() === "'. $classDefinition->name .'") {
-
-                $this->' . PBC_CLASS_INVARIANT_NAME . '();
-
-            } else {
-
-                throw new \BadMethodCallException;
-            }
-        }
-        ';
-
         // Now we need our magic __set method to catch anybody who wants to change the attributes.
         // If we would not do so a client could break the class without triggering the invariant.
-        $fileContent .= '
-        /**
+        $fileContent .= '/**
          * Magic function to forward writing property access calls if within visibility boundaries.
          *
          * @throws InvalidArgumentException
@@ -263,7 +332,7 @@ class ProxyFactory
         public function __set($name, $value)
         {
             // Does this property even exist? If not, throw an exception
-            if ($this->attributes->offsetExists($name)) {
+            if (isset($this->attributes[$name])) {
 
                 throw new \InvalidArgumentException;
 
@@ -273,8 +342,8 @@ class ProxyFactory
             $this->' . PBC_CLASS_INVARIANT_NAME . '();
 
             // Now check what kind of visibility we would have
-            $attribute = $this->attributes->offsetGet($name);
-            switch ($attribute->visibility) {
+            $attribute = $this->attributes[$name];
+            switch ($attribute["visibility"]) {
 
                 case "protected" :
 
@@ -301,68 +370,46 @@ class ProxyFactory
 
             // Check if the invariant holds
             $this->' . PBC_CLASS_INVARIANT_NAME . '();
-        }
-        ';
+        }';
 
-        // Add to token list as string
-        $tokens[] = $fileContent;
 
-        // Finally add the closing bracket we popped before
-        $tokens[] = '}';
 
-        // Create the proxy file from the token array
-        $tmpFileName = str_replace(DIRECTORY_SEPARATOR, '_', $fileName);
-        $targetFileName = __DIR__ . '/cache/' . str_replace('.php', '', $tmpFileName) . PBC_PROXY_SUFFIX . '.php';
+        // Create all the methods.
+        // To do so we need the list of function definitions.
+        $functionDefinitionList = $classDefinition->functionDefinitions;
 
-        return $this->createFileFromTokens($targetFileName, $tokens);
-    }
-
-    /**
-     * @param $targetFileName
-     * @param ClassDefinition $classDefinition
-     * @param FunctionDefinitionList $functionDefinitionList
-     * @return bool
-     */
-    private function createFileFromDefinitions($targetFileName, ClassDefinition $classDefinition, FunctionDefinitionList $functionDefinitionList)
-    {
-        // Simply create the file content by traversing over the definitions and build a string from the
-        // multiple parts of them.
-        $fileContent = '<?php ';
-
-        // Lets begin with the namespace
-        if (!empty($classDefinition->namespace)) {
-
-            $fileContent .= 'namespace ' . $classDefinition->namespace . ';';
-        }
-
-        // Also don't forget to require the parent class
-        $tmpFile = str_replace('.php', '', $targetFileName);
-        $fileContent .= 'require "' . $tmpFile . PBC_PROXY_SUFFIX . '.php";';
-
-        // Tell them to use our exception namespaces
-        $fileContent .= 'use TechDivision\PBC\Exceptions\BrokenPreConditionException;
-        use TechDivision\PBC\Exceptions\BrokenPostConditionException;';
-
-        // Next build up the class header
-        $fileContent .= $classDefinition->docBlock;
-        $fileContent .= 'class ' . $classDefinition->name . ' extends ' . $classDefinition->name . PBC_PROXY_SUFFIX . ' {';
-
-        // We should create attributes to save old and result
-        $fileContent .=
-            '/**
-            * @var mixed
-            */
-            private ' . PBC_KEYWORD_OLD . ';';
-
-        // Create all the methods
+        // Iterate over them and build up the methods.
         $functionIterator = $functionDefinitionList->getIterator();
         for ($i = 0; $i < $functionIterator->count(); $i++) {
 
             $functionDefinition = $functionIterator->current();
 
             // Create the method header
-            $fileContent .= $functionDefinition->visibility . ' function ' . $functionDefinition->name . '(';
-            $fileContent .= implode(', ', $functionDefinition->parameters) . ') {';
+            $fileContent .= $functionDefinition->visibility . ' function ' . $functionDefinition->name;
+            //var_dump($functionDefinition);die();
+            // Iterate over all parameters and create the parameter string.
+            // We will create two strings, one for calling the method and one for defining it.
+            $parameterCallString = '';
+            $parameterDefineString = '';
+            $parameterIterator = $functionDefinition->parameterDefinitions->getIterator();
+            for ($k = 0; $k < $parameterIterator->count(); $k++) {
+
+                // Our parameter
+                $parameter = $parameterIterator->current();
+
+                // Fill our strings
+                $parameterDefineString .= $parameter->type . ' ' . $parameter->name . ', ';
+                $parameterCallString .= $parameter->name . ', ';
+
+                // Next assertion please
+                $parameterIterator->next();
+            }
+
+            // Don't forget to cut the trailing commata from the strings
+            $parameterCallString = substr($parameterCallString, 0, strlen($parameterCallString) - 2);
+            $parameterDefineString = substr($parameterDefineString, 0, strlen($parameterDefineString) - 2);
+
+            $fileContent .= $parameterDefineString . '{';
 
             // First of all check if our invariant holds
             $fileContent .= '$this->' . PBC_CLASS_INVARIANT_NAME . '();';
@@ -383,15 +430,17 @@ class ProxyFactory
                 $fileContent .= '$this->' . PBC_KEYWORD_OLD . ' = clone $this;';
             }
 
-            // We do not need typing for the parameters anymore, so omit it
-            foreach ($functionDefinition->parameters as $key => $parameter) {
+            // Now call the original method itself
+            if ($functionDefinition->isStatic) {
 
-                $functionDefinition->parameters[$key] = strstr($parameter, '$');
+                $fileContent .= PBC_KEYWORD_RESULT . ' = self::' . $functionDefinition->name . PBC_ORIGINAL_FUNCTION_SUFFIX .
+                    $parameterCallString . ';';
+
+            } else {
+
+                $fileContent .= PBC_KEYWORD_RESULT . ' = $this->' . $functionDefinition->name . PBC_ORIGINAL_FUNCTION_SUFFIX .
+                    $parameterCallString . ';';
             }
-
-            // Now call the parent method itself
-            $fileContent .= PBC_KEYWORD_RESULT . ' = parent::' . $functionDefinition->name .
-                '(' . implode(', ', $functionDefinition->parameters) . ');';
 
             // Iterate over all postconditions
             $assertionIterator = $functionDefinition->postConditions->getIterator();
@@ -408,6 +457,18 @@ class ProxyFactory
 
             // If we passed every check we can return the result
             $fileContent .= 'return ' . PBC_KEYWORD_RESULT . ';}';
+
+            // Now we have to create the original function
+            if ($functionDefinition->isStatic) {
+
+                $fileContent .= 'final private static function ';
+
+            } else {
+
+                $fileContent .= 'final private function ';
+            }
+            $fileContent .= $functionDefinition->name . PBC_ORIGINAL_FUNCTION_SUFFIX . $parameterCallString . '{';
+            $fileContent .= $functionDefinition->body . '}';
 
             // Move the iterator
             $functionIterator->next();

@@ -30,6 +30,11 @@ class AttributeDefinition
     public $name;
 
     /**
+     * @var mixed
+     */
+    public $defaultValue;
+
+    /**
      * Default constructor
      */
     public function __construct()
@@ -37,5 +42,6 @@ class AttributeDefinition
         $this->visibility = 'public';
         $this->isStatic = false;
         $this->name = '';
+        $this->defaultValue = null;
     }
 }

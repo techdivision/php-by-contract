@@ -103,6 +103,10 @@ class FunctionParser extends AbstractParser
         return $functionDefinition;
     }
 
+    /**
+     * @param array $tokens
+     * @return ParameterDefinitionList
+     */
     private function getParameterDefinitionList(array $tokens)
     {
         // Check the tokens
@@ -164,6 +168,9 @@ class FunctionParser extends AbstractParser
                 $parameterDefinition->type = $paramPieces[0];
                 $parameterDefinition->name = $paramPieces[1];
             }
+
+            // Add the definition to the list
+            $parameterDefinitionList->add($parameterDefinition);
         }
 
         return $parameterDefinitionList;

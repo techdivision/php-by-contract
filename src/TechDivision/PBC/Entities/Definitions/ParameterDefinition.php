@@ -28,7 +28,7 @@ class ParameterDefinition
      */
     public function __construct()
     {
-        $this->visibility = '';
+        $this->type = '';
         $this->name = '';
     }
 }

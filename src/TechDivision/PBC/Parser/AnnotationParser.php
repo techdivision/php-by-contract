@@ -33,191 +33,6 @@ class AnnotationParser extends AbstractParser
     }
 
     /**
-     * @param $fileName
-     * @return ClassDefinition|ScriptDefinition
-     */
-    public function parseFile($fileName)
-    {
-        $fileContent = file_get_contents($fileName);
-
-        $docBlocks = array();
-        preg_match_all('/\/\*\*(.+?)\(/s', $fileContent, $docBlocks);
-
-        // We have to check what kind of file we are scanning. Might be a class or just a script or might be even
-        // both in one file.
-        // If we do not get a class name, we assume a simple script.
-        $className = $this->getClassName($fileName);
-
-        // Did we find a class?
-        $definition = null;
-        if (empty($className) === false) {
-
-            // We got a class, hoooray!
-            $definition = new ClassDefinition();
-            $definition->name = $className;
-            $definition->namespace = $this->getClassNamespace($fileName);
-
-            $tokens = token_get_all($fileContent);
-            $definition->attributeDefinitions = $this->getAttributes($tokens);
-
-            // As we are handling a class right now we might check for invariant annotations as well
-            $definition->invariantConditions = $this->getConditions($docBlocks[0], PBC_KEYWORD_INVARIANT);
-
-        } else {
-
-            // We seem to have gotten a simple script file, duh!
-            $definition = new ScriptDefinition();
-            $definition->name = basename($fileName);
-        }
-
-        // The filePath attribute is needed by whatever we got
-        $definition->filePath = realpath($fileName);
-
-        // Get all the functions/methods
-        $functionList = new FunctionDefinitionList();
-
-        $tokens = token_get_all($fileContent);
-
-        for ($i = 0; $i < count($tokens); $i++) {
-
-            if (is_array($tokens[$i]) === true) {
-
-                if ($tokens[$i][0] === T_FUNCTION) {
-
-                    // Create our definition of this function/method
-                    $functionDefinition = new FunctionDefinition();
-
-                    // We should get a name
-                    if ($tokens[$i + 2][0] === T_STRING) {
-
-                        $functionDefinition->name = $tokens[$i + 2][1];
-                    }
-
-                    if ($tokens[$i - 2][0] === T_DOC_COMMENT) {
-
-                        // Lets check if we use any of our self defined keywords.
-                        $functionDefinition->usesOld = $this->usesKeyword($tokens[$i - 2][1], PBC_KEYWORD_OLD);
-                        $functionDefinition->usesResult = $this->usesKeyword($tokens[$i - 2][1], PBC_KEYWORD_RESULT);
-
-                        // Lets get our pre- and postconditions
-                        $functionDefinition->preConditions = $this->getConditions($tokens[$i - 2][1], PBC_KEYWORD_PRE);
-                        $functionDefinition->postConditions = $this->getConditions($tokens[$i - 2][1], PBC_KEYWORD_POST);
-                    }
-
-                    // Add the definition to the list
-                    $functionList->offsetSet($functionDefinition->name, $functionDefinition);
-
-                    // Clean the variable as it might be reused
-                    $functionDefinition = null;
-                }
-            }
-        }
-
-        // Add the list of function definitions to our overall definition
-        $definition->functionDefinitions = $functionList;
-
-        return $definition;
-    }
-
-    /**
-     * @param $tokens
-     * @param $functionName
-     * @return bool|FunctionDefinition
-     */
-    public function getFunctionDefinition($tokens, $functionName)
-    {
-        for ($i = 0; $i < count($tokens); $i++) {
-
-            // Only makes sense to check for arrays
-            if (is_array($tokens[$i])) {
-
-                // did we find the function we are looking for?
-                if ($tokens[$i][0] === T_FUNCTION && $tokens[$i + 2][1] === $functionName) {
-
-                    // Create our definition of this function/method
-                    $functionDefinition = new FunctionDefinition();
-
-                    // We should get a name
-                    if ($tokens[$i + 2][0] === T_STRING) {
-
-                        $functionDefinition->name = $tokens[$i + 2][1];
-
-                    } else {
-
-                        return false;
-                    }
-
-                    if ($tokens[$i - 2][0] === T_DOC_COMMENT) {
-
-                        $functionDefinition->docBlock = $tokens[$i - 2][1];
-
-                        // There is nothing between the function token and the doc comment, so the function has to be public
-                        $functionDefinition->visibility = 'public';
-
-                        // Lets check if we use any of our self defined keywords.
-                        $functionDefinition->usesOld = $this->usesKeyword($tokens[$i - 2][1], PBC_KEYWORD_OLD);
-                        $functionDefinition->usesResult = $this->usesKeyword($tokens[$i - 2][1], PBC_KEYWORD_RESULT);
-
-                        // Lets get our pre- and postconditions
-                        $functionDefinition->preConditions = $this->getConditions($tokens[$i - 2][1], PBC_KEYWORD_PRE);
-                        $functionDefinition->postConditions = $this->getConditions($tokens[$i - 2][1], PBC_KEYWORD_POST);
-
-                    } elseif ($tokens[$i - 2][0] === T_PRIVATE || $tokens[$i - 2][0] === T_PROTECTED || $tokens[$i - 2][0] === T_PUBLIC) {
-
-                        $functionDefinition->visibility = $tokens[$i - 2][1];
-
-                        if ($tokens[$i - 4][0] === T_DOC_COMMENT) {
-
-                            $functionDefinition->docBlock = $tokens[$i - 4][1];
-
-                            // Lets check if we use any of our self defined keywords.
-                            $functionDefinition->usesOld = $this->usesKeyword($tokens[$i - 4][1], PBC_KEYWORD_OLD);
-                            $functionDefinition->usesResult = $this->usesKeyword($tokens[$i - 4][1], PBC_KEYWORD_RESULT);
-
-                            // Lets get our pre- and postconditions
-                            $functionDefinition->preConditions = $this->getConditions($tokens[$i - 4][1], PBC_KEYWORD_PRE);
-                            $functionDefinition->postConditions = $this->getConditions($tokens[$i - 4][1], PBC_KEYWORD_POST);
-
-                        }
-
-                    }
-
-                    // Check if we got parameters
-                    if ($tokens[$i + 3] === '(' && $tokens[$i + 4] !== ')') {
-
-                        // Gotta get them all
-                        for ($j = $i + 3; $j < count($tokens); $j++) {
-
-                            if (is_array($tokens[$j]) && $tokens[$j][0] === T_VARIABLE) {
-
-                                // We might have gotten a type with it, if so, preserve it
-                                if ((is_array($tokens[$j - 2]) && $tokens[$j -2 ][0] === T_STRING) &&
-                                    $tokens[$j - 2][1] !== $functionDefinition->name) {
-
-                                    $functionDefinition->parameterDefinitions[] = $tokens[$j -2 ][1] . ' ' . $tokens[$j][1];
-
-                                } else {
-
-                                    $functionDefinition->parameterDefinitions[] = $tokens[$j][1];
-                                }
-
-                            } elseif ($tokens[$j] === ')') {
-
-                                break;
-                            }
-                        }
-                    }
-
-                    return $functionDefinition;
-                }
-            }
-        }
-
-        // We did not find anything
-        return false;
-    }
-
-    /**
      * @param $docBlock
      * @param $conditionKeyword
      * @return bool|AssertionList
@@ -275,7 +90,7 @@ class AnnotationParser extends AbstractParser
                 $assertion = $this->parseAssertion($condition);
                 if ($assertion !== false) {
 
-                    $result->set(null, $assertion);
+                    $result->add($assertion);
                 }
             }
         }
@@ -350,7 +165,7 @@ class AnnotationParser extends AbstractParser
 
                 $operand = $this->filterOperand($docString);
                 $operators = $this->filterOperators($docString, $operand);
-            //var_dump($variable, $type, $class, $operand, $operators, '----------------------------------');
+
                 // Now we have to check what we got
                 // First of all handle if we got a simple type
                 if ($type !== false) {

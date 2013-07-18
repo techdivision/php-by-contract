@@ -14,3 +14,4 @@ define('PBC_KEYWORD_OLD', '$pbcOld');
 define('PBC_KEYWORD_RESULT', '$pbcResult');
 define('PBC_PROXY_SUFFIX', 'PBCProxied');
 define('PBC_CLASS_INVARIANT_NAME', 'pbcClassInvariant');
+define('PBC_ORIGINAL_FUNCTION_SUFFIX', 'PBCOriginal');
