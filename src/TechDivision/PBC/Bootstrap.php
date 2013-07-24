@@ -12,6 +12,7 @@ require_once __DIR__ . "/AutoLoader.php";
 require_once __DIR__ . "/Config.php";
 
 use TechDivision\PBC\AutoLoader;
+use TechDivision\PBC\Config;
 
 // We have to register our autoLoader to put our proxies in place
 $config = new Config();

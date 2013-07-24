@@ -12,7 +12,7 @@ namespace TechDivision\PBC;
 require_once 'PHPUnit/Autoload.php';
 
 require_once __DIR__ . '/BasicTest.php';
-
+require_once __DIR__ . '/RealTest.php';
 
 class AllTests
 {
@@ -21,6 +21,7 @@ class AllTests
         $suite = new \PHPUnit_Framework_TestSuite();
 
         $suite->addTestSuite('BasicTest');
+        $suite->addTestSuite('RealTest');
 
         return $suite;
     }

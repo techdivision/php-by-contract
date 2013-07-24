@@ -7,6 +7,8 @@
  * To change this template use File | Settings | File Templates.
  */
 
+namespace TechDivision\PBC;
+
 class Config
 {
     public function __construct()

@@ -180,6 +180,12 @@ class ClassParser
 
                         return true;
                     }
+
+                    // We might reach 0, if so, break
+                    if ($j === 0) {
+
+                        break;
+                    }
                 }
 
                 // We passed the 6 token loop but did not find something. So report it.
@@ -211,6 +217,12 @@ class ClassParser
                     if ($tokens[$j][0] === T_ABSTRACT) {
 
                         return true;
+                    }
+
+                    // We might reach 0, if so, break
+                    if ($j === 0) {
+
+                        break;
                     }
                 }
 

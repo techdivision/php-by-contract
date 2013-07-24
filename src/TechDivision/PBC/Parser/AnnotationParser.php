@@ -15,6 +15,7 @@ use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
+use TechDivision\PBC\Config;
 
 /**
  * Class AnnotationParser
@@ -28,7 +29,7 @@ class AnnotationParser extends AbstractParser
 
     public function __construct()
     {
-        $config = new \Config();
+        $config = new Config();
         $this->config = $config->getConfig('Parser');
     }
 
