@@ -24,6 +24,16 @@ abstract class AbstractTypedList implements TypedList
     protected $container = array();
 
     /**
+     * Checks if the list is empty
+     *
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return empty($this->container);
+    }
+
+    /**
      * @param $value
      * @return bool|mixed
      */

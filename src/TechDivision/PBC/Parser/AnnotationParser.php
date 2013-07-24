@@ -252,9 +252,10 @@ class AnnotationParser extends AbstractParser
         foreach ($explodedString as $stringPiece) {
 
             // Check if we got a variable
+            $stringPiece = trim($stringPiece);
             if (strpos($stringPiece, '$') === 0 || $stringPiece === PBC_KEYWORD_RESULT || $stringPiece === PBC_KEYWORD_OLD) {
 
-                return trim($stringPiece);
+                return $stringPiece;
             }
         }
 
@@ -277,9 +278,10 @@ class AnnotationParser extends AbstractParser
         foreach ($explodedString as $stringPiece) {
 
             // Check if we got a variable
-            if (isset($validTypes[strtolower($stringPiece)])) {
+            $stringPiece = strtolower(trim($stringPiece));
+            if (isset($validTypes[$stringPiece])) {
 
-                return trim($stringPiece);
+                return $stringPiece;
             }
         }
 
@@ -305,12 +307,13 @@ class AnnotationParser extends AbstractParser
 
         // We assume we got a class if the second part is no scalar type and no variable
         $validTypes = array_flip($this->validSimpleTypes);
-        if (strpos($explodedString[1], '$') === false && !isset($validTypes[strtolower($explodedString[1])])) {
+        $stringPiece = trim(str_replace('\\', '\\\\', $explodedString[1]));
+        if (strpos($stringPiece, '$') === false && !isset($validTypes[strtolower($stringPiece)])) {
 
             // If we got "void" we do not need to bother
             if (trim($explodedString[1]) !== 'void') {
 
-                return trim(str_replace('\\', '\\\\', $explodedString[1]));
+                return $stringPiece;
             }
         }
 

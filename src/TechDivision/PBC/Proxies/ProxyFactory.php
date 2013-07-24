@@ -202,6 +202,13 @@ class ProxyFactory
      */
     private function createFileFromDefinitions($targetFileName, FileDefinition $fileDefinition, ClassDefinition $classDefinition)
     {
+        // This variable is used to determine if we need an invariant, as we might as well not.
+        $invariantUsed = false;
+        if ($classDefinition->invariantConditions->isEmpty() === false) {
+
+            $invariantUsed = true;
+        }
+
         // Simply create the file content by traversing over the definitions and build a string from the
         // multiple parts of them.
         $fileContent = '<?php ';
@@ -216,7 +223,6 @@ class ProxyFactory
         $fileContent .= 'use TechDivision\PBC\Exceptions\BrokenPreConditionException;
         use TechDivision\PBC\Exceptions\BrokenPostConditionException;
         use TechDivision\PBC\Exceptions\BrokenInvariantException;
-        use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
         ';
 
         // Also include the use statements that where already present in the source file
@@ -326,16 +332,19 @@ class ProxyFactory
         }
 
         // Create the invariant
-        $fileContent .= 'private function ' . PBC_CLASS_INVARIANT_NAME . '() {';
-        $iterator = $classDefinition->invariantConditions->getIterator();
-        for ($i = 0; $i < $iterator->count(); $i++) {
+        if ($invariantUsed === true) {
+            $fileContent .= 'private function ' . PBC_CLASS_INVARIANT_NAME . '() {';
+            $iterator = $classDefinition->invariantConditions->getIterator();
+            for ($i = 0; $i < $iterator->count(); $i++) {
 
-            $fileContent .= $this->createAroundAdviceCode($iterator->current(), PBC_CLASS_INVARIANT_NAME, 'BrokenInvariantException');
+                $fileContent .= $this->createAroundAdviceCode($iterator->current(), PBC_CLASS_INVARIANT_NAME, 'BrokenInvariantException');
 
-            // Move the iterator
-            $iterator->next();
+                // Move the iterator
+                $iterator->next();
+            }
+            $fileContent .= '}
+        ';
         }
-        $fileContent .= '}';
 
         // Now we need our magic __set method to catch anybody who wants to change the attributes.
         // If we would not do so a client could break the class without triggering the invariant.
@@ -354,7 +363,7 @@ class ProxyFactory
             }
 
             // Check if the invariant holds
-            '. $this->createInvariantCall() .'
+            ' . $this->createInvariantCall($invariantUsed) . '
 
             // Now check what kind of visibility we would have
             $attribute = $this->attributes[$name];
@@ -362,7 +371,7 @@ class ProxyFactory
 
                 case "protected" :
 
-                    if (is_subclass_of(get_called_class(), "'. $classDefinition->name .'")) {
+                    if (is_subclass_of(get_called_class(), "' . $classDefinition->name . '")) {
 
                         $this->$name = $value;
 
@@ -384,10 +393,9 @@ class ProxyFactory
             }
 
             // Check if the invariant holds
-            '. $this->createInvariantCall() .'
+            ' . $this->createInvariantCall($invariantUsed) . '
         }
         ';
-
 
 
         // Create all the methods.
@@ -450,7 +458,7 @@ class ProxyFactory
             // First of all check if our invariant holds, but only if we need it
             if ($functionDefinition->visibility !== 'private') {
 
-                $fileContent .= $this->createInvariantCall();
+                $fileContent .= $this->createInvariantCall($invariantUsed);
             }
 
             // Iterate over all preconditions
@@ -494,7 +502,7 @@ class ProxyFactory
             // Last of all check if our invariant holds, but only if we need it
             if ($functionDefinition->visibility !== 'private') {
 
-                $fileContent .= $this->createInvariantCall();
+                $fileContent .= $this->createInvariantCall($invariantUsed);
             }
 
             // If we passed every check we can return the result
@@ -526,14 +534,21 @@ class ProxyFactory
     /**
      * @return string
      */
-    private function createInvariantCall()
+    private function createInvariantCall($invariantUsed)
     {
-        $code = 'list(, $caller) = debug_backtrace(false);
+        if ($invariantUsed === true) {
+
+            $code = 'list(, $caller) = debug_backtrace(false);
         if (isset($caller["class"]) && $caller["class"] !== __CLASS__) {
 
             $this->' . PBC_CLASS_INVARIANT_NAME . '();
         }
         ';
+
+        } else {
+
+            $code = '';
+        }
 
         return $code;
     }
