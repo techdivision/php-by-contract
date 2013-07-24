@@ -9,6 +9,8 @@
 
 namespace TechDivision\PBC\Proxies;
 
+require_once __DIR__ . "/../Constants.php";
+
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Interfaces\Assertion;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;

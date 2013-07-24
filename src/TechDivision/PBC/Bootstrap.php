@@ -7,7 +7,6 @@
  * To change this template use File | Settings | File Templates.
  */
 
-require_once __DIR__ . "/Constants.php";
 require_once __DIR__ . "/AutoLoader.php";
 require_once __DIR__ . "/Config.php";
 

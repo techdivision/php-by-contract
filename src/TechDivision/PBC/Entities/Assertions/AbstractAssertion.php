@@ -40,6 +40,7 @@ abstract class AbstractAssertion implements Assertion
     {
         // Invert this instance
         $self = $this;
+
         $self->invert();
 
         // Return the string of the inverted instance

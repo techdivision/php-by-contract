@@ -307,11 +307,11 @@ class AnnotationParser extends AbstractParser
 
         // We assume we got a class if the second part is no scalar type and no variable
         $validTypes = array_flip($this->validSimpleTypes);
-        $stringPiece = trim(str_replace('\\', '\\\\', $explodedString[1]));
+        $stringPiece = trim($explodedString[1]);
         if (strpos($stringPiece, '$') === false && !isset($validTypes[strtolower($stringPiece)])) {
 
             // If we got "void" we do not need to bother
-            if (trim($explodedString[1]) !== 'void') {
+            if ($stringPiece !== 'void') {
 
                 return $stringPiece;
             }

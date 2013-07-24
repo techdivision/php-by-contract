@@ -29,18 +29,12 @@ class InstanceAssertion extends AbstractAssertion
     public $class;
 
     /**
-     * @var
-     */
-    public $validatesTo;
-
-    /**
      * @param string $_operand
      * @param $_type
      */
     public function __construct($_operand, $_class)
     {
         $this->operand = $_operand;
-        $this->validatesTo = true;
         $this->class = $_class;
     }
 
@@ -49,7 +43,7 @@ class InstanceAssertion extends AbstractAssertion
      */
     public function getString()
     {
-        return (string) 'is_a(' . $this->operand . ', "' . $this->class . '")' . ' === ' . var_export($this->validatesTo, true);
+        return (string) $this->operand . ' instanceof ' . $this->class;
     }
 
     /**
@@ -57,15 +51,15 @@ class InstanceAssertion extends AbstractAssertion
      */
     public function invert()
     {
-        if ($this->validatesTo === true) {
+        if ($this->inverted !== true) {
 
-            $this->validatesTo = false;
+            $this->operand = '!' . $this->operand;
             $this->inverted = true;
             return true;
 
-        }  elseif ($this->validatesTo === false) {
+        }  elseif ($this->inverted === true) {
 
-            $this->validatesTo = true;
+            $this->operand = ltrim($this->operand, '!');
             $this->inverted = false;
             return true;
 
