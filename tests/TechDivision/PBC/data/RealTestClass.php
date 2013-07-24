@@ -12,7 +12,6 @@
 
 namespace TechDivision\Example\Servlets;
 
-use TechDivision\ServletContainer\Interfaces\Servlet;
 use TechDivision\Example\Servlets\AbstractServlet;
 
 /**
@@ -22,7 +21,7 @@ use TechDivision\Example\Servlets\AbstractServlet;
  *              Open Software License (OSL 3.0)
  * @author      Tim Wagner <tw@techdivision.com>
  */
-class IndexServlet extends AbstractServlet implements Servlet {
+class IndexServlet extends AbstractServlet {
 
     /**
      * The relative path, up from the webapp path, to the template to use.
