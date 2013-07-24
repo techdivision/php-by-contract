@@ -87,7 +87,7 @@ class FileParser
         }
 
         // Return what we did or did not found
-        return $namespace;
+        return substr($namespace, 1);
     }
 
     /**

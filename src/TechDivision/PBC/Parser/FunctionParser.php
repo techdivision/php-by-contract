@@ -35,9 +35,13 @@ class FunctionParser extends AbstractParser
             return false;
 
         } elseif (count($tokens) === 0) {
-            // We got what we came for
+            // We got what we came for, or did we?
 
-            $functionDefinitionList->add($this->getDefinitionFromTokens($tokens[0]));
+            if (isset($tokens[0])) {
+
+                $functionDefinitionList->add($this->getDefinitionFromTokens($tokens[0]));
+            }
+
             return $functionDefinitionList;
 
         } elseif (count($tokens) > 1) {
@@ -384,12 +388,6 @@ class FunctionParser extends AbstractParser
 
                 $result[] = array_slice($tokens, $lowerBound, $upperBound - $lowerBound);
             }
-        }
-
-        // Last line of defence; did we get something?
-        if (empty($result)) {
-
-            return false;
         }
 
         return $result;

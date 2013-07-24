@@ -13,13 +13,7 @@
 namespace TechDivision\Example\Servlets;
 
 use TechDivision\ServletContainer\Interfaces\Servlet;
-use TechDivision\ServletContainer\Interfaces\ServletConfig;
-use TechDivision\ServletContainer\Interfaces\Request;
-use TechDivision\ServletContainer\Interfaces\Response;
-use TechDivision\PersistenceContainerClient\Context\Connection\Factory;
 use TechDivision\Example\Servlets\AbstractServlet;
-use TechDivision\Example\Entities\Sample;
-use TechDivision\Example\Utils\ContextKeys;
 
 /**
  * @package     TechDivision\Example

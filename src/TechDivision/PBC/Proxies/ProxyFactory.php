@@ -207,9 +207,9 @@ class ProxyFactory
         $fileContent = '<?php ';
 
         // Lets begin with the namespace
-        if (!empty($classDefinition->namespace)) {
+        if (!empty($fileDefinition->namespace)) {
 
-            $fileContent .= 'namespace ' . $classDefinition->namespace . ';';
+            $fileContent .= 'namespace ' . $fileDefinition->namespace . ';';
         }
 
         // Tell them to use our exception namespaces
@@ -237,7 +237,20 @@ class ProxyFactory
             $fileContent .= 'abstract ';
         }
 
-        $fileContent .= 'class ' . $classDefinition->name . ' {';
+        $fileContent .= 'class ' . $classDefinition->name;
+
+        // Add any parent class or interfaces there might be.
+        if ($classDefinition->extends !== '') {
+
+            $fileContent .= ' extends ' . $classDefinition->extends;
+        }
+
+        if (!empty($classDefinition->implements)) {
+
+            $fileContent .= ' implements ' . implode(', ', $classDefinition->implements);
+        }
+
+        $fileContent .= ' {';
 
         // We should create attributes to save old instance state
         $fileContent .=
@@ -404,8 +417,27 @@ class ProxyFactory
             }
 
             // Don't forget to cut the trailing commata from the strings
-            $parameterCallString = substr($parameterCallString, 0, strlen($parameterCallString) - 2);
-            $parameterDefineString = substr($parameterDefineString, 0, strlen($parameterDefineString) - 2);
+            $parameterCallString = trim(substr($parameterCallString, 0, strlen($parameterCallString) - 2));
+            $parameterDefineString = trim(substr($parameterDefineString, 0, strlen($parameterDefineString) - 2));
+
+            // We have to sanitize the strings, and make sure there are brackets enclosing them.
+            if (strpos($parameterDefineString, '(') !== 0) {
+
+                $parameterDefineString = '(' . $parameterDefineString;
+            }
+            if (strrpos($parameterDefineString, ')') !== strlen($parameterDefineString) - 1) {
+
+                $parameterDefineString .= ')';
+            }
+
+            if (strpos($parameterCallString, '(') !== 0) {
+
+                $parameterCallString = '(' . $parameterCallString;
+            }
+            if (strrpos($parameterCallString, ')') !== strlen($parameterCallString) - 1) {
+
+                $parameterCallString .= ')';
+            }
 
             $fileContent .= $parameterDefineString . '{';
 
@@ -558,8 +590,7 @@ class ProxyFactory
             return false;
         }
 
-        $tmpFileName = str_replace(DIRECTORY_SEPARATOR, '_', $this->fileMap[$className]['path']);
-        return realpath(__DIR__ . '/cache/' . $tmpFileName);
+        return $this->cacheMap[$className]['path'];
     }
 
     /**

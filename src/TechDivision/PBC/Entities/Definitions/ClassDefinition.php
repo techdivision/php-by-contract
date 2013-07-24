@@ -38,6 +38,16 @@ class ClassDefinition
     public $name;
 
     /**
+     * @var string
+     */
+    public $extends;
+
+    /**
+     * @var array
+     */
+    public $implements;
+
+    /**
      * @var AttributeDefinitionList
      */
     public $attributeDefinitions;
@@ -61,6 +71,8 @@ class ClassDefinition
         $this->isFinal = false;
         $this->isAbstract = false;
         $this->name = '';
+        $this->extends = '';
+        $this->implements = array();
         $this->attributeDefinitions = new AttributeDefinitionList();
         $this->invariantConditions = new AssertionList();
         $this->functionDefinitions = new FunctionDefinitionList();

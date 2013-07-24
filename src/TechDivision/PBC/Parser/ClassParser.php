@@ -122,6 +122,10 @@ class ClassParser
         $classDefinition->isAbstract = $this->isAbstractClass($tokens);
         $classDefinition->name = $this->getClassName($tokens);
 
+        // Lets check if there is any inheritance, or if we implement any interfaces
+        $classDefinition->extends = $this->getParent($tokens);
+        $classDefinition->implements = $this->getInterfaces($tokens);
+
         // Lets get the attributes the class might have
         $classDefinition->attributeDefinitions = $this->getAttributes($tokens);
 
@@ -157,6 +161,68 @@ class ClassParser
 
         // Return what we did or did not found
         return $className;
+    }
+
+    /**
+     * @param $tokens
+     * @return string
+     */
+    private function getParent($tokens)
+    {
+        // Check the tokens
+        $className = '';
+        for ($i = 0; $i < count($tokens); $i++) {
+
+            // If we got the class name
+            if ($tokens[$i][0] === T_EXTENDS) {
+
+                for ($j = $i + 1; $j < count($tokens); $j++) {
+
+                    if ($tokens[$j] === '{' || $tokens[$j][0] === T_IMPLEMENTS) {
+
+                        return $className;
+
+                    } elseif ($tokens[$j][0] === T_STRING) {
+
+                        $className .= $tokens[$j][1];
+                    }
+                }
+            }
+        }
+
+        // Return what we did or did not found
+        return $className;
+    }
+
+    /**
+     * @param $tokens
+     * @return array
+     */
+    private function getInterfaces($tokens)
+    {
+        // Check the tokens
+        $interfaces = '';
+        for ($i = 0; $i < count($tokens); $i++) {
+
+            // If we got the class name
+            if ($tokens[$i][0] === T_IMPLEMENTS) {
+
+                for ($j = $i + 1; $j < count($tokens); $j++) {
+
+                    if ($tokens[$j] === '{' || $tokens[$j][0] === T_EXTENDS) {
+
+                        return $interfaces;
+
+                    } elseif ($tokens[$j][0] === T_STRING) {
+
+                        $interfaces[] = $tokens[$j][1];
+                    }
+                }
+            }
+        }
+
+        // Return what we did or did not found
+        return $interfaces;
     }
 
     /**
