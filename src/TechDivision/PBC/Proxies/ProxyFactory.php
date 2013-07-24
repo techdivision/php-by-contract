@@ -152,7 +152,7 @@ class ProxyFactory
             if ($tmp === true) {
 
                 // Now get our new file into the cacheMap
-                $this->pushCacheMap($classDefinition->name, $filePath);
+                $this->pushCacheMap($className, $filePath);
             }
 
             // Next assertion please
@@ -403,7 +403,7 @@ class ProxyFactory
             // Create the method header
             $fileContent .= $functionDefinition->docBlock;
             $fileContent .= $functionDefinition->visibility . ' function ' . $functionDefinition->name;
-            //var_dump($functionDefinition);die();
+
             // Iterate over all parameters and create the parameter string.
             // We will create two strings, one for calling the method and one for defining it.
             $parameterCallString = '';
