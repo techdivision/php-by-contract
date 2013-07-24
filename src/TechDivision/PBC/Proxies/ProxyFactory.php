@@ -216,12 +216,14 @@ class ProxyFactory
         $fileContent .= 'use TechDivision\PBC\Exceptions\BrokenPreConditionException;
         use TechDivision\PBC\Exceptions\BrokenPostConditionException;
         use TechDivision\PBC\Exceptions\BrokenInvariantException;
-        use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;';
+        use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
+        ';
 
         // Also include the use statements that where already present in the source file
         foreach ($fileDefinition->usedNamespaces as $usedNamespace) {
 
-            $fileContent .= 'use ' . $usedNamespace . ';';
+            $fileContent .= 'use ' . $usedNamespace . ';
+            ';
         }
 
         // Next build up the class header
@@ -257,7 +259,8 @@ class ProxyFactory
             '/**
             * @var mixed
             */
-            private ' . PBC_KEYWORD_OLD . ';';
+            private ' . PBC_KEYWORD_OLD . ';
+            ';
 
         // We should create attributes to store our attribute types
         $fileContent .=
@@ -290,7 +293,8 @@ class ProxyFactory
             // Move the iterator
             $iterator->next();
         }
-        $fileContent .= ');';
+        $fileContent .= ');
+        ';
 
         // After that we should enter all the other attributes
         $iterator = $classDefinition->attributeDefinitions->getIterator();
@@ -381,7 +385,8 @@ class ProxyFactory
 
             // Check if the invariant holds
             '. $this->createInvariantCall() .'
-        }';
+        }
+        ';
 
 
 
@@ -396,6 +401,7 @@ class ProxyFactory
             $functionDefinition = $functionIterator->current();
 
             // Create the method header
+            $fileContent .= $functionDefinition->docBlock;
             $fileContent .= $functionDefinition->visibility . ' function ' . $functionDefinition->name;
             //var_dump($functionDefinition);die();
             // Iterate over all parameters and create the parameter string.
@@ -526,7 +532,8 @@ class ProxyFactory
         if (isset($caller["class"]) && $caller["class"] !== __CLASS__) {
 
             $this->' . PBC_CLASS_INVARIANT_NAME . '();
-        }';
+        }
+        ';
 
         return $code;
     }

@@ -27,6 +27,27 @@ class AnnotationParser extends AbstractParser
      */
     private $config;
 
+    /**
+     * @var array
+     */
+    private $validSimpleTypes = array(
+        'array',
+        'bool',
+        'callable',
+        'double',
+        'float',
+        'int',
+        'integer',
+        'long',
+        'null',
+        'numeric',
+        'object',
+        'real',
+        'resource',
+        'scalar',
+        'string'
+    );
+
     public function __construct()
     {
         $config = new Config();
@@ -252,10 +273,11 @@ class AnnotationParser extends AbstractParser
         $explodedString = explode(' ', $docString);
 
         // Filter for the first variable. The first as there might be a variable name in any following description
+        $validTypes = array_flip($this->validSimpleTypes);
         foreach ($explodedString as $stringPiece) {
 
             // Check if we got a variable
-            if (function_exists('is_' . $stringPiece) && $stringPiece !== 'a') {
+            if (isset($validTypes[strtolower($stringPiece)])) {
 
                 return trim($stringPiece);
             }
@@ -275,13 +297,20 @@ class AnnotationParser extends AbstractParser
         // Explode the string to get the different pieces
         $explodedString = explode(' ', $docString);
 
-        // Filter for the first variable. The first as there might be a variable name in any following description
-        foreach ($explodedString as $stringPiece) {
+        // Check if we got a valid docsting, if so the first part must begin with @
+        if (strpos($explodedString[0], '@') !== 0) {
 
-            // Check if we got a variable
-            if (class_exists($stringPiece) || interface_exists($stringPiece)) {
+            return false;
+        }
 
-                return trim($stringPiece);
+        // We assume we got a class if the second part is no scalar type and no variable
+        $validTypes = array_flip($this->validSimpleTypes);
+        if (strpos($explodedString[1], '$') === false && !isset($validTypes[strtolower($explodedString[1])])) {
+
+            // If we got "void" we do not need to bother
+            if (trim($explodedString[1]) !== 'void') {
+
+                return trim(str_replace('\\', '\\\\', $explodedString[1]));
             }
         }
 
