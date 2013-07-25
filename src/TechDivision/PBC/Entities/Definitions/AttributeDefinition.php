@@ -8,11 +8,12 @@
  */
 
 namespace TechDivision\PBC\Entities\Definitions;
+use TechDivision\PBC\Interfaces\Definition;
 
 /**
  * Class AttributeDefinition
  */
-class AttributeDefinition
+class AttributeDefinition implements Definition
 {
     /**
      * @var string
@@ -43,5 +44,34 @@ class AttributeDefinition
         $this->isStatic = false;
         $this->name = '';
         $this->defaultValue = null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getString()
+    {
+        $stringParts = array();
+
+        // Set the visibility
+        $stringParts[] = $this->visibility;
+
+        // If we are static, we have to tell so
+        if ($this->isStatic === true) {
+
+            $stringParts[] = 'static';
+        }
+
+        // Add the name
+        $stringParts[] = $this->name;
+
+        // Add any default value we might get
+        $stringParts[] = $this->defaultValue;
+
+        // And don't forget the trailing semicolon + linebreak
+        $stringParts[] = ';
+        ';
+
+        return implode(' ', $stringParts);
     }
 }

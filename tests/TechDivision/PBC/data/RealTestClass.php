@@ -109,6 +109,15 @@ class IndexServlet extends AbstractServlet {
     }
 
     /**
+     * Sets the value for the class member syncedAt.
+     *
+     * @param integer $syncedAt Holds the value for the class member syncedAt
+     */
+    public function setSyncedAt($syncedAt = null) {
+        $this->syncedAt = $syncedAt;
+    }
+
+    /**
      * Persists the entity data found in the request.
      *
      * @param Request $req The request instance

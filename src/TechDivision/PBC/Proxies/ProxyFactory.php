@@ -425,8 +425,8 @@ class ProxyFactory
 
             // Iterate over all parameters and create the parameter string.
             // We will create two strings, one for calling the method and one for defining it.
-            $parameterCallString = '';
-            $parameterDefineString = '';
+            $parameterCallString = array();
+            $parameterDefineString = array();
             $parameterIterator = $functionDefinition->parameterDefinitions->getIterator();
             for ($k = 0; $k < $parameterIterator->count(); $k++) {
 
@@ -434,37 +434,18 @@ class ProxyFactory
                 $parameter = $parameterIterator->current();
 
                 // Fill our strings
-                $parameterDefineString .= $parameter->type . ' ' . $parameter->name . ', ';
-                $parameterCallString .= $parameter->name . ', ';
+                $parameterDefineString[] = $parameter->getString('definition');
+                $parameterCallString[] = $parameter->getString('call');
 
                 // Next assertion please
                 $parameterIterator->next();
             }
 
-            // Don't forget to cut the trailing commata from the strings
-            $parameterCallString = trim(substr($parameterCallString, 0, strlen($parameterCallString) - 2));
-            $parameterDefineString = trim(substr($parameterDefineString, 0, strlen($parameterDefineString) - 2));
+            // Explode to insert commas
+            $parameterCallString = implode(', ', $parameterCallString);
+            $parameterDefineString = implode(', ', $parameterDefineString);
 
-            // We have to sanitize the strings, and make sure there are brackets enclosing them.
-            if (strpos($parameterDefineString, '(') !== 0) {
-
-                $parameterDefineString = '(' . $parameterDefineString;
-            }
-            if (strrpos($parameterDefineString, ')') !== strlen($parameterDefineString) - 1) {
-
-                $parameterDefineString .= ')';
-            }
-
-            if (strpos($parameterCallString, '(') !== 0) {
-
-                $parameterCallString = '(' . $parameterCallString;
-            }
-            if (strrpos($parameterCallString, ')') !== strlen($parameterCallString) - 1) {
-
-                $parameterCallString .= ')';
-            }
-
-            $fileContent .= $parameterDefineString . '{';
+            $fileContent .= '(' . $parameterDefineString . ') {';
 
             // First of all check if our invariant holds, but only if we need it
             if ($functionDefinition->visibility !== 'private') {
@@ -492,12 +473,12 @@ class ProxyFactory
             if ($functionDefinition->isStatic) {
 
                 $fileContent .= PBC_KEYWORD_RESULT . ' = self::' . $functionDefinition->name . PBC_ORIGINAL_FUNCTION_SUFFIX .
-                    $parameterCallString . ';';
+                    '(' . $parameterCallString . ');';
 
             } else {
 
                 $fileContent .= PBC_KEYWORD_RESULT . ' = $this->' . $functionDefinition->name . PBC_ORIGINAL_FUNCTION_SUFFIX .
-                    $parameterCallString . ';';
+                    '(' . $parameterCallString . ');';
             }
 
             // Iterate over all postconditions
@@ -528,7 +509,7 @@ class ProxyFactory
 
                 $fileContent .= 'final private function ';
             }
-            $fileContent .= $functionDefinition->name . PBC_ORIGINAL_FUNCTION_SUFFIX . $parameterCallString . '{';
+            $fileContent .= $functionDefinition->name . PBC_ORIGINAL_FUNCTION_SUFFIX . '(' . $parameterCallString . ') {';
             $fileContent .= $functionDefinition->body . '}';
             // Move the iterator
             $functionIterator->next();

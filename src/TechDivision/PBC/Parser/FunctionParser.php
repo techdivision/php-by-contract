@@ -153,11 +153,12 @@ class FunctionParser extends AbstractParser
         }
 
         // Now lets analyse what we got
+        $parameterString = str_replace(array('(', ')'), '', $parameterString);
         $parameterStrings = explode(',', $parameterString);
         foreach ($parameterStrings as $param) {
 
             $param = trim($param);
-            $paramPieces = explode(' ', $param);
+            $paramPieces = explode('$', $param);
 
             // Get a new ParameterDefinition
             $parameterDefinition = new ParameterDefinition();
@@ -165,12 +166,21 @@ class FunctionParser extends AbstractParser
             // we either get one or two pieces
             if (count($paramPieces) === 1) {
 
-                $parameterDefinition->name = $paramPieces[0];
+                continue;
 
-            } else {
+            } elseif (count($paramPieces) === 2) {
 
-                $parameterDefinition->type = $paramPieces[0];
-                $parameterDefinition->name = $paramPieces[1];
+                $parameterDefinition->type = trim($paramPieces[0]);
+
+                // We might have an overload going on
+                $nameArray = explode('=', $paramPieces[1]);
+                $parameterDefinition->name = '$' . trim($nameArray[0]);
+
+                // check if we got a default value for overloading
+                if (isset($nameArray[1])) {
+
+                    $parameterDefinition->defaultValue = $nameArray[1];
+                }
             }
 
             // Add the definition to the list
