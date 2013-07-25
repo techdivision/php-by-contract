@@ -108,8 +108,8 @@ class AutoLoader
         // Also register "our" Symfony ClassLoader so we have a PSR-0 compatible loader at hand.
         // Register this one to append to the autoloader stack.
         $loader = new UniversalClassLoader();
-        $loader->registerNamespace("Symfony\\Component", realpath(__DIR__ . "/../../vendor/symfony/class-loader/Symfony/Component/"));
+        $loader->registerNamespace("Symfony\\Component", realpath(__DIR__ . "/../../../vendor/symfony/class-loader/Symfony/Component/"));
         $loader->registerNamespace("TechDivision\\PBC", realpath(__DIR__ . '/../../'));
         $loader->register(false);
-    }
+}
 }

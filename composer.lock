@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "46aa9391fc154fd08c57b08431b6a326",
+    "hash": "fdf3d1f6a614ea93ff06f3b9d6c8de7f",
     "packages": [
         {
             "name": "andrewsville/php-token-reflection",

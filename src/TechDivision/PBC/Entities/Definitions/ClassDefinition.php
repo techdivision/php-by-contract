@@ -48,6 +48,11 @@ class ClassDefinition
     public $implements;
 
     /**
+     * @var array
+     */
+    public $constants;
+
+    /**
      * @var AttributeDefinitionList
      */
     public $attributeDefinitions;
@@ -73,6 +78,7 @@ class ClassDefinition
         $this->name = '';
         $this->extends = '';
         $this->implements = array();
+        $this->constants = array();
         $this->attributeDefinitions = new AttributeDefinitionList();
         $this->invariantConditions = new AssertionList();
         $this->functionDefinitions = new FunctionDefinitionList();

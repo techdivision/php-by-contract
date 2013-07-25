@@ -260,7 +260,16 @@ class ProxyFactory
             $fileContent .= ' implements ' . implode(', ', $classDefinition->implements);
         }
 
-        $fileContent .= ' {';
+        $fileContent .= '
+        {
+        ';
+
+        // Lets fill in all the constants (if any).
+        foreach ($classDefinition->constants as $constant => $value) {
+
+            $fileContent .= ' const ' . $constant . ' = ' . $value . ';
+            ';
+        }
 
         // We should create attributes to save old instance state
         $fileContent .=
@@ -573,33 +582,6 @@ class ProxyFactory
         $result .= '}';
 
         return $result;
-    }
-
-    /**
-     * @param $targetFileName
-     * @param array $tokens
-     *
-     * @return bool
-     */
-    private function createFileFromTokens($targetFileName, array $tokens)
-    {
-        // Simply create the file content by traversing over the token array and build a string from the
-        // multiple parts of the array.
-        $fileContent = '';
-        foreach ($tokens as $token) {
-
-            if (is_string($token)) {
-
-                $fileContent .= $token;
-
-            } elseif (is_array($token) && isset($token[1])) {
-
-                $fileContent .= $token[1];
-            }
-        }
-
-        // Return if we succeeded or not
-        return (boolean)file_put_contents($targetFileName, $fileContent);
     }
 
     /**

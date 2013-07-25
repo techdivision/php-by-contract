@@ -13,6 +13,7 @@ use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Entities\Definitions\AttributeDefinition;
 use TechDivision\PBC\Entities\Lists\ClassDefinitionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
+use TokenReflection\Broker;
 
 /**
  * Class ClassParser
@@ -126,6 +127,8 @@ class ClassParser
         $classDefinition->extends = $this->getParent($tokens);
         $classDefinition->implements = $this->getInterfaces($tokens);
 
+        $classDefinition->constants = $this->getConstants($tokens);
+
         // Lets get the attributes the class might have
         $classDefinition->attributeDefinitions = $this->getAttributes($tokens);
 
@@ -134,6 +137,52 @@ class ClassParser
         $classDefinition->functionDefinitions = $functionParser->getDefinitionListFromTokens($tokens);
 
         return $classDefinition;
+    }
+
+    /**
+     * @param $tokens
+     * @return array|string
+     */
+    private function getConstants($tokens)
+    {
+        // Check the tokens
+        $constants = array();
+        for ($i = 0; $i < count($tokens); $i++) {
+
+            // If we got the class name
+            if ($tokens[$i][0] === T_CONST) {
+
+                for ($j = $i + 1; $j < count($tokens); $j++) {
+
+                    if ($tokens[$j] === ';') {
+
+                        break;
+
+                    } elseif ($tokens[$j][0] === T_STRING) {
+
+                        $constants[$tokens[$j][1]] = '';
+
+                        for ($k = $j + 1; $k < count($tokens); $k++) {
+
+                            if ($tokens[$k] === ';') {
+
+                                break;
+
+                            } elseif ($tokens[$k][0] !== '=') {
+
+                                $constants[$tokens[$j][1]] .= $tokens[$k][1];
+                            }
+                        }
+
+                        // Now trim what we got
+                        $constants[$tokens[$j][1]] = trim($constants[$tokens[$j][1]]);
+                    }
+                }
+            }
+        }
+
+        // Return what we did or did not found
+        return $constants;
     }
 
     /**
