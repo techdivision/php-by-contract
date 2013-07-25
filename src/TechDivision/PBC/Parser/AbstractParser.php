@@ -57,6 +57,12 @@ abstract class AbstractParser implements Parser
             // I would say should be within 6 tokens in front of the function keyword.
             if ($tokens[$i][0] === $parsedEntity) {
 
+                // Check if our $i is lower than 6, if so we have to avoid getting into a negative range
+                if ($i < 6) {
+
+                    $i = 6;
+                }
+
                 for ($j = $i - 1; $j >= $i - 6; $j--) {
 
                     if ($tokens[$j][0] === $searchedToken) {

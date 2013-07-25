@@ -34,7 +34,7 @@ class FunctionParser extends AbstractParser
 
             return false;
 
-        } elseif (count($tokens) === 0) {
+        } elseif (count($tokens) === 1) {
             // We got what we came for, or did we?
 
             if (isset($tokens[0])) {
@@ -296,10 +296,10 @@ class FunctionParser extends AbstractParser
                     // Do we have an even amount of brackets yet?
                     if ($bracketCounter === 0) {
 
-                        break 2;
+                        return $functionBody;
                     }
 
-                    // Collect wo we get
+                    // Collect what we get
                     if (is_array($tokens[$j])) {
 
                         $functionBody .= $tokens[$j][1];
@@ -313,14 +313,7 @@ class FunctionParser extends AbstractParser
         }
 
         // Return what we did or did not found
-        if (empty($functionBody)) {
-
-            return false;
-
-        } else {
-
-            return $functionBody;
-        }
+        return $functionBody;
     }
 
     /**
@@ -336,18 +329,18 @@ class FunctionParser extends AbstractParser
         for ($i = 0; $i < count($tokens); $i++) {
 
             // If we got a function keyword, we have to check how far the function extends,
-            // then copy the array withing that bounds
+            // then copy the array within that bounds
             if (is_array($tokens[$i]) && $tokens[$i][0] === T_FUNCTION) {
 
                 // The lower bound should be the last semicolon|closing curly bracket|PHP tag before the function
                 $lowerBound = 0;
                 for ($j = $i - 1; $j >= 0; $j--) {
 
-                    if ($tokens[$j] === ';' || $tokens[$j] === '}' ||
-                        is_array($tokens[$j]) && $tokens[$j][0] === T_OPEN_TAG
+                    if ($tokens[$j] === ';' || $tokens[$j] === '{' ||
+                        (is_array($tokens[$j]) && $tokens[$j][0] === T_OPEN_TAG)
                     ) {
 
-                        $lowerBound = $j;
+                        $lowerBound = $j + 1;
                         break;
                     }
                 }
@@ -381,7 +374,7 @@ class FunctionParser extends AbstractParser
                     // Do we have an even amount of brackets yet?
                     if ($bracketCounter === 0) {
 
-                        $upperBound = $j;
+                        $upperBound = $j + 1;
                         break;
                     }
                 }

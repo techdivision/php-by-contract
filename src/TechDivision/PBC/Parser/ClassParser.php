@@ -71,7 +71,7 @@ class ClassParser
             // If we did not get a class name and we got more than one class we can fail right here
             return false;
 
-        } elseif (count($tokens) === 0) {
+        } elseif (count($tokens) === 1) {
             // We got what we came for
 
             return $this->getDefinitionFromTokens($tokens[0]);

@@ -530,7 +530,6 @@ class ProxyFactory
             }
             $fileContent .= $functionDefinition->name . PBC_ORIGINAL_FUNCTION_SUFFIX . $parameterCallString . '{';
             $fileContent .= $functionDefinition->body . '}';
-
             // Move the iterator
             $functionIterator->next();
         }
