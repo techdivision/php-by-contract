@@ -44,7 +44,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
         // These tests should all be successful
         $test->stringToArray("null");
-        $test->concatSomeStuff(26, 'test', new \Exception());
+        $test->concatSomeStuff(17, 'test', new \Exception());
         $test->stringToWelcome('stranger');
 
 

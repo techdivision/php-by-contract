@@ -28,7 +28,7 @@ final class BasicTestClass
     private $motd = 'Welcome stranger!';
 
     /**
-     * @requires $param1 < 27 && $param1 > 13
+     * @requires $param1 < 27 && $param1 > 18 or $param1 === 17
      *
      * @param integer $param1
      * @param string $param2

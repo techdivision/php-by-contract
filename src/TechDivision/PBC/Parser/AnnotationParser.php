@@ -9,12 +9,8 @@
 
 namespace TechDivision\PBC\Parser;
 
-use TechDivision\PBC\Entities\Definitions\AttributeDefinition;
 use TechDivision\PBC\Entities\Lists\AssertionList;
-use TechDivision\PBC\Entities\Definitions\ClassDefinition;
-use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
-use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
-use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
+use TechDivision\PBC\Entities\Assertions\ChainedAssertion;
 use TechDivision\PBC\Config;
 
 /**
@@ -122,20 +118,24 @@ class AnnotationParser extends AbstractParser
 
     /**
      * @param $docString
+     * @param null $usedAnnotation
      * @return bool
      */
-    private function parseAssertion($docString)
+    private function parseAssertion($docString, $usedAnnotation = null)
     {
-        // We have to differ between several types of assertions, so lets check which one we got
-        $annotations = array('@param', '@return', PBC_KEYWORD_POST, PBC_KEYWORD_PRE, PBC_KEYWORD_INVARIANT);
+        if ($usedAnnotation === null) {
 
-        $usedAnnotation = '';
-        foreach ($annotations as $annotation) {
+            // We have to differ between several types of assertions, so lets check which one we got
+            $annotations = array('@param', '@return', PBC_KEYWORD_POST, PBC_KEYWORD_PRE, PBC_KEYWORD_INVARIANT);
 
-            if (strpos($docString, $annotation) !== false) {
+            $usedAnnotation = '';
+            foreach ($annotations as $annotation) {
 
-                $usedAnnotation = $annotation;
-                break;
+                if (strpos($docString, $annotation) !== false) {
+
+                    $usedAnnotation = $annotation;
+                    break;
+                }
             }
         }
 
@@ -187,6 +187,7 @@ class AnnotationParser extends AbstractParser
 
                 $operand = $this->filterOperand($docString);
                 $operators = $this->filterOperators($docString, $operand);
+                $combinators = $this->filterCombinators($docString);
 
                 // Now we have to check what we got
                 // First of all handle if we got a simple type
@@ -198,9 +199,13 @@ class AnnotationParser extends AbstractParser
 
                     $assertionType = 'TechDivision\PBC\Entities\Assertions\InstanceAssertion';
 
-                } elseif ($operand !== false && $operators !== false) {
+                } elseif ($operand !== false && $operators !== false && $combinators === false) {
 
                     $assertionType = 'TechDivision\PBC\Entities\Assertions\BasicAssertion';
+
+                } elseif ($operand !== false && $operators !== false && $combinators !== false) {
+
+                    $assertionType = 'TechDivision\PBC\Entities\Assertions\ChainedAssertion';
 
                 } else {
 
@@ -211,6 +216,10 @@ class AnnotationParser extends AbstractParser
                 if ($assertionType === 'TechDivision\PBC\Entities\Assertions\BasicAssertion') {
 
                     $assertion = new $assertionType($operators[0], $operators[1], $operand);
+
+                } elseif ($assertionType === 'TechDivision\PBC\Entities\Assertions\ChainedAssertion') {
+
+                    $assertion = $this->createChainedAssertion($docString, $usedAnnotation);
 
                 } else {
 
@@ -238,6 +247,44 @@ class AnnotationParser extends AbstractParser
 
         return $assertion;
     }
+
+    /**
+     * @param $docString
+     * @param $usedAnnotation
+     * @return ChainedAssertion
+     */
+    private function createChainedAssertion($docString, $usedAnnotation)
+    {
+        // We do not need the annotation identifier anymore.
+        $docString = str_replace($usedAnnotation, '', $docString);
+
+        // First of all we have to get all combinators
+        $combinators = $this->filterCombinators($docString);
+
+        // The combinators are fetched in the order they appear in. Let's use that to split the docString by.
+        $assertionStrings = array();
+        foreach($combinators as $combinator) {
+
+            // Get the part before the first combinator
+            $assertionStrings[] = $tmp = stristr($docString, $combinator, true);
+            // Make sure to cut the original string, or we might have copies.
+            $docString = str_ireplace($tmp . $combinator, '', $docString);
+        }
+        // Do not forget to check the piece which is left after the last combinator was checked
+        $assertionStrings[] = $docString;
+
+        // Now that we got all assertionStrings we have to create the proper assertions from them
+        $assertions = new AssertionList();
+        foreach($assertionStrings as $assertionString) {
+
+            $assertions->add($this->parseAssertion($assertionString, $usedAnnotation));
+        }
+
+        // return the complete ChainedAssertion
+        return new ChainedAssertion($assertions, $combinators);
+    }
+
+
     /**
      * @param $docString
      *
@@ -287,6 +334,40 @@ class AnnotationParser extends AbstractParser
 
         // We found nothing; tell them.
         return false;
+    }
+
+    /**
+     * @param $docString
+     *
+     * @return bool
+     */
+    private function filterCombinators($docString)
+    {
+        // Explode the string to get the different pieces
+        $explodedString = explode(' ', $docString);
+        $combinators = array();
+
+        // Filter for the first variable. The first as there might be a variable name in any following description
+        $validCombinators = array_flip(array('and', '&&', 'or', '||'));
+        foreach ($explodedString as $stringPiece) {
+
+            // Check if we got a variable
+            $stringPiece = strtolower(trim($stringPiece));
+            if (isset($validCombinators[$stringPiece])) {
+
+                $combinators[] = $stringPiece;
+            }
+        }
+
+        // We found nothing; tell them.
+        if (count($combinators) === 0) {
+
+            return false;
+
+        } else {
+
+            return $combinators;
+        }
     }
 
     /**

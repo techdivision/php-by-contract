@@ -128,4 +128,12 @@ abstract class AbstractTypedList implements TypedList
     {
         return new \ArrayIterator($this->container);
     }
+
+    /**
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->container);
+    }
 }
