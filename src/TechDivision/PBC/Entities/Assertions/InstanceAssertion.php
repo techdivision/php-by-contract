@@ -29,8 +29,8 @@ class InstanceAssertion extends AbstractAssertion
     public $class;
 
     /**
-     * @param string $_operand
-     * @param $_type
+     * @param $_operand
+     * @param $_class
      */
     public function __construct($_operand, $_class)
     {

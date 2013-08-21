@@ -51,7 +51,14 @@ class TypeAssertion extends AbstractAssertion
     {
         if (function_exists('is_' . $this->type)) {
 
-            return (string) 'is_' . $this->type . '(' . $this->operand . ')' . ' === ' . var_export($this->validatesTo, true);
+            if ($this->validatesTo === true) {
+
+                return (string) 'is_' . $this->type . '(' . $this->operand . ')';
+
+            } else {
+
+                return (string) '!is_' . $this->type . '(' . $this->operand . ')';
+            }
 
         } else {
 
