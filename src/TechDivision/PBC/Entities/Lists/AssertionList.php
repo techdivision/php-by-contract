@@ -9,8 +9,6 @@
 
 namespace TechDivision\PBC\Entities\Lists;
 
-require_once __DIR__ . "/AbstractTypedList.php";
-
 class AssertionList extends AbstractTypedList
 {
 

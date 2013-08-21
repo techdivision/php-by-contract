@@ -9,120 +9,29 @@
 
 namespace TechDivision\PBC\Proxies;
 
-require_once __DIR__ . "/../Constants.php";
-
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Interfaces\Assertion;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
-use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Parser\FileParser;
+use TechDivision\PBC\Interfaces\PBCCache;
 
 /**
  * Class ProxyFactory
  */
 class ProxyFactory
 {
-    /**
-     * @var array
-     */
-    private $cacheMap;
 
     /**
-     * @var array
+     * @var \TechDivision\PBC\Interfaces\PBCCache
      */
-    private $fileMap;
+    private $cache;
 
     /**
-     *
+     * @param PBCCache $cache
      */
-    const GLOB_CACHE_PATTERN = '/cache/*';
-
-    /**
-     * @param $projectRoot
-     */
-    public function __construct($projectRoot)
+    public function __construct(PBCCache $cache)
     {
-        // Building up the cache map
-        $this->cacheMap = $this->getCacheMap();
-
-        // Create the complete file map
-        $this->fileMap = $this->getClassMap($projectRoot . '/*');
-    }
-
-    /**
-     * @return array|mixed
-     */
-    private function getCacheMap()
-    {
-        // We might already have a serialized map
-        $mapFile = false;
-        if (is_readable(__DIR__ . '/cacheMap') === true) {
-
-            $mapFile = file_get_contents(__DIR__ . '/cacheMap');
-        }
-
-        if (is_string($mapFile)) {
-            // We got the file unserialize it
-            $map = unserialize($mapFile);
-
-            // Lets check if it is current, if yes, return what we got
-            if (isset($map['version']) && $map['version'] == filemtime(__DIR__ . '/cache')) {
-
-                return $map;
-            }
-        }
-
-        // We have none (or old one), create it.
-        // Get the timestamp of the cache folder first so we would not miss a file if it got written during
-        // a further check
-        $map = array('version' => filemtime(__DIR__ . '/cache'));
-        $map = array_merge($map, $this->getClassMap(__DIR__ . self::GLOB_CACHE_PATTERN));
-        // Filter for all self generated proxied classes
-        $suffixOffset = strlen(PBC_PROXY_SUFFIX);
-        foreach ($map as $class => $file) {
-
-            if (strrpos($class, PBC_PROXY_SUFFIX) === strlen($class) - $suffixOffset) {
-
-                unset($map[$class]);
-            }
-        }
-
-        // When the map is ready we store it for later use
-        file_put_contents(__DIR__ . '/cacheMap', serialize($map));
-
-        // Return what we produced
-        return $map;
-    }
-
-    /**
-     * @param $pattern
-     *
-     * @return array
-     */
-    private function getClassMap($pattern)
-    {
-        $classMap = array();
-        $items = glob($pattern);
-
-        for ($i = 0; $i < count($items); $i++) {
-            if (is_dir($items[$i])) {
-
-                $add = glob($items[$i] . '/*');
-                $items = array_merge($items, $add);
-
-            } else {
-
-                // This is not a dir, so check if it contains a class
-                $className = $this->getClassIdentifier(realpath($items[$i]));
-                if (empty($className) === false) {
-
-                    $classMap[$className]['path'] = realpath($items[$i]);
-                    $classMap[$className]['version'] = filemtime(realpath($items[$i]));
-                }
-            }
-        }
-
-        return $classMap;
+        $this->cache = $cache;
     }
 
     /**
@@ -132,14 +41,15 @@ class ProxyFactory
     public function createProxy($className)
     {
         // If we do not know the file we can forget it
-        if (isset($this->fileMap[$className]['path']) === false) {
+        $fileMap = $this->cache->getFiles();
+        if (isset($fileMap[$className]['path']) === false) {
 
             return false;
         }
 
         // We know the class and we know the file it is in, so get our FileParser and have a blast
         $fileParser = new FileParser();
-        $fileDefinition = $fileParser->getDefinitionFromFile($this->fileMap[$className]['path']);
+        $fileDefinition = $fileParser->getDefinitionFromFile($fileMap[$className]['path']);
 
         // So we got our FileDefinition, now lets check if there are multiple classes in there.
         // Iterate over all classes within the FileDefinition and create a file for each of them
@@ -147,14 +57,14 @@ class ProxyFactory
         for ($k = 0; $k < $classIterator->count(); $k++) {
 
             $classDefinition = $classIterator->current();
-            $filePath = $this->createProxyFilePath($this->fileMap[$className]['path'], $classDefinition->name);
+            $filePath = $this->createProxyFilePath($fileMap[$className]['path'], $classDefinition->name);
 
             $tmp = $this->createFileFromDefinitions($filePath, $fileDefinition, $classDefinition);
 
             if ($tmp === true) {
 
                 // Now get our new file into the cacheMap
-                $this->pushCacheMap($className, $filePath);
+                $this->cache->add($className, $filePath);
             }
 
             // Next assertion please
@@ -163,23 +73,6 @@ class ProxyFactory
 
         // Still here? Than everything worked out great.
         return true;
-    }
-
-    /**
-     * @param $className
-     * @param $fileName
-     *
-     * @return bool
-     */
-    private function pushCacheMap($className, $fileName)
-    {
-        // Add the entry
-        $time = time();
-        $this->cacheMap[$className] = array('version' => $time, 'path' => $fileName);
-        $this->cacheMap['version'] = $time;
-
-        // When the map is ready we store it for later use
-        return file_put_contents(__DIR__ . '/cacheMap', serialize($this->cacheMap));
     }
 
     /**
@@ -523,6 +416,7 @@ class ProxyFactory
     }
 
     /**
+     * @param $invariantUsed
      * @return string
      */
     private function createInvariantCall($invariantUsed)
@@ -571,105 +465,12 @@ class ProxyFactory
      */
     public function getProxyFileName($className)
     {
-        if (!isset($this->cacheMap[$className]) || !isset($this->cacheMap[$className]['path'])) {
+        $cacheMap = $this->cache->get();
+        if (!isset($cacheMap[$className]) || !isset($cacheMap[$className]['path'])) {
 
             return false;
         }
 
-        return $this->cacheMap[$className]['path'];
-    }
-
-    /**
-     * Will check if a certain file is cached in a current manner.
-     *
-     * @param $className
-     *
-     * @return bool
-     */
-    public function isCached($className)
-    {
-        if (isset($this->cacheMap[$className]) &&
-            $this->cacheMap[$className]['version'] >= filemtime($this->fileMap[$className]['path'])
-        ) {
-
-            return true;
-
-        } else {
-
-            return false;
-        }
-    }
-
-    /**
-     * @param $fileName
-     *
-     * @return string
-     */
-    private function getClassIdentifier($fileName)
-    {
-        // Lets open the file readonly
-        $fileResource = fopen($fileName, 'r');
-
-        // Prepare some variables we will need
-        $className = '';
-        $namespace = '';
-        $buffer = '';
-
-        // Declaring the iterator here, to not check the start of the file again and again
-        $i = 0;
-        while (empty($className) === true) {
-
-            // Is the file over already?
-            if (feof($fileResource)) {
-
-                break;
-            }
-
-            // We only read a small portion of the file, as we should find the class declaration up front
-            $buffer .= fread($fileResource, 512);
-            // Get all the tokens in the read buffer
-            $tokens = @token_get_all($buffer);
-
-            // If we did not reach anything of value yet we will continue reading
-            if (strpos($buffer, '{') === false) {
-
-                continue;
-            }
-
-            // Check the tokens
-            for (; $i < count($tokens); $i++) {
-
-                // If we got the class name
-                if ($tokens[$i][0] === T_CLASS) {
-
-                    for ($j = $i + 1; $j < count($tokens); $j++) {
-
-                        if ($tokens[$j] === '{') {
-
-                            $className = $tokens[$i + 2][1];
-                        }
-                    }
-                }
-
-                // If we got the namespace
-                if ($tokens[$i][0] === T_NAMESPACE) {
-
-                    for ($j = $i + 1; $j < count($tokens); $j++) {
-
-                        if ($tokens[$j][0] === T_STRING) {
-
-                            $namespace .= $tokens[$j][1] . '\\';
-
-                        } elseif ($tokens[$j] === '{' || $tokens[$j] === ';') {
-
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Return what we did or did not found
-        return $namespace . $className;
+        return $cacheMap[$className]['path'];
     }
 }

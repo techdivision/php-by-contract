@@ -9,7 +9,9 @@
 
 namespace TechDivision\PBC;
 
-class Config
+use TechDivision\PBC\Interfaces\PBCConfig;
+
+class Config implements PBCConfig
 {
     public function __construct()
     {

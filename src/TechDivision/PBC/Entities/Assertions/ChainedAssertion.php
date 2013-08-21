@@ -9,8 +9,6 @@
 
 namespace TechDivision\PBC\Entities\Assertions;
 
-require_once __DIR__ . "/AbstractAssertion.php";
-
 use TechDivision\PBC\Entities\Lists\AssertionList;
 
 /**

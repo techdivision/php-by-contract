@@ -9,8 +9,6 @@
 
 namespace TechDivision\PBC\Entities\Assertions;
 
-require_once __DIR__ . "/../../Interfaces/Assertion.php";
-
 use TechDivision\PBC\Interfaces\Assertion;
 
 /**
