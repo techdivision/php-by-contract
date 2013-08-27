@@ -18,4 +18,6 @@ interface Assertion
     public function invert();
 
     public function isInverted();
+
+    public function isValid();
 }

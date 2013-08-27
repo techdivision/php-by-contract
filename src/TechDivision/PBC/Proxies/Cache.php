@@ -17,6 +17,11 @@ class Cache implements PBCCache
     private $files;
 
     /**
+     * @var Cache
+     */
+    private static $instance = null;
+
+    /**
      *
      */
     const GLOB_CACHE_PATTERN = '/cache/*';
@@ -24,10 +29,30 @@ class Cache implements PBCCache
     /**
      * @param $projectRoot
      */
-    public function __construct($projectRoot)
+    private function __construct()
     {
-        $this->files = $this->createFileMap($projectRoot . '/*');
-        $this->map = $this->createMap();
+
+    }
+
+    private function __clone()
+    {
+
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function getInstance($projectRoot = '.')
+    {
+        if (self::$instance === null) {
+
+            $self = new self;
+            $self->files = $self->createFileMap($projectRoot . '/*');
+            $self->map = $self->createMap();
+            self::$instance = $self;
+        }
+
+        return self::$instance;
     }
 
     /**
@@ -57,7 +82,7 @@ class Cache implements PBCCache
         // Get the timestamp of the cache folder first so we would not miss a file if it got written during
         // a further check
         $map = array('version' => filemtime(__DIR__ . '/cache'));
-        $map = array_merge($map, $this->createFileMap(__DIR__ . self::GLOB_CACHE_PATTERN));
+        $map = array_merge($map, self::createFileMap(__DIR__ . self::GLOB_CACHE_PATTERN));
         // Filter for all self generated proxied classes
         $suffixOffset = strlen(PBC_PROXY_SUFFIX);
         foreach ($map as $class => $file) {
@@ -94,7 +119,7 @@ class Cache implements PBCCache
             } else {
 
                 // This is not a dir, so check if it contains a class
-                $className = $this->getClassIdentifier(realpath($items[$i]));
+                $className = self::getClassIdentifier(realpath($items[$i]));
                 if (empty($className) === false) {
 
                     $classMap[$className]['path'] = realpath($items[$i]);

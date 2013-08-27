@@ -122,6 +122,27 @@ abstract class AbstractTypedList implements TypedList
     }
 
     /**
+     * @param TypedList $foreignList
+     */
+    public function attach(TypedList $foreignList)
+    {
+        $iterator = $foreignList->getIterator();
+        for ($i = 0; $i < $iterator->count(); $i++) {
+
+            try {
+
+                $this->add($iterator->current());
+
+            } catch (\UnexpectedValueException $e) {
+
+                throw $e;
+            }
+
+            $iterator->next();
+        }
+    }
+
+    /**
      * @return ArrayIterator
      */
     public function getIterator()

@@ -31,7 +31,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
         } catch (Exception $e) {}
 
         // Did we get the right $e?
-        $this->assertInstanceOf("Exception", $e);
+        $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenInvariantException", $e);
     }
 
     /**
@@ -57,17 +57,17 @@ class BasicTest extends PHPUnit_Framework_TestCase
         } catch (Exception $e) {}
 
         // Did we get the right $e?
-        $this->assertInstanceOf("Exception", $e);
+        $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreConditionException", $e);
 
         $e = null;
         try {
 
-            $test->concatSomeStuff("26", array(), $this);
+            $test->concatSomeStuff("26", array(), new \Exception());
 
         } catch (Exception $e) {}
 
         // Did we get the right $e?
-        $this->assertInstanceOf("Exception", $e);
+        $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreConditionException", $e);
 
         $e = null;
         try {
@@ -77,7 +77,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
         } catch (Exception $e) {}
 
         // Did we get the right $e?
-        $this->assertInstanceOf("Exception", $e);
+        $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreConditionException", $e);
     }
 
     /**

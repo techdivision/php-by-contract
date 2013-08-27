@@ -99,6 +99,8 @@ class ProxyFactory
     {
         // This variable is used to determine if we need an invariant, as we might as well not.
         $invariantUsed = false;
+        // Get all the invariants the class and it ancestors might have first
+        $classDefinition->getAncestralInvariant();
         if ($classDefinition->invariantConditions->isEmpty() === false) {
 
             $invariantUsed = true;
@@ -396,11 +398,11 @@ class ProxyFactory
             // Now we have to create the original function
             if ($functionDefinition->isStatic) {
 
-                $fileContent .= 'final private static function ';
+                $fileContent .= 'private static function ';
 
             } else {
 
-                $fileContent .= 'final private function ';
+                $fileContent .= 'private function ';
             }
             $fileContent .= $functionDefinition->name . PBC_ORIGINAL_FUNCTION_SUFFIX . '(' . $parameterCallString . ') {';
             $fileContent .= $functionDefinition->body . '}';

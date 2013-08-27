@@ -13,6 +13,7 @@ require_once 'PHPUnit/Autoload.php';
 
 require_once __DIR__ . '/BasicTest.php';
 require_once __DIR__ . '/RealTest.php';
+require_once __DIR__ . '/InheritanceTest.php';
 
 class AllTests
 {
@@ -22,6 +23,7 @@ class AllTests
 
         $suite->addTestSuite('BasicTest');
         $suite->addTestSuite('RealTest');
+        $suite->addTestSuite('InheritanceTest');
 
         return $suite;
     }

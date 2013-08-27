@@ -9,6 +9,7 @@
 
 namespace TechDivision\PBC\Parser;
 
+use TechDivision\PBC\Entities\Assertions\RawAssertion;
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Assertions\ChainedAssertion;
 use TechDivision\PBC\Config;
@@ -185,7 +186,9 @@ class AnnotationParser extends AbstractParser
             case PBC_KEYWORD_POST:
             case PBC_KEYWORD_INVARIANT:
 
-                $operand = $this->filterOperand($docString);
+                $assertion = new RawAssertion(trim(str_replace($usedAnnotation, '', $docString)));
+
+                /*$operand = $this->filterOperand($docString);
                 $operators = $this->filterOperators($docString, $operand);
                 $combinators = $this->filterCombinators($docString);
 
@@ -242,7 +245,7 @@ class AnnotationParser extends AbstractParser
             default:
 
                 return false;
-                break;
+                break;*/
         }
 
         return $assertion;

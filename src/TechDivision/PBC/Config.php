@@ -17,7 +17,7 @@ class Config implements PBCConfig
     {
         $this->config = array(
             'AutoLoader' => array(
-                'omit' => array('TechDivision\PBC', 'PHPUnit'),
+                'omit' => array('TechDivision\PBC', 'PHPUnit', 'PHPParser', 'Symfony\Component'),
                 'projectRoot' => realpath('../../')
             ),
             'Parser' => array(

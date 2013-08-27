@@ -21,6 +21,9 @@ if (is_dir(__DIR__ . "/../../../vendor")) {
 // Load the constants
 require_once 'Constants.php';
 
+// Grab the composer autoloader
+require_once __DIR__ . "/../../../vendor/autoload.php";
+
 use TechDivision\PBC\AutoLoader;
 use TechDivision\PBC\Proxies\Cache;
 use TechDivision\PBC\Config;
@@ -32,13 +35,14 @@ use Symfony\Component\ClassLoader\UniversalClassLoader;
 $loader = new UniversalClassLoader();
 $loader->registerNamespace("Symfony\\Component", realpath(__DIR__ . "/../../../vendor/symfony/class-loader/Symfony/Component/"));
 $loader->registerNamespace("TechDivision\\PBC", realpath(__DIR__ . '/../../'));
+$loader->registerNamespace("PHPParser", realpath(__DIR__ . '/../../../vendor/nikic/php-parser/lib'));
 $loader->register(false);
 
 // We have to register our autoLoader to put our proxies in place
 $config = new Config();
 $config = $config->getConfig('AutoLoader');
 
-$cache = new Cache($config['projectRoot']);
+$cache = Cache::getInstance($config['projectRoot']);
 $autoLoader = new AutoLoader($config, $cache);
 $autoLoader->register();
 

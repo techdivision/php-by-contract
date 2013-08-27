@@ -32,6 +32,7 @@ class TypeAssertion extends AbstractAssertion
     public $validatesTo;
 
     /**
+     *
      * @param string $_operand
      * @param $_type
      */
