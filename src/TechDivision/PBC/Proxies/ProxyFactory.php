@@ -413,6 +413,21 @@ class ProxyFactory
         // Make the final closing bracket
         $fileContent .= '}';
 
+        // PrettyPrint it so humans can read it
+        $parser        = new \PHPParser_Parser(new \PHPParser_Lexer);
+        $prettyPrinter = new \PHPParser_PrettyPrinter_Default;
+
+        try {
+            // parse
+            $stmts = $parser->parse($fileContent);
+
+            $fileContent = '<?php ' . $prettyPrinter->prettyPrint($stmts);
+
+        } catch (PHPParser_Error $e) {
+
+            throw $e;
+        }
+
         // Return if we succeeded or not
         return (boolean)file_put_contents($targetFileName, $fileContent);
     }
