@@ -94,9 +94,107 @@ class ClassDefinition
     }
 
     /**
+     * Finalize this class definition
+     *
+     * Will make the final steps to complete the class definition.
+     * Mostly this consists of getting the ancestral invariants and
+     * method pre- and postconditions.
+     *
+     * @return  boolean
+     */
+    public function finalize()
+    {
+        // We have to get all ancestral classes and interfaces
+        $ancestors = $this->implements;
+        $ancestors[] = $this->extends;
+
+        // Do we even have something like that?
+        if (count($ancestors) === 0) {
+
+            return true;
+        }
+
+        // Now finalize them recursively
+        $classParser = new ClassParser();
+        $cache = Cache::getInstance();
+        $files = $cache->getFiles();
+        $ancestorDefinitions = array();
+        foreach ($ancestors as $key => $ancestor) {
+
+            // Do we know this file?
+            if (isset($files[$ancestor])) {
+
+                $ancestorDefinitions[$key] = $classParser->getDefinitionFromFile($files[$ancestor]['path'], $ancestor);
+                $ancestorDefinitions[$key]->finalize();
+            }
+        }
+
+        // Get all the ancestral invariants
+        $this->getAncestralInvariant($ancestorDefinitions);
+
+        // Get all the ancestral method pre- and postconditions
+        $this->getAncestralConditions($ancestorDefinitions);
+
+        return true;
+    }
+
+    /**
+     * @param $ancestorDefinitions
+     * @return bool
+     */
+    protected function getAncestralConditions($ancestorDefinitions)
+    {
+        // Maybe we do not have to do anything
+        if (count($ancestorDefinitions) === 0) {
+
+            return false;
+        }
+
+        // We have to get a map of all the methods we have to know which got overridden
+        $methods = array();
+        if ($this->functionDefinitions->count() === 0) {
+
+            return false;
+
+        } else {
+
+            foreach($ancestorDefinitions as $ancestorDefinition) {
+
+                $functionIterator = $ancestorDefinition->functionDefinitions->getIterator();
+                for ($j = 0; $j < $functionIterator->count(); $j++) {
+
+                    // Do we have a method like that?
+                    $function = $this->functionDefinitions->get($functionIterator->current()->name);
+                    if ($function !== false) {
+
+                        // Get the pre- and postconditions of the ancestor
+                        if ($functionIterator->current()->preConditions->count() > 0) {
+
+                            $function->ancestralPreConditions->add($functionIterator->current()->preConditions);
+                        }
+                        if ($functionIterator->current()->postConditions->count() > 0) {
+
+                            $function->ancestralPostConditions->add($functionIterator->current()->postConditions);
+                        }
+
+                        // Safe the enhanced functionDefinition back
+                        $this->functionDefinitions->set($function->name, $function);
+                    }
+
+                    // increment iterator
+                    $functionIterator->next();
+                }
+            }
+        }
+
+        // We are still here, seems good
+        return true;
+    }
+
+    /**
      *
      */
-    public function getAncestralInvariant()
+    protected function getAncestralInvariant($ancestorDefinitions)
     {
         // We have to get all the contracts for our interfaces and parent class
         if ($this->extends !== '') {
@@ -111,7 +209,7 @@ class ClassDefinition
                 $parent = $classParser->getDefinitionFromFile($files[$this->extends]['path'], $this->extends);
 
                 // Make the parent get their parent's invariant contracts
-                $isChild = $parent->getAncestralInvariant();
+                $isChild = $parent->getAncestralInvariant($ancestorDefinitions);
 
                 // Add them to this invariant list
                 $this->ancestralInvariants->add($parent->invariantConditions);

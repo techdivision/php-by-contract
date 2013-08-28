@@ -14,5 +14,6 @@ class FunctionDefinitionList extends AbstractTypedList
     public function __construct()
     {
         $this->itemType = 'TechDivision\PBC\Entities\Definitions\FunctionDefinition';
+        $this->defaultOffset = 'name';
     }
 }

@@ -29,7 +29,6 @@ use TechDivision\PBC\Proxies\Cache;
 use TechDivision\PBC\Config;
 use Symfony\Component\ClassLoader\UniversalClassLoader;
 
-
 // Register "our" Symfony ClassLoader so we have a PSR-0 compatible loader at hand.
 // Register this one to append to the autoloader stack.
 $loader = new UniversalClassLoader();

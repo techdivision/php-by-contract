@@ -10,6 +10,7 @@
 namespace TechDivision\PBC\Proxies;
 
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
+use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Interfaces\Assertion;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Parser\FileParser;
@@ -45,6 +46,7 @@ class ProxyFactory
 
     /**
      * @param $className
+     * @param bool $update
      * @return bool
      */
     public function createProxy($className, $update = false)
@@ -113,13 +115,14 @@ class ProxyFactory
      * @param FileDefinition $fileDefinition
      * @param ClassDefinition $classDefinition
      * @return bool
+     * @throws \Exception|PHPParser_Error
      */
     private function createFileFromDefinitions($targetFileName, FileDefinition $fileDefinition, ClassDefinition $classDefinition)
     {
         // This variable is used to determine if we need an invariant, as we might as well not.
         $invariantUsed = false;
-        // Get all the invariants the class and it ancestors might have first
-        $classDefinition->getAncestralInvariant();
+        // Before using the definition we have to finalize it
+        $classDefinition->finalize();
         if ($classDefinition->invariantConditions->isEmpty() === false) {
 
             $invariantUsed = true;
@@ -362,15 +365,12 @@ class ProxyFactory
                 $fileContent .= $this->createInvariantCall($invariantUsed);
             }
 
-            // Iterate over all preconditions
-            $assertionIterator = $functionDefinition->preConditions->getIterator();
-            for ($k = 0; $k < $assertionIterator->count(); $k++) {
+            // Here we need the combined preconditions, so gather them first
+            $preConditions = $functionDefinition->ancestralPreConditions;
+            $preConditions->add($functionDefinition->preConditions);
 
-                $fileContent .= $this->createAroundAdviceCode($assertionIterator->current(), $functionDefinition->name, 'BrokenPreConditionException');
-
-                // Next assertion please
-                $assertionIterator->next();
-            }
+            // And now let our helper method render the code
+            $fileContent .= $this->generateAroundAdviceCode($preConditions, $functionDefinition->name, 'precondition');
 
             // Do we have to keep an instance of $this to compare with old later?
             if ($functionDefinition->usesOld === true) {
@@ -390,15 +390,12 @@ class ProxyFactory
                     '(' . $parameterCallString . ');';
             }
 
-            // Iterate over all postconditions
-            $assertionIterator = $functionDefinition->postConditions->getIterator();
-            for ($k = 0; $k < $assertionIterator->count(); $k++) {
+            // Here we need the combined preconditions, so gather them first
+            $postConditions = $functionDefinition->ancestralPostConditions;
+            $postConditions->add($functionDefinition->postConditions);
 
-                $fileContent .= $this->createAroundAdviceCode($assertionIterator->current(), $functionDefinition->name, 'BrokenPostConditionException');
-
-                // Next assertion please
-                $assertionIterator->next();
-            }
+            // And now let our helper method render the code
+            $fileContent .= $this->generateAroundAdviceCode($postConditions, $functionDefinition->name, 'postcondition');
 
             // Last of all check if our invariant holds, but only if we need it
             if ($functionDefinition->visibility !== 'private') {
@@ -430,7 +427,7 @@ class ProxyFactory
         // PrettyPrint it so humans can read it
         $parser = new \PHPParser_Parser(new \PHPParser_Lexer);
         $prettyPrinter = new \PHPParser_PrettyPrinter_Default;
-
+file_put_contents('test.php', $fileContent);
         try {
             // parse
             $stmts = $parser->parse($fileContent);
@@ -444,6 +441,113 @@ class ProxyFactory
 
         // Return if we succeeded or not
         return (boolean)file_put_contents($targetFileName, $fileContent);
+    }
+
+    /**
+     * @param TypedListList $conditionLists
+     * @param $methodName
+     * @param $type
+     * @return string
+     */
+    private function generateAroundAdviceCode(TypedListList $conditionLists, $methodName, $type)
+    {
+        // What kind of types do we handle?
+        $allowedTypes = array_flip(array('precondition', 'postcondition', 'invariant'));
+
+        if (!isset($allowedTypes[$type])) {
+
+            return '';
+        }
+
+        // What kind of exception do we need?
+        switch($type) {
+
+            case 'precondition':
+
+                $exception = 'BrokenPreConditionException';
+                break;
+
+            case 'postcondition':
+
+                $exception = 'BrokenPostConditionException';
+                break;
+
+            case 'invariant':
+
+                $exception = 'BrokenInvariantException';
+                break;
+
+            default:
+
+                $exception = '\Exception';
+                break;
+        }
+
+        // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
+        if ($type === 'precondition') {
+
+            $code = '$passedOne = false;
+                $failedAssertion = array();';
+
+        } else {
+
+            $code = '';
+        }
+
+        // We need a counter to check how much conditions we got
+        $conditionCounter = 0;
+        $listIterator = $conditionLists->getIterator();
+        for ($i = 0; $i < $listIterator->count(); $i++) {
+
+            // Create the inner loop for the different assertions
+            $assertionIterator = $listIterator->current()->getIterator();
+
+            // Only act if we got actual entries
+            if ($assertionIterator->count() === 0) {
+
+                // increment the outer loop
+                $listIterator->next();
+                continue;
+            }
+
+            $codeFragment = array();
+            for ($j = 0; $j < $assertionIterator->count(); $j++) {
+
+                $codeFragment[] = $assertionIterator->current()->getString();
+
+                $assertionIterator->next();
+            }
+
+            // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
+            $conditionCounter ++;
+            if ($type === 'precondition') {
+
+                $code .= 'if ($passedOne === false && !((';
+                $code .= implode(') && (', $codeFragment) . '))){';
+                $code .= '$failedAssertion[] = \'(' . str_replace('\'', '"', implode(') && (', $codeFragment)) . ')\';';
+                $code .= '} else {$passedOne = true;}';
+
+            } else {
+
+                $code .= 'if (!((';
+                $code .= implode(') && (', $codeFragment) . '))){';
+                $code .= 'throw new ' . $exception . '(\'Assertion (' . str_replace('\'', '"', implode(') && (', $codeFragment)) .
+                    ') failed in ' . $methodName . '.\');';
+                $code .= '}';
+            }
+
+            // increment the outer loop
+            $listIterator->next();
+        }
+
+        // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
+        if ($type === 'precondition' && $conditionCounter > 0) {
+
+            $code .= 'if ($passedOne === false){';
+            $code .= 'throw new ' . $exception . '(\'Assertions \' . implode(", ", $failedAssertion) . \' failed in ' . $methodName . '.\');}';
+        }
+
+        return $code;
     }
 
     /**
@@ -476,7 +580,7 @@ class ProxyFactory
                 ' failed in ' . PBC_CLASS_INVARIANT_NAME . '.\');';
             $code .= '}';
 
-            // increment the oiuter loop
+            // increment the outer loop
             $invariantIterator->next();
         }
 

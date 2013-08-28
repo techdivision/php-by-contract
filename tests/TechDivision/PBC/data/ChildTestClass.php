@@ -34,9 +34,9 @@ class ChildTestClass extends ParentTestClass
     }
 
     /**
-     * @ensures in_array($this->elements, $obj)
+     * @ensures in_array($obj, $this->elements)
      */
-    public function push(object $obj)
+    public function push(\Object $obj)
     {
         return array_push($this->elements, $obj);
     }

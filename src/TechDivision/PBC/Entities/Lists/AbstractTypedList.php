@@ -24,6 +24,11 @@ abstract class AbstractTypedList implements TypedList
     protected $container = array();
 
     /**
+     * @var string
+     */
+    protected $defaultOffset = '';
+
+    /**
      * Checks if the list is empty
      *
      * @return bool
@@ -83,7 +88,14 @@ abstract class AbstractTypedList implements TypedList
      */
     public function get($offset)
     {
-        return $this->container[$offset];
+        if (isset($this->container[$offset])) {
+
+            return $this->container[$offset];
+
+        } else {
+
+            return false;
+        }
     }
 
     /**
@@ -117,7 +129,15 @@ abstract class AbstractTypedList implements TypedList
 
         } else {
 
-            $this->container[] = $value;
+            $tmp = $this->defaultOffset;
+            if (property_exists($value, $tmp)) {
+
+                $this->container[$value->$tmp] = $value;
+
+            } else {
+
+                $this->container[] = $value;
+            }
         }
     }
 

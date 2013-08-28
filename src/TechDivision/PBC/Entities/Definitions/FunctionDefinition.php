@@ -10,6 +10,7 @@
 namespace TechDivision\PBC\Entities\Definitions;
 
 use TechDivision\PBC\Entities\Lists\AssertionList;
+use TechDivision\PBC\Entities\Lists\TypedListList;
 
 /**
  * Class FunctionDefinition
@@ -52,6 +53,11 @@ class FunctionDefinition
     public $preConditions;
 
     /**
+     * @var TypedListList
+     */
+    public $ancestralPreConditions;
+
+    /**
      * @var boolean
      */
     public $usesOld;
@@ -67,6 +73,11 @@ class FunctionDefinition
     public $postConditions;
 
     /**
+     * @var TypedListList
+     */
+    public $ancestralPostConditions;
+
+    /**
      * Default constructor
      */
     public function __construct()
@@ -78,8 +89,10 @@ class FunctionDefinition
         $this->name = '';
         $this->parameterDefinitions = array();
         $this->preConditions = new AssertionList();
+        $this->ancestralPreConditions = new TypedListList();
         $this->usesOld = false;
         $this->body = '';
         $this->postConditions = new AssertionList();
+        $this->ancestralPostConditions = new TypedListList();
     }
 }
