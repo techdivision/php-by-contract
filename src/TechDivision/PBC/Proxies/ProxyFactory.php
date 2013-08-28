@@ -519,7 +519,7 @@ file_put_contents('test.php', $fileContent);
             }
 
             // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
-            $conditionCounter ++; 
+            $conditionCounter ++;
             if ($type === 'precondition') {
 
                 $code .= 'if ($passedOne === false && !((';
