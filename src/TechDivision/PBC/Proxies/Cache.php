@@ -3,6 +3,8 @@
 namespace TechDivision\PBC\Proxies;
 
 use TechDivision\PBC\Interfaces\PBCCache;
+use TechDivision\PBC\Entities\Definitions\ClassDefinition;
+use TechDivision\PBC\Parser\ClassParser;
 
 class Cache implements PBCCache
 {
@@ -27,27 +29,31 @@ class Cache implements PBCCache
     const GLOB_CACHE_PATTERN = '/cache/*';
 
     /**
-     * @param $projectRoot
+     *
      */
     private function __construct()
     {
 
     }
 
+    /**
+     *
+     */
     private function __clone()
     {
 
     }
 
     /**
-     * @return mixed
+     * @param string $projectRoot
+     * @return Cache
      */
     public static function getInstance($projectRoot = '.')
     {
         if (self::$instance === null) {
 
             $self = new self;
-            $self->files = $self->createFileMap($projectRoot . '/*');
+            $self->files = $self->createFiles($projectRoot . '/*');
             $self->map = $self->createMap();
             self::$instance = $self;
         }
@@ -82,19 +88,47 @@ class Cache implements PBCCache
         // Get the timestamp of the cache folder first so we would not miss a file if it got written during
         // a further check
         $map = array('version' => filemtime(__DIR__ . '/cache'));
-        $map = array_merge($map, self::createFileMap(__DIR__ . self::GLOB_CACHE_PATTERN));
-        // Filter for all self generated proxied classes
-        $suffixOffset = strlen(PBC_PROXY_SUFFIX);
-        foreach ($map as $class => $file) {
-
-            if (strrpos($class, PBC_PROXY_SUFFIX) === strlen($class) - $suffixOffset) {
-
-                unset($map[$class]);
-            }
-        }
+        $map = array_merge($map, $this->createFileMap(__DIR__ . self::GLOB_CACHE_PATTERN));
 
         // When the map is ready we store it for later use
         file_put_contents(__DIR__ . '/cacheMap', serialize($map));
+
+        // Return what we produced
+        return $map;
+    }
+
+    /**
+     * @param $pattern
+     * @return array|mixed
+     */
+    private function createFiles($pattern)
+    {
+        // We might already have a serialized map
+        $mapFile = false;
+        if (is_readable(__DIR__ . '/fileMap') === true) {
+
+            $mapFile = file_get_contents(__DIR__ . '/fileMap');
+        }
+
+        if (is_string($mapFile)) {
+            // We got the file unserialize it
+            $map = unserialize($mapFile);
+
+            // Lets check if it is current, if yes, return what we got
+            if (isset($map['version']) && $map['version'] == filemtime(dirname($pattern))) {
+
+                return $map;
+            }
+        }
+
+        // We have none (or old one), create it.
+        // Get the timestamp of the cache folder first so we would not miss a file if it got written during
+        // a further check
+        $map = array('version' => filemtime(dirname($pattern)));
+        $map = array_merge($map, $this->createFileMap($pattern));
+
+        // When the map is ready we store it for later use
+        file_put_contents(__DIR__ . '/fileMap', serialize($map));
 
         // Return what we produced
         return $map;
@@ -119,11 +153,18 @@ class Cache implements PBCCache
             } else {
 
                 // This is not a dir, so check if it contains a class
-                $className = self::getClassIdentifier(realpath($items[$i]));
+                $className = $this->getClassIdentifier(realpath($items[$i]));
                 if (empty($className) === false) {
 
                     $classMap[$className]['path'] = realpath($items[$i]);
                     $classMap[$className]['version'] = filemtime(realpath($items[$i]));
+
+                    // We also have to check if there are any dependencies
+                    $parser = new ClassParser();
+
+                    $classDefinition = $parser->getDefinitionFromFile(realpath($items[$i]), $className);
+                    $classMap[$className]['dependencies'] = $classDefinition->implements;
+                    $classMap[$className]['dependencies'][] = $classDefinition->extends;
                 }
             }
         }
@@ -148,19 +189,50 @@ class Cache implements PBCCache
     }
 
     /**
-     * @param $className
+     * @param $classIdentifier
+     * @param ClassDefinition $classDefinition
      * @param $fileName
      * @return bool
      */
-    public function add($className, $fileName)
+    public function add($classIdentifier, ClassDefinition $classDefinition, $fileName)
     {
         // Add the entry
         $time = time();
-        $this->map[$className] = array('version' => $time, 'path' => $fileName);
+
+        // Lets get all classes which depend on this one
+        $dependencies = $classDefinition->implements;
+        $dependencies[] = $classDefinition->extends;
+
+        $this->map[$classIdentifier] = array('version' => $time, 'path' => $fileName, 'dependencies' => $dependencies);
         $this->map['version'] = $time;
 
         // When the map is ready we store it for later use
         return (boolean)file_put_contents(__DIR__ . '/cacheMap', serialize($this->map));
+    }
+
+    /**
+     * @param $classIdentifier
+     * @return array
+     */
+    public function getDependants($classIdentifier)
+    {
+        $dependants = array();
+        foreach ($this->map as $className => $class) {
+
+            if (isset($class['dependencies']) && is_array($class['dependencies'])) {
+
+                foreach ($class['dependencies'] as $dependency) {
+
+                    // If this cache entry is depending on the class $classIdentifier we have to say so
+                    if ($dependency === $classIdentifier) {
+
+                        $dependants[] = $className;
+                    }
+                }
+            }
+        }
+
+        return $dependants;
     }
 
     /**
@@ -170,6 +242,22 @@ class Cache implements PBCCache
      * @return bool
      */
     public function isCached($className)
+    {
+        if (isset($this->map[$className])) {
+
+            return true;
+
+        } else {
+
+            return false;
+        }
+    }
+
+    /**
+     * @param $className
+     * @return bool
+     */
+    public function isCurrent($className)
     {
         if (isset($this->map[$className]) &&
             $this->map[$className]['version'] >= filemtime($this->files[$className]['path'])
@@ -183,6 +271,22 @@ class Cache implements PBCCache
         }
     }
 
+    /**
+     * @param $classIdentifier
+     * @return bool
+     */
+    public function touch($classIdentifier)
+    {
+        if(isset($this->map[$classIdentifier])) {
+
+            $this->map[$classIdentifier]['version'] = time();
+            return true;
+
+        } else {
+
+            return false;
+        }
+    }
 
     /**
      * @param $fileName

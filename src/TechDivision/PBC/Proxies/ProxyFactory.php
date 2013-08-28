@@ -38,7 +38,16 @@ class ProxyFactory
      * @param $className
      * @return bool
      */
-    public function createProxy($className)
+    public function updateProxy($className)
+    {
+        return $this->createProxy($className, true);
+    }
+
+    /**
+     * @param $className
+     * @return bool
+     */
+    public function createProxy($className, $update = false)
     {
         // If we do not know the file we can forget it
         $fileMap = $this->cache->getFiles();
@@ -64,7 +73,17 @@ class ProxyFactory
             if ($tmp === true) {
 
                 // Now get our new file into the cacheMap
-                $this->cache->add($className, $filePath);
+                $this->cache->add($className, $classDefinition, $filePath);
+
+                if ($update === true) {
+                    // If this was an update we might have to update possible children as well, as contracts are inherited
+                    $dependants = $this->cache->getDependants($className);
+
+                    foreach ($dependants as $dependant) {
+
+                        $this->updateProxy($dependant, true);
+                    }
+                }
             }
 
             // Next assertion please
@@ -240,14 +259,9 @@ class ProxyFactory
         // Create the invariant
         if ($invariantUsed === true) {
             $fileContent .= 'private function ' . PBC_CLASS_INVARIANT_NAME . '() {';
-            $iterator = $classDefinition->invariantConditions->getIterator();
-            for ($i = 0; $i < $iterator->count(); $i++) {
 
-                $fileContent .= $this->createAroundAdviceCode($iterator->current(), PBC_CLASS_INVARIANT_NAME, 'BrokenInvariantException');
+            $fileContent .= $this->createInvariantCode($classDefinition);
 
-                // Move the iterator
-                $iterator->next();
-            }
             $fileContent .= '}
         ';
         }
@@ -414,7 +428,7 @@ class ProxyFactory
         $fileContent .= '}';
 
         // PrettyPrint it so humans can read it
-        $parser        = new \PHPParser_Parser(new \PHPParser_Lexer);
+        $parser = new \PHPParser_Parser(new \PHPParser_Lexer);
         $prettyPrinter = new \PHPParser_PrettyPrinter_Default;
 
         try {
@@ -430,6 +444,43 @@ class ProxyFactory
 
         // Return if we succeeded or not
         return (boolean)file_put_contents($targetFileName, $fileContent);
+    }
+
+    /**
+     * @param ClassDefinition $classDefinition
+     * @return string
+     */
+    private function createInvariantCode(ClassDefinition $classDefinition)
+    {
+        // We might have ancestral, interface and direct invariants, so collect them first so we can better handle them later
+        $invariants = $classDefinition->ancestralInvariants;
+        $invariants->add($classDefinition->invariantConditions);
+
+        $code = '';
+
+        $invariantIterator = $invariants->getIterator();
+        for ($i = 0; $i < $invariantIterator->count(); $i++) {
+
+            // Create the inner loop for the different assertions
+            $assertionIterator = $invariantIterator->current()->getIterator();
+            $codeFragment = array();
+            for ($j = 0; $j < $assertionIterator->count(); $j++) {
+
+                $codeFragment[] = $assertionIterator->current()->getString();
+
+                $assertionIterator->next();
+            }
+            $code .= 'if (!(';
+            $code .= implode(' && ', $codeFragment) . ')){';
+            $code .= 'throw new BrokenInvariantException(\'Assertion ' . str_replace('\'', '"', implode(' && ', $codeFragment)) .
+                ' failed in ' . PBC_CLASS_INVARIANT_NAME . '.\');';
+            $code .= '}';
+
+            // increment the oiuter loop
+            $invariantIterator->next();
+        }
+
+        return $code;
     }
 
     /**

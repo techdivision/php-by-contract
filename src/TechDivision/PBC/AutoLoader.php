@@ -81,6 +81,11 @@ class AutoLoader
 
                 // Create our proxy class
                 $this->proxyFactory->createProxy($className);
+
+            } elseif ($this->cache->isCurrent($className) === false) {
+
+                // Update our proxy class
+                $this->proxyFactory->updateProxy($className);
             }
 
             // Require the proxy class, it should have been created now

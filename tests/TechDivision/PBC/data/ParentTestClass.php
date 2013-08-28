@@ -4,6 +4,7 @@
  * Class Stack
  *
  * @invariant $this->size() >= 0
+ * @invariant $this->size() < 100
  */
 class ParentTestClass
 {

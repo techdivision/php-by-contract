@@ -7,9 +7,6 @@
  * To change this template use File | Settings | File Templates.
  */
 
-// Do the bootstrapping, so we will use our library
-require __DIR__ . "/../../../src/TechDivision/PBC/Bootstrap.php";
-
 class BasicTest extends PHPUnit_Framework_TestCase
 {
     /**
@@ -28,7 +25,8 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
             $test->iBreakTheInvariant();
 
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenInvariantException", $e);

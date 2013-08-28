@@ -11,9 +11,12 @@ namespace TechDivision\PBC;
 
 require_once 'PHPUnit/Autoload.php';
 
-require_once __DIR__ . '/BasicTest.php';
-require_once __DIR__ . '/RealTest.php';
-require_once __DIR__ . '/InheritanceTest.php';
+require __DIR__ . '/../../../vendor/autoload.php';
+require __DIR__ . "/../../../src/TechDivision/PBC/Bootstrap.php";
+
+require __DIR__ . '/BasicTest.php';
+require __DIR__ . '/RealTest.php';
+require __DIR__ . '/InheritanceTest.php';
 
 class AllTests
 {
