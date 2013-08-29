@@ -10,24 +10,70 @@
 namespace TechDivision\PBC;
 
 use TechDivision\PBC\Interfaces\PBCConfig;
+use Psr\Log\LoggerInterface;
 
 class Config implements PBCConfig
 {
     public function __construct()
     {
-        $this->config = array(
-            'AutoLoader' => array(
-                'omit' => array('TechDivision\PBC', 'PHPUnit', 'PHPParser', 'Symfony\Component'),
-                'projectRoot' => realpath('../../')
-            ),
-            'Parser' => array(
-                'enforceDefaultTypeSafety' => true
-            )
+        /**
+         * Specify which classes are affected by the library's autoloading process.
+         *
+         * 'omit' lets you specify namespaces which are not parsed or check for contracts.
+         *
+         * 'projectRoot' specifies the root of your project. All enclosed non-omitted classes will be parsed.
+         */
+        $this->config['AutoLoader'] = array(
+            'omit' => array('TechDivision\PBC', 'PHPUnit', 'PHPParser', 'Symfony\Component'),
+            'projectRoot' => realpath('../../')
         );
+
+        /**
+         * Specify how and what to enforce in therms of contracts.
+         *
+         * 'enforceDefaultTypeSafety' (true|false) states if type hints with @param and @return should be considered
+         *      pre- or postconditions in terms of a variable type check
+         *
+         * 'processing' ('exception'|'logging'|'none') states how the library should react in case of a contract
+         *      violation. If 'logging' is chosen, the config entry 'logger' has to be filled correctly.
+         *
+         * 'logger' specify a logging class using its fully qualified name. The class has to be PSR-3 compliant and
+         *      should therefore implement the Psr\Log\LoggerInterface interface which comes with this library.
+         *      (See also https://github.com/php-fig/log)
+         *      If the specified class does not satisfy our needs 'processing' will default to 'none'
+         */
+        $this->config['Enforcement'] = array(
+            'enforceDefaultTypeSafety' => true,
+            'processing' => 'exception',
+            'logger' => ''
+        );
+
+        // Validate the configuration.
+        $this->validate();
     }
 
     /**
-     * @param null $aspect
+     *
+     */
+    private function validate()
+    {
+        // Check if we have to use a logger, and if so check if it complies with PSR-3.
+        if ($this->config['Enforcement']['processing'] === 'logging') {
+
+            if (!class_exists($this->config['Enforcement']['logger']) ||
+                !new $this->config['Enforcement']['logger'] instanceof LoggerInterface) {
+
+                // Logger does not satisfy PSR-3, lets set processing to none
+                $this->config['Enforcement']['processing'] = 'none';
+            }
+        }
+
+        // There was no error till now, so return true.
+        return true;
+    }
+
+    /**
+     * @param string $aspect
      *
      * @return array
      */

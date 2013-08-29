@@ -15,6 +15,7 @@ use TechDivision\PBC\Interfaces\Assertion;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Parser\FileParser;
 use TechDivision\PBC\Interfaces\PBCCache;
+use TechDivision\PBC\Config;
 
 /**
  * Class ProxyFactory
@@ -28,11 +29,19 @@ class ProxyFactory
     private $cache;
 
     /**
+     * @var array
+     */
+    private $config;
+
+    /**
      * @param PBCCache $cache
      */
     public function __construct(PBCCache $cache)
     {
         $this->cache = $cache;
+
+        $config = new Config();
+        $this->config = $config->getConfig('Enforcement');
     }
 
     /**
@@ -427,7 +436,7 @@ class ProxyFactory
         // PrettyPrint it so humans can read it
         $parser = new \PHPParser_Parser(new \PHPParser_Lexer);
         $prettyPrinter = new \PHPParser_PrettyPrinter_Default;
-file_put_contents('test.php', $fileContent);
+
         try {
             // parse
             $stmts = $parser->parse($fileContent);
@@ -444,6 +453,63 @@ file_put_contents('test.php', $fileContent);
     }
 
     /**
+     * @param $for
+     * @param $message
+     * @return string
+     */
+    private function generateReactionCode($for, $message)
+    {
+        $code = '';
+
+        // What kind of reaction should we create?
+        switch ($this->config['processing']) {
+
+            case 'exception':
+
+                // What kind of exception do we need?
+                switch ($for) {
+
+                    case 'precondition':
+
+                        $exception = 'BrokenPreConditionException';
+                        break;
+
+                    case 'postcondition':
+
+                        $exception = 'BrokenPostConditionException';
+                        break;
+
+                    case 'invariant':
+
+                        $exception = 'BrokenInvariantException';
+                        break;
+
+                    default:
+
+                        $exception = '\Exception';
+                        break;
+                }
+                // Create the code
+                $code .= 'throw new ' . $exception . '(\'' . $message . '\');';
+
+                break;
+
+            case 'logging':
+
+                // Create the code
+                $code .= '$logger = new ' . $this->config['logger'] . '();
+                $logger->error(\'Broken ' . $for . ' with message: ' . $message . ' in \' . __METHOD__);';
+                break;
+
+            default:
+
+                break;
+        }
+
+        return $code;
+    }
+
+    /**
      * @param TypedListList $conditionLists
      * @param $methodName
      * @param $type
@@ -457,30 +523,6 @@ file_put_contents('test.php', $fileContent);
         if (!isset($allowedTypes[$type])) {
 
             return '';
-        }
-
-        // What kind of exception do we need?
-        switch($type) {
-
-            case 'precondition':
-
-                $exception = 'BrokenPreConditionException';
-                break;
-
-            case 'postcondition':
-
-                $exception = 'BrokenPostConditionException';
-                break;
-
-            case 'invariant':
-
-                $exception = 'BrokenInvariantException';
-                break;
-
-            default:
-
-                $exception = '\Exception';
-                break;
         }
 
         // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
@@ -519,7 +561,7 @@ file_put_contents('test.php', $fileContent);
             }
 
             // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
-            $conditionCounter ++;
+            $conditionCounter++;
             if ($type === 'precondition') {
 
                 $code .= 'if ($passedOne === false && !((';
@@ -531,8 +573,8 @@ file_put_contents('test.php', $fileContent);
 
                 $code .= 'if (!((';
                 $code .= implode(') && (', $codeFragment) . '))){';
-                $code .= 'throw new ' . $exception . '(\'Assertion (' . str_replace('\'', '"', implode(') && (', $codeFragment)) .
-                    ') failed in ' . $methodName . '.\');';
+                $code .= $this->generateReactionCode($type, 'Assertion (' . str_replace('\'', '"', implode(') && (', $codeFragment)) .
+                    ') failed');
                 $code .= '}';
             }
 
@@ -544,7 +586,8 @@ file_put_contents('test.php', $fileContent);
         if ($type === 'precondition' && $conditionCounter > 0) {
 
             $code .= 'if ($passedOne === false){';
-            $code .= 'throw new ' . $exception . '(\'Assertions \' . implode(", ", $failedAssertion) . \' failed in ' . $methodName . '.\');}';
+            $code .= $this->generateReactionCode($type, 'Assertions \' . implode(", ", $failedAssertion) . \' failed');
+            $code .= '}';
         }
 
         return $code;

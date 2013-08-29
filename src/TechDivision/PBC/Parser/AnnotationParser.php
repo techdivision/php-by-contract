@@ -48,7 +48,7 @@ class AnnotationParser extends AbstractParser
     public function __construct()
     {
         $config = new Config();
-        $this->config = $config->getConfig('Parser');
+        $this->config = $config->getConfig('Enforcement');
     }
 
     /**
