@@ -11,18 +11,18 @@
 if (is_dir(__DIR__ . "/../../../vendor")) {
 
     require_once __DIR__ . "/../../../vendor/symfony/class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php";
+    // Grab the composer autoloader
+    require_once __DIR__ . "/../../../vendor/autoload.php";
 
 } elseif (is_dir(__DIR__ . "/../../../../../symfony")) {
 
     require_once __DIR__ . "/../../../../../symfony/class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php";
-
+    // Grab the composer autoloader
+    require_once __DIR__ . "/../../../../../autoload.php";
 }
 
 // Load the constants
 require_once 'Constants.php';
-
-// Grab the composer autoloader
-require_once __DIR__ . "/../../../vendor/autoload.php";
 
 use TechDivision\PBC\AutoLoader;
 use TechDivision\PBC\Proxies\Cache;
