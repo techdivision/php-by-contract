@@ -197,13 +197,12 @@ class ProxyFactory
             ';
         }
 
-        // We should create attributes to save old instance state
+        // We need an attribute to check if we are in an observable state
         $fileContent .=
             '/**
-            * @var mixed
+            * @var boolean
             */
-            private ' . PBC_KEYWORD_OLD . ';
-            ';
+            private ' . PBC_TOGGLE_INVARIANT . ' = true;';
 
         // We should create attributes to store our attribute types
         $fileContent .=
@@ -295,7 +294,7 @@ class ProxyFactory
             }
 
             // Check if the invariant holds
-            ' . $this->createInvariantCall($invariantUsed) . '
+            ' . $this->createInvariantCall($invariantUsed, "entry") . '
 
             // Now check what kind of visibility we would have
             $attribute = $this->attributes[$name];
@@ -325,7 +324,7 @@ class ProxyFactory
             }
 
             // Check if the invariant holds
-            ' . $this->createInvariantCall($invariantUsed) . '
+            ' . $this->createInvariantCall($invariantUsed, "exit") . '
         }
         ';
 
@@ -371,7 +370,7 @@ class ProxyFactory
             // First of all check if our invariant holds, but only if we need it
             if ($functionDefinition->visibility !== 'private') {
 
-                $fileContent .= $this->createInvariantCall($invariantUsed);
+                $fileContent .= $this->createInvariantCall($invariantUsed, "entry");
             }
 
             // Here we need the combined preconditions, so gather them first
@@ -384,7 +383,7 @@ class ProxyFactory
             // Do we have to keep an instance of $this to compare with old later?
             if ($functionDefinition->usesOld === true) {
 
-                $fileContent .= '$this->' . PBC_KEYWORD_OLD . ' = clone $this;';
+                $fileContent .= PBC_KEYWORD_OLD . ' = clone $this;';
             }
 
             // Now call the original method itself
@@ -409,7 +408,7 @@ class ProxyFactory
             // Last of all check if our invariant holds, but only if we need it
             if ($functionDefinition->visibility !== 'private') {
 
-                $fileContent .= $this->createInvariantCall($invariantUsed);
+                $fileContent .= $this->createInvariantCall($invariantUsed, "exit");
             }
 
             // If we passed every check we can return the result
@@ -497,7 +496,7 @@ class ProxyFactory
             case 'logging':
 
                 // Create the code
-                $code .= '$logger = new ' . $this->config['logger'] . '();
+                $code .= '$logger = new \\' . $this->config['logger'] . '();
                 $logger->error(\'Broken ' . $for . ' with message: ' . $message . ' in \' . __METHOD__);';
                 break;
 
@@ -632,23 +631,35 @@ class ProxyFactory
 
     /**
      * @param $invariantUsed
+     * @param $position
      * @return string
      */
-    private function createInvariantCall($invariantUsed)
+    private function createInvariantCall($invariantUsed, $position)
     {
-        if ($invariantUsed === true) {
+        $allowed_positions = array_flip(array('entry', 'exit'));
 
-            $code = 'list(, $caller) = debug_backtrace(false);
-        if (isset($caller["class"]) && $caller["class"] !== __CLASS__) {
+        if ($invariantUsed !== true || !isset($allowed_positions[$position])) {
 
-            $this->' . PBC_CLASS_INVARIANT_NAME . '();
+            return '';
         }
-        ';
 
-        } else {
+        // Decide how our if statement should look depending on the position of the invariant
+        if ($position === 'entry') {
 
-            $code = '';
+            $code = 'if ($this->pbcIsObservable === true) {
+            // Tell them that we are fulfilling a client\'s contract right now
+            $this->pbcIsObservable = false;
+            // Make clear that this method started the contracting.
+            ' . PBC_MARK_CONTRACT_ENTRY . ' = true;';
+
+        } elseif ($position === 'exit') {
+
+            $code = 'if (isset(' . PBC_MARK_CONTRACT_ENTRY . ')) {
+            // Tell them that we worked through the contract
+            $this->pbcIsObservable = true;';
         }
+
+        $code .= '$this->' . PBC_CLASS_INVARIANT_NAME . '();}';
 
         return $code;
     }
