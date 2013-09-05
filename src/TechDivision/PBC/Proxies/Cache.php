@@ -114,8 +114,9 @@ class Cache implements PBCCache
             // We got the file unserialize it
             $map = unserialize($mapFile);
 
-            // Lets check if it is current, if yes, return what we got
-            if (isset($map['version']) && $map['version'] == filemtime(dirname($pattern))) {
+            // Lets check if it is current and references the same projectRoot, if yes, return what we got
+            if (isset($map['version']) && $map['version'] == filemtime(dirname($pattern)) &&
+                    isset($map['projectRoot']) && $map['projectRoot'] === dirname($pattern)) {
 
                 return $map;
             }
@@ -124,7 +125,7 @@ class Cache implements PBCCache
         // We have none (or old one), create it.
         // Get the timestamp of the cache folder first so we would not miss a file if it got written during
         // a further check
-        $map = array('version' => filemtime(dirname($pattern)));
+        $map = array('version' => filemtime(dirname($pattern)), 'projectRoot' => dirname($pattern));
         $map = array_merge($map, $this->createFileMap($pattern));
 
         // When the map is ready we store it for later use

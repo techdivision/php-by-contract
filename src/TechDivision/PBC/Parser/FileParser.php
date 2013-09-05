@@ -140,13 +140,14 @@ class FileParser
         }
 
         // Lets iterate over all tokens and check for any class declarations
+        $bracketCounter = null;
         for ($i = 0; $i < count($tokens); $i++) {
 
             // If we found a class keyword we have to count the opening and closing curly brackets after it.
             // If the number is even we should have a valid class.
             if (is_array($tokens[$i]) && $tokens[$i][0] === T_CLASS) {
 
-                // Initialize our counter
+                // Reset our counter
                 $bracketCounter = 0;
 
                 // We got something, lets count the brackets between it and our variable's position
@@ -168,7 +169,7 @@ class FileParser
         }
 
         // Even number of brackets?
-        if ($bracketCounter === 0) {
+        if (isset($bracketCounter) && $bracketCounter === 0) {
 
             return true;
 
