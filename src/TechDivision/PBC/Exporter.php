@@ -6,3 +6,107 @@
  * Time: 11:57
  * To change this template use File | Settings | File Templates.
  */
+
+namespace TechDivision\PBC;
+
+use TechDivision\PBC\Proxies\Cache;
+
+require_once __DIR__ . '/Bootstrap.php';
+
+/**
+ * Class Exporter
+ * @package TechDivision\PBC
+ */
+class Exporter
+{
+    /**
+     * @var Cache
+     */
+    private $cache;
+
+    /**
+     * Used to export
+     *
+     * @param $source
+     * @param $target
+     */
+    public function export($source, $target)
+    {
+        // Check if we got a valid source directory
+        if (!is_readable($source)) {
+
+            throw new \InvalidArgumentException('Source folder missing or not readable.');
+        }
+
+        // Check if we got a valid target directory
+        if (!is_dir($target) || !is_writeable($target)) {
+
+            throw new \InvalidArgumentException('Target folder missing or not writeable.');
+        }
+
+        // We are still here so everything seems to be according to plan
+        $this->cache = Cache::getInstance(dirname($source));
+
+        // Get all files within this dir
+        $tmpFiles = $this->cache->getFiles();
+        $fileList = array();
+        $sourcePath = realpath($source);
+        foreach($tmpFiles as $class => $tmpFile) {
+
+            if (strpos($tmpFile['path'], $sourcePath) === 0) {
+
+                $fileList[$class] = str_replace($sourcePath, '', $tmpFile['path']);
+            }
+        }
+
+        // Remember how mcuh we got for later checks
+        $sourceCount = count($fileList);
+
+        // No we got all the files which we can handle. So do something nice with them.
+        // First of all get all the files we might have inside our cache.
+        $parsedFiles = $this->getCachedFiles($fileList);
+
+        // Create all the files!!
+        foreach($parsedFiles as $origPath => $parsedPath) {
+
+            // Have a look where to write the new file
+            $targetPath = str_replace('\\\\', '\\', $target . DIRECTORY_SEPARATOR . $origPath);
+            // Make the dirs if needed
+            if (!is_writeable(dirname($targetPath))) {
+
+                mkdir(dirname($targetPath), 0755, true);
+            }
+            // Write content to file
+            file_put_contents($targetPath, file_get_contents($parsedPath));
+        }
+
+        // Did we get all of them?
+        if ($sourceCount !== count($parsedFiles)) {
+
+            throw new \Exception('Could not parse all needed files. Some will be missing.');
+        }
+
+        return true;
+    }
+
+    /**
+     * @param array $fileList
+     */
+    private function getCachedFiles(array $fileList)
+    {
+        // Get all the cached classes
+        $classCache = $this->cache->get();
+
+        // Get all the parsed classes of our requested files
+        $parsedFiles = array();
+        foreach($fileList as $class => $file) {
+
+            if (isset($classCache[$class])) {
+
+                $parsedFiles[$file] = $classCache[$class]['path'];
+            }
+        }
+
+        return $parsedFiles;
+    }
+}
