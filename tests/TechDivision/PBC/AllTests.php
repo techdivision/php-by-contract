@@ -9,14 +9,10 @@
 
 namespace TechDivision\PBC;
 
-require_once 'PHPUnit/Autoload.php';
-
-require __DIR__ . '/../../../vendor/autoload.php';
-require __DIR__ . "/../../../src/TechDivision/PBC/Bootstrap.php";
-
 require __DIR__ . '/BasicTest.php';
 require __DIR__ . '/RealTest.php';
 require __DIR__ . '/InheritanceTest.php';
+require __DIR__ . '/StackTest.php';
 
 class AllTests
 {
@@ -27,6 +23,7 @@ class AllTests
         $suite->addTestSuite('BasicTest');
         $suite->addTestSuite('RealTest');
         $suite->addTestSuite('InheritanceTest');
+        $suite->addTestSuite('StackTest');
 
         return $suite;
     }

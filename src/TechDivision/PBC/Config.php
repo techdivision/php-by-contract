@@ -24,7 +24,7 @@ class Config implements PBCConfig
          * 'projectRoot' specifies the root of your project. All enclosed non-omitted classes will be parsed.
          */
         $this->config['AutoLoader'] = array(
-            'omit' => array('TechDivision\PBC', 'PHPUnit', 'PHPParser', 'Symfony\Component'),
+            'omit' => array('TechDivision\PBC', 'PHPUnit', 'PHPParser', 'Symfony\Component', 'Psr\Log'),
             'projectRoot' => realpath('../../')
         );
 

@@ -10,6 +10,7 @@
 namespace TechDivision\PBC\Parser;
 
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
+use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Definitions\AttributeDefinition;
 use TechDivision\PBC\Entities\Lists\ClassDefinitionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
@@ -24,7 +25,7 @@ class ClassParser
      * @param $file
      * @return bool|ClassDefinitionList
      */
-    public function getDefinitionListFromFile($file)
+    public function getDefinitionListFromFile($file, FileDefinition $fileDefinition)
     {
         // Get all the token arrays for the different classes
         $tokens = $this->getClassTokens($file);
@@ -40,7 +41,7 @@ class ClassParser
 
             try {
 
-                $classDefinitionList->add($this->getDefinitionFromTokens($token));
+                $classDefinitionList->add($this->getDefinitionFromTokens($token, $fileDefinition));
 
             } catch (\UnexpectedValueException $e) {
                 // Just try the next one
@@ -59,6 +60,9 @@ class ClassParser
      */
     public function getDefinitionFromFile($file, $className = null)
     {
+        $fileParser = new FileParser();
+        $fileDefinition = $fileParser->getDefinitionFromFile($file);
+
         // First of all we need to get the class tokens
         $tokens = $this->getClassTokens($file);
 
@@ -74,7 +78,7 @@ class ClassParser
         } elseif (count($tokens) === 1) {
             // We got what we came for
 
-            return $this->getDefinitionFromTokens($tokens[0]);
+            return $this->getDefinitionFromTokens($tokens[0], $fileDefinition);
 
         } elseif (is_string($className) && count($tokens) > 1) {
             // We are still here, but got a class name to look for
@@ -86,7 +90,7 @@ class ClassParser
 
                     if (is_array($token[$i]) && $token[$i] === T_CLASS && $token[$i + 2] === $className) {
 
-                        return $this->getDefinitionFromTokens($tokens[$key]);
+                        return $this->getDefinitionFromTokens($tokens[$key], $fileDefinition);
                     }
                 }
             }
@@ -106,7 +110,7 @@ class ClassParser
      * @param $tokens
      * @return ClassDefinition
      */
-    private function getDefinitionFromTokens($tokens)
+    private function getDefinitionFromTokens($tokens, FileDefinition $fileDefinition)
     {
         // First of all we need a new ClassDefinition to fill
         $classDefinition = new ClassDefinition();
@@ -124,7 +128,37 @@ class ClassParser
         $classDefinition->name = $this->getClassName($tokens);
 
         // Lets check if there is any inheritance, or if we implement any interfaces
-        $classDefinition->extends = $this->getParent($tokens);
+
+        $parentName = $this->getParent($tokens);
+        if ($parentName === '') {
+
+            $classDefinition->extends = $parentName;
+
+        } elseif (count($fileDefinition->usedNamespaces) === 0) {
+
+            if (strpos($parentName, '\\') !== false) {
+
+                $classDefinition->extends = $parentName;
+
+            } else {
+
+                $classDefinition->extends = '\\' . $fileDefinition->namespace . '\\' . $parentName;
+            }
+
+        } else {
+
+            foreach($fileDefinition->usedNamespaces as $alias) {
+
+                if (strpos($alias, $parentName) !== false) {
+
+                    $classDefinition->extends = '\\' . $alias;
+                }
+            }
+        }
+
+        // Clean possible double-\
+        $classDefinition->extends = str_replace('\\\\', '\\', $classDefinition->extends);
+
         $classDefinition->implements = $this->getInterfaces($tokens);
 
         $classDefinition->constants = $this->getConstants($tokens);

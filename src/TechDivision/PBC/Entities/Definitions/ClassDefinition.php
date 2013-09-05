@@ -121,6 +121,12 @@ class ClassDefinition
         $ancestorDefinitions = array();
         foreach ($ancestors as $key => $ancestor) {
 
+            // Do we have this pestering leading \?
+            if (strpos($ancestor, '\\') === 0) {
+
+                $ancestor = ltrim($ancestor, '\\');
+            }
+
             // Do we know this file?
             if (isset($files[$ancestor])) {
 
@@ -128,9 +134,6 @@ class ClassDefinition
                 $ancestorDefinitions[$key]->finalize();
             }
         }
-
-        // Get all the ancestral invariants
-        $this->getAncestralInvariant($ancestorDefinitions);
 
         // Get all the ancestral method pre- and postconditions
         $this->getAncestralConditions($ancestorDefinitions);
@@ -175,6 +178,12 @@ class ClassDefinition
                         if ($functionIterator->current()->postConditions->count() > 0) {
 
                             $function->ancestralPostConditions->add($functionIterator->current()->postConditions);
+                        }
+
+                        // Check if we have to use the old keyword now
+                        if ($functionIterator->current()->usesOld === true) {
+
+                            $function->usesOld = true;
                         }
 
                         // Safe the enhanced functionDefinition back

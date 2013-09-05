@@ -132,7 +132,8 @@ class ProxyFactory
         $invariantUsed = false;
         // Before using the definition we have to finalize it
         $classDefinition->finalize();
-        if ($classDefinition->invariantConditions->isEmpty() === false) {
+
+        if ($classDefinition->invariantConditions->isEmpty() === false || $classDefinition->extends !== '') {
 
             $invariantUsed = true;
         }
@@ -200,9 +201,15 @@ class ProxyFactory
         // We need an attribute to check if we are in an observable state
         $fileContent .=
             '/**
-            * @var boolean
+            * @var int
             */
-            private ' . PBC_TOGGLE_INVARIANT . ' = true;';
+            protected $' . PBC_CONTRACT_DEPTH . ' = 0;';
+
+        $fileContent .=
+            '/**
+            * @var mixed
+            */
+            private $pbcOld;';
 
         // We should create attributes to store our attribute types
         $fileContent .=
@@ -269,7 +276,7 @@ class ProxyFactory
 
         // Create the invariant
         if ($invariantUsed === true) {
-            $fileContent .= 'private function ' . PBC_CLASS_INVARIANT_NAME . '() {';
+            $fileContent .= 'protected function ' . PBC_CLASS_INVARIANT_NAME . '() {';
 
             $fileContent .= $this->createInvariantCode($classDefinition);
 
@@ -287,11 +294,18 @@ class ProxyFactory
         public function __set($name, $value)
         {
             // Does this property even exist? If not, throw an exception
-            if (isset($this->attributes[$name])) {
+            if (!isset($this->attributes[$name])) {';
 
-                throw new \InvalidArgumentException;
+        if ($classDefinition->extends !== '') {
 
-            }
+            $fileContent .= 'return parent::__set($name, $value);';
+
+        } else {
+
+            $fileContent .= 'throw new \InvalidArgumentException;';
+        }
+
+        $fileContent .= '}
 
             // Check if the invariant holds
             ' . $this->createInvariantCall($invariantUsed, "entry") . '
@@ -302,7 +316,7 @@ class ProxyFactory
 
                 case "protected" :
 
-                    if (is_subclass_of(get_called_class(), "' . $classDefinition->name . '")) {
+                    if (is_subclass_of(get_called_class(), __CLASS__)) {
 
                         $this->$name = $value;
 
@@ -328,6 +342,57 @@ class ProxyFactory
         }
         ';
 
+        // Now we need our magic __get method. We do not check the invariant for reading from an attribute
+        // but we already protected the attributes for using __set, so this step is necessary.
+        $fileContent .= '/**
+         * Magic function to forward reading property access calls if within visibility boundaries.
+         *
+         * @throws InvalidArgumentException
+         */
+        public function __get($name)
+        {
+            // Does this property even exist? If not, throw an exception
+            if (!isset($this->attributes[$name])) {';
+
+        if ($classDefinition->extends !== '') {
+
+            $fileContent .= 'return parent::__get($name);';
+
+        } else {
+
+            $fileContent .= 'throw new \InvalidArgumentException;';
+        }
+
+        $fileContent .= '}
+
+            // Now check what kind of visibility we would have
+            $attribute = $this->attributes[$name];
+            switch ($attribute["visibility"]) {
+
+                case "protected" :
+
+                    if (is_subclass_of(get_called_class(), __CLASS__)) {
+
+                        return $this->$name;
+
+                    } else {
+
+                        throw new \InvalidArgumentException;
+                    }
+                    break;
+
+                case "public" :
+
+                    return $this->$name;
+                    break;
+
+                default :
+
+                    throw new \InvalidArgumentException;
+                    break;
+            }
+        }
+        ';
 
         // Create all the methods.
         // To do so we need the list of function definitions.
@@ -489,7 +554,8 @@ class ProxyFactory
                         break;
                 }
                 // Create the code
-                $code .= 'throw new ' . $exception . '(\'' . $message . '\');';
+                $code .= '$this->' . PBC_CONTRACT_DEPTH . '--;
+                throw new ' . $exception . '(\'' . $message . '\');';
 
                 break;
 
@@ -524,15 +590,15 @@ class ProxyFactory
             return '';
         }
 
+        // We only use contracting if we're not inside another contract already
+        $code = 'if ($this->' . PBC_CONTRACT_DEPTH . ' < 2) {';
+
         // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
         if ($type === 'precondition') {
 
-            $code = '$passedOne = false;
+            $code .= '$passedOne = false;
                 $failedAssertion = array();';
 
-        } else {
-
-            $code = '';
         }
 
         // We need a counter to check how much conditions we got
@@ -589,6 +655,9 @@ class ProxyFactory
             $code .= '}';
         }
 
+        // Closing bracket for contract depth check
+        $code .= '}';
+
         return $code;
     }
 
@@ -608,22 +677,28 @@ class ProxyFactory
         for ($i = 0; $i < $invariantIterator->count(); $i++) {
 
             // Create the inner loop for the different assertions
-            $assertionIterator = $invariantIterator->current()->getIterator();
-            $codeFragment = array();
-            for ($j = 0; $j < $assertionIterator->count(); $j++) {
+            if ($invariantIterator->current()->count() !== 0) {
+                $assertionIterator = $invariantIterator->current()->getIterator();
+                $codeFragment = array();
+                for ($j = 0; $j < $assertionIterator->count(); $j++) {
 
-                $codeFragment[] = $assertionIterator->current()->getString();
+                    $codeFragment[] = $assertionIterator->current()->getString();
 
-                $assertionIterator->next();
+                    $assertionIterator->next();
+                }
+                $code .= 'if (!(';
+                $code .= implode(' && ', $codeFragment) . ')){';
+                $code .= 'throw new BrokenInvariantException(\'Assertion ' . str_replace('\'', '"', implode(' && ', $codeFragment)) .
+                    ' failed in ' . PBC_CLASS_INVARIANT_NAME . '.\');';
+                $code .= '}';
             }
-            $code .= 'if (!(';
-            $code .= implode(' && ', $codeFragment) . ')){';
-            $code .= 'throw new BrokenInvariantException(\'Assertion ' . str_replace('\'', '"', implode(' && ', $codeFragment)) .
-                ' failed in ' . PBC_CLASS_INVARIANT_NAME . '.\');';
-            $code .= '}';
-
             // increment the outer loop
             $invariantIterator->next();
+        }
+
+        if ($classDefinition->extends !== '') {
+
+            $code .= 'parent::' . PBC_CLASS_INVARIANT_NAME . '();';
         }
 
         return $code;
@@ -646,20 +721,18 @@ class ProxyFactory
         // Decide how our if statement should look depending on the position of the invariant
         if ($position === 'entry') {
 
-            $code = 'if ($this->pbcIsObservable === true) {
-            // Tell them that we are fulfilling a client\'s contract right now
-            $this->pbcIsObservable = false;
-            // Make clear that this method started the contracting.
-            ' . PBC_MARK_CONTRACT_ENTRY . ' = true;';
+            $code = 'if ($this->' . PBC_CONTRACT_DEPTH . ' === 0) {
+            $this->' . PBC_CLASS_INVARIANT_NAME . '();}
+            // Tell them we entered a contracted method
+            $this->' . PBC_CONTRACT_DEPTH . '++;';
 
         } elseif ($position === 'exit') {
 
-            $code = 'if (isset(' . PBC_MARK_CONTRACT_ENTRY . ')) {
-            // Tell them that we worked through the contract
-            $this->pbcIsObservable = true;';
+            $code = 'if ($this->' . PBC_CONTRACT_DEPTH . ' === 1) {
+            $this->' . PBC_CLASS_INVARIANT_NAME . '();}
+            // Tell them we are done at this level
+            $this->' . PBC_CONTRACT_DEPTH . '--;';
         }
-
-        $code .= '$this->' . PBC_CLASS_INVARIANT_NAME . '();}';
 
         return $code;
     }

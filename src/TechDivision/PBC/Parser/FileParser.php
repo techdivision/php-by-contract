@@ -46,7 +46,7 @@ class FileParser
 
             // Get our ClassParser to work
             $classParser = new ClassParser();
-            $classDefinitions = $classParser->getDefinitionListFromFile($file);
+            $classDefinitions = $classParser->getDefinitionListFromFile($file, $fileDefinition);
 
             // Did we get the right thing?
             if ($classDefinitions instanceof ClassDefinitionList) {
