@@ -10,32 +10,20 @@
 // I don't know how to handle that better, forgive me (or better: explain me how!) TODO
 if (is_dir(__DIR__ . "/../../../vendor")) {
 
-    require_once __DIR__ . "/../../../vendor/symfony/class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php";
-    // Grab the composer autoloader
-    require_once __DIR__ . "/../../../vendor/autoload.php";
+    $vendorDir = __DIR__ . "/../../../vendor/";
 
-} elseif (is_dir(__DIR__ . "/../../../../../symfony")) {
+} elseif (is_dir(__DIR__ . "/../../vendor")) {
 
-    require_once __DIR__ . "/../../../../../symfony/class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php";
-    // Grab the composer autoloader
-    require_once __DIR__ . "/../../../../../autoload.php";
+    $vendorDir = __DIR__ . "/../../vendor/";
 }
 
 // Load the constants
 require_once 'Constants.php';
+require_once $vendorDir . 'autoload.php';
 
 use TechDivision\PBC\AutoLoader;
 use TechDivision\PBC\Proxies\Cache;
 use TechDivision\PBC\Config;
-use Symfony\Component\ClassLoader\UniversalClassLoader;
-
-// Register "our" Symfony ClassLoader so we have a PSR-0 compatible loader at hand.
-// Register this one to append to the autoloader stack.
-$loader = new UniversalClassLoader();
-$loader->registerNamespace("Symfony\\Component", realpath(__DIR__ . "/../../../vendor/symfony/class-loader/Symfony/Component/"));
-$loader->registerNamespace("TechDivision\\PBC", realpath(__DIR__ . '/../../'));
-$loader->registerNamespace("PHPParser", realpath(__DIR__ . '/../../../vendor/nikic/php-parser/lib'));
-$loader->register(false);
 
 // We have to register our autoLoader to put our proxies in place
 $config = new Config();
