@@ -16,6 +16,8 @@ use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Parser\FileParser;
 use TechDivision\PBC\Interfaces\PBCCache;
 use TechDivision\PBC\Config;
+use TokenReflection\Broker;
+use TokenReflection\Broker\Backend\Memory;
 
 /**
  * Class ProxyFactory
@@ -67,7 +69,14 @@ class ProxyFactory
             return false;
         }
 
+        $time = microtime(true);
 
+        $broker = new Broker(new Memory());
+        $class = $broker->getClass($className);
+
+        var_dump($class->getName(), microtime(true) - $time);
+
+/*
         // We know the class and we know the file it is in, so get our FileParser and have a blast
         $fileParser = new FileParser();
         $fileDefinition = $fileParser->getDefinitionFromFile($fileMap[$className]['path']);
@@ -103,7 +112,7 @@ class ProxyFactory
         }
 
         // Still here? Than everything worked out great.
-        return true;
+        return true;*/
     }
 
     /**
