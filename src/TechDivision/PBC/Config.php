@@ -25,7 +25,7 @@ class Config implements PBCConfig
          */
         $this->config['AutoLoader'] = array(
             'omit' => array('TechDivision\PBC', 'PHPUnit', 'PHPParser', 'Symfony\Component', 'Psr\Log'),
-            'projectRoot' => realpath(dirname(__FILE__) . '/../../../')
+            'projectRoot' => realpath(dirname(__FILE__) . '/../../../tests/TechDivision/PBC/data/')
         );
 
         /**

@@ -14,7 +14,8 @@
         "php": ">=5.3.0",
         "symfony/class-loader": ">=2.0",
         "nikic/php-parser": "0.9.*@dev",
-        "psr/log": "*"
+        "psr/log": "*",
+        "andrewsville/php-token-reflection": "dev-develop"
     },
     "autoload": {
         "psr-0": {"TechDivision": "src/"}

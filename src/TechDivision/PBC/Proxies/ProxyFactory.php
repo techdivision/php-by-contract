@@ -67,6 +67,7 @@ class ProxyFactory
             return false;
         }
 
+
         // We know the class and we know the file it is in, so get our FileParser and have a blast
         $fileParser = new FileParser();
         $fileDefinition = $fileParser->getDefinitionFromFile($fileMap[$className]['path']);

@@ -164,8 +164,12 @@ class Cache implements PBCCache
                     $parser = new ClassParser();
 
                     $classDefinition = $parser->getDefinitionFromFile(realpath($items[$i]), $className);
-                    $classMap[$className]['dependencies'] = $classDefinition->implements;
-                    $classMap[$className]['dependencies'][] = $classDefinition->extends;
+
+                    if ($classDefinition instanceof ClassDefinition) {
+
+                        $classMap[$className]['dependencies'] = $classDefinition->implements;
+                        $classMap[$className]['dependencies'][] = $classDefinition->extends;
+                    }
                 }
             }
         }
