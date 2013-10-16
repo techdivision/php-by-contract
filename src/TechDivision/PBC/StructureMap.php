@@ -63,6 +63,15 @@ class StructureMap
         }
     }
 
+    /**
+     * @param $identifier
+     * @return bool
+     */
+    public function entryExists($identifier)
+    {
+        return isset($this->map[$identifier]);
+    }
+
     public function update(Structure $structure = null)
     {
 

@@ -77,15 +77,12 @@ class AutoLoader
         if ($queryProxy == true) {
 
             // If we do not have the class in our proxy cache
-            if ($this->cache->isCached($className) === false) {
+            if ($this->cache->entryExists($className) === false || $this->cache->isCurrent($className) === false) {
 
                 // Create our proxy class
-                $this->proxyFactory->createProxy($className);
-
-            } elseif ($this->cache->isCurrent($className) === false) {
-
-                // Update our proxy class
-                $this->proxyFactory->updateProxy($className);
+                $fileMap = new StructureMap($this->config['projectRoot']);
+                $proxyFactory = new ProxyFactory($fileMap);
+                $proxyFactory->createProxy($className);
             }
 
             // Require the proxy class, it should have been created now

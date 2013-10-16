@@ -22,7 +22,7 @@ require_once 'Constants.php';
 require_once $vendorDir . 'autoload.php';
 
 use TechDivision\PBC\AutoLoader;
-use TechDivision\PBC\Proxies\Cache;
+use TechDivision\PBC\StructureMap;
 use TechDivision\PBC\Config;
 
 // We have to register our autoLoader to put our proxies in place
