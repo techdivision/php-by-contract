@@ -44,7 +44,7 @@ class AutoLoader
      * @param $config
      * @param PBCCache $cache
      */
-    public function __construct($config, PBCCache $cache)
+    public function __construct($config, $cache)
     {
         $this->config = $config;
         $this->cache = $cache;

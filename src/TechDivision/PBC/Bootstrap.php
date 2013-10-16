@@ -29,7 +29,7 @@ use TechDivision\PBC\Config;
 $config = new Config();
 $config = $config->getConfig('AutoLoader');
 
-$cache = Cache::getInstance($config['projectRoot']);
+$cache = new StructureMap(__DIR__ . '/Proxies/cache');
 $autoLoader = new AutoLoader($config, $cache);
 $autoLoader->register();
 

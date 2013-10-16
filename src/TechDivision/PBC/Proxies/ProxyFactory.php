@@ -38,12 +38,12 @@ class ProxyFactory
     /**
      * @param PBCCache $cache
      */
-    public function __construct(PBCCache $cache)
+    public function __construct($cache)
     {
         $this->cache = $cache;
 
         $config = new Config();
-        $this->config = $config->getConfig('Enforcement');
+        $this->config = $config->getConfig();
     }
 
     /**
@@ -72,8 +72,10 @@ class ProxyFactory
         $time = microtime(true);
 
         $broker = new Broker(new Memory());
-        $class = $broker->getClass($className);
+        $broker->processDirectory($this->config['AutoLoader']['projectRoot']);
 
+        $class = $broker->getClass($className);
+$methods = $class->getMethods();
         var_dump($class->getName(), microtime(true) - $time);
 
 /*
