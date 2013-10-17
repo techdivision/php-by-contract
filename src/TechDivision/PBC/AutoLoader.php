@@ -11,6 +11,7 @@ namespace TechDivision\PBC;
 
 use TechDivision\PBC\Proxies\ProxyFactory;
 use TechDivision\PBC\Interfaces\PBCCache;
+use TechDivision\PBC\Proxies\Cache;
 
 /**
  * Class AutoLoader
@@ -44,11 +45,10 @@ class AutoLoader
      * @param $config
      * @param PBCCache $cache
      */
-    public function __construct($config, PBCCache $cache)
+    public function __construct($config, PBCCache $cache = null)
     {
         $this->config = $config;
         $this->cache = $cache;
-        $this->proxyFactory = new ProxyFactory($cache);
     }
 
     /**
@@ -58,6 +58,13 @@ class AutoLoader
      */
     public function loadClass($className)
     {
+        // Do we have the file in our cache dir?
+        $cachePath = __DIR__ . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php';
+        if (is_readable($cachePath)) {
+
+            require $cachePath;
+        }
+
         // Decide if we need to query the proxy factory
         $queryProxy = true;
         if (isset($this->config['omit'])) {
@@ -75,6 +82,13 @@ class AutoLoader
 
         // Do need to query our ProxyFactory?
         if ($queryProxy == true) {
+
+            // Still here? Then we have to check the cache.
+            if ($this->cache === null) {
+
+                $this->cache = Cache::getInstance($this->config['projectRoot']);
+            }
+            $this->proxyFactory = new ProxyFactory($this->cache);
 
             // If we do not have the class in our proxy cache
             if ($this->cache->isCached($className) === false) {

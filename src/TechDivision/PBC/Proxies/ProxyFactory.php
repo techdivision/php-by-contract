@@ -78,7 +78,7 @@ class ProxyFactory
         for ($k = 0; $k < $classIterator->count(); $k++) {
 
             $classDefinition = $classIterator->current();
-            $filePath = $this->createProxyFilePath($fileMap[$className]['path'], $classDefinition->name);
+            $filePath = $this->createProxyFilePath($fileDefinition->namespace . '\\' . $classDefinition->name);
 
             $tmp = $this->createFileFromDefinitions($filePath, $fileDefinition, $classDefinition);
 
@@ -111,12 +111,10 @@ class ProxyFactory
      * @param $className
      * @return string
      */
-    private function createProxyFilePath($fileName, $className)
+    private function createProxyFilePath($className)
     {
         // As a file can contain multiple classes we will substitute the filename with the class name
-        $tmpFileName = dirname($fileName);
-        $tmpFileName .= '_' . $className;
-        $tmpFileName = str_replace(DIRECTORY_SEPARATOR, '_', $tmpFileName);
+        $tmpFileName = ltrim(str_replace('\\', '_', $className), '_');
         return __DIR__ . '/cache/' . $tmpFileName . '.php';
     }
 

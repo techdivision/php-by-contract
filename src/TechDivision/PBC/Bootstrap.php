@@ -29,7 +29,6 @@ use TechDivision\PBC\Config;
 $config = new Config();
 $config = $config->getConfig('AutoLoader');
 
-$cache = Cache::getInstance($config['projectRoot']);
-$autoLoader = new AutoLoader($config, $cache);
+$autoLoader = new AutoLoader($config);
 $autoLoader->register();
 
