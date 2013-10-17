@@ -14,11 +14,12 @@ use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Parser\ClassParser;
 use TechDivision\PBC\Proxies\Cache;
+use TechDivision\PBC\Interfaces\StructureDefinition;
 
 /**
  * Class ClassDefinition
  */
-class ClassDefinition
+class ClassDefinition implements StructureDefinition
 {
     /**
      * @var string
@@ -91,6 +92,19 @@ class ClassDefinition
         $this->invariantConditions = new AssertionList();
         $this->ancestralInvariants = new TypedListList();
         $this->functionDefinitions = new FunctionDefinitionList();
+    }
+
+    /**
+     * Will return a list of all dependencies eg. parent class, interfaces and traits.
+     *
+     * @return array
+     */
+    public function getDependencies()
+    {
+        $result = $this->implements;
+        $result[] = $this->extends;
+
+        return $result;
     }
 
     /**

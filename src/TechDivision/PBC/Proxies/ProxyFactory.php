@@ -67,14 +67,13 @@ class ProxyFactory
             return false;
         }
 
-
         // We know the class and we know the file it is in, so get our FileParser and have a blast
         $fileParser = new FileParser();
         $fileDefinition = $fileParser->getDefinitionFromFile($fileMap[$className]['path']);
-
+var_dump($fileDefinition);
         // So we got our FileDefinition, now lets check if there are multiple classes in there.
         // Iterate over all classes within the FileDefinition and create a file for each of them
-        $classIterator = $fileDefinition->classDefinitions->getIterator();
+        $classIterator = $fileDefinition->structureDefinitions->getIterator();
         for ($k = 0; $k < $classIterator->count(); $k++) {
 
             $classDefinition = $classIterator->current();

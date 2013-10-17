@@ -8,12 +8,12 @@
  */
 namespace TechDivision\PBC\Entities\Lists;
 
-class ClassDefinitionList extends AbstractTypedList
+class StructureDefinitionList extends AbstractTypedList
 {
 
     public function __construct()
     {
-        $this->itemType = 'TechDivision\PBC\Entities\Definitions\ClassDefinition';
+        $this->itemType = 'TechDivision\PBC\Interfaces\StructureDefinition';
         $this->defaultOffset = 'name';
     }
 }

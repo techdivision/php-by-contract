@@ -202,7 +202,7 @@ class ClassParser
 
                                 break;
 
-                            } elseif ($tokens[$k][0] !== '=') {
+                            } elseif (is_array($tokens[$k]) && $tokens[$k][0] !== '=') {
 
                                 $constants[$tokens[$j][1]] .= $tokens[$k][1];
                             }

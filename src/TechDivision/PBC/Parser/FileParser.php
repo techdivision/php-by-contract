@@ -46,12 +46,12 @@ class FileParser
 
             // Get our ClassParser to work
             $classParser = new ClassParser();
-            $classDefinitions = $classParser->getDefinitionListFromFile($file, $fileDefinition);
+            $structureDefinitions = $classParser->getDefinitionListFromFile($file, $fileDefinition);
 
             // Did we get the right thing?
-            if ($classDefinitions instanceof ClassDefinitionList) {
+            if ($structureDefinitions instanceof StructureDefinitionList) {
 
-                $fileDefinition->classDefinitions = $classDefinitions;
+                $fileDefinition->classDefinitions = $structureDefinitions;
             }
         }
 

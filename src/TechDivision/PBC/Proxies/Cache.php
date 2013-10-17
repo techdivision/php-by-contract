@@ -3,6 +3,7 @@
 namespace TechDivision\PBC\Proxies;
 
 use TechDivision\PBC\Interfaces\PBCCache;
+use TechDivision\PBC\Interfaces\StructureDefinition;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Parser\ClassParser;
 
@@ -154,7 +155,7 @@ class Cache implements PBCCache
             } else {
 
                 // This is not a dir, so check if it contains a class
-                $className = $this->getClassIdentifier(realpath($items[$i]));
+                $className = $this->getStructureIdentifier(realpath($items[$i]));
                 if (empty($className) === false) {
 
                     $classMap[$className]['path'] = realpath($items[$i]);
@@ -163,12 +164,11 @@ class Cache implements PBCCache
                     // We also have to check if there are any dependencies
                     $parser = new ClassParser();
 
-                    $classDefinition = $parser->getDefinitionFromFile(realpath($items[$i]), $className);
+                    $definition = $parser->getDefinitionFromFile(realpath($items[$i]), $className);
 
-                    if ($classDefinition instanceof ClassDefinition) {
+                    if ($definition instanceof StructureDefinition) {
 
-                        $classMap[$className]['dependencies'] = $classDefinition->implements;
-                        $classMap[$className]['dependencies'][] = $classDefinition->extends;
+                        $classMap[$className]['dependencies'] = $definition->getDependencies();
                     }
                 }
             }
@@ -298,19 +298,19 @@ class Cache implements PBCCache
      *
      * @return string
      */
-    private function getClassIdentifier($fileName)
+    private function getStructureIdentifier($fileName)
     {
         // Lets open the file readonly
         $fileResource = fopen($fileName, 'r');
 
         // Prepare some variables we will need
-        $className = '';
+        $structureName = '';
         $namespace = '';
         $buffer = '';
 
         // Declaring the iterator here, to not check the start of the file again and again
         $i = 0;
-        while (empty($className) === true) {
+        while (empty($structureName) === true) {
 
             // Is the file over already?
             if (feof($fileResource)) {
@@ -332,14 +332,26 @@ class Cache implements PBCCache
             // Check the tokens
             for (; $i < count($tokens); $i++) {
 
-                // If we got the class name
+                // If we got a class name
                 if ($tokens[$i][0] === T_CLASS) {
 
                     for ($j = $i + 1; $j < count($tokens); $j++) {
 
                         if ($tokens[$j] === '{') {
 
-                            $className = $tokens[$i + 2][1];
+                            $structureName = $tokens[$i + 2][1];
+                        }
+                    }
+                }
+
+                // If we got an interface name
+                if ($tokens[$i][0] === T_INTERFACE) {
+
+                    for ($j = $i + 1; $j < count($tokens); $j++) {
+
+                        if ($tokens[$j] === '{') {
+
+                            $structureName = $tokens[$i + 2][1];
                         }
                     }
                 }
@@ -363,6 +375,6 @@ class Cache implements PBCCache
         }
 
         // Return what we did or did not found
-        return $namespace . $className;
+        return $namespace . $structureName;
     }
 }

@@ -201,7 +201,7 @@ class FunctionParser extends AbstractParser
         for ($i = 0; $i < count($tokens); $i++) {
 
             // If we got the function name
-            if ($tokens[$i][0] === T_FUNCTION) {
+            if ($tokens[$i][0] === T_FUNCTION && $tokens[$i + 2][0] === T_STRING) {
 
                 $functionName = $tokens[$i + 2][1];
             }

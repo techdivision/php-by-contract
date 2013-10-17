@@ -7,7 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 namespace TechDivision\PBC\Entities\Definitions;
-use TechDivision\PBC\Entities\Lists\ClassDefinitionList;
+use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 
 /**
  * Class FileDefinition
@@ -35,9 +35,9 @@ class FileDefinition
     public $usedNamespaces;
 
     /**
-     * @var ClassDefinitionList
+     * @var StructureDefinitionList
      */
-    public $classDefinitions;
+    public $structureDefinitions;
 
     /**
      * Default constructor
@@ -48,6 +48,6 @@ class FileDefinition
         $this->name = '';
         $this->namespace = '';
         $this->usedNamespaces = array();
-        $this->classDefinitions = new ClassDefinitionList();
+        $this->structureDefinitions = new StructureDefinitionList();
     }
 }
