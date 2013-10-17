@@ -44,7 +44,8 @@ class StructureMap
     private $omittedPathes;
 
     /**
-     * @param $rootPath
+     * @param string $rootPath
+     * @param array $omittedPathes
      */
     public function __construct($rootPath, $omittedPathes = array())
     {
@@ -64,6 +65,24 @@ class StructureMap
     }
 
     /**
+     * Will add a structure entry to the map.
+     *
+     * @param Structure $structure
+     * @return bool
+     */
+    public function add(Structure $structure)
+    {
+        // The the entry
+        $this->map[$structure->getIdentifier()] = array('cTime' => $structure->getCTime(),
+            'identifier' => $structure->getIdentifier(),
+            'path' => $structure->getPath(),
+            'type' => $structure->getType());
+
+        // Persist the map
+        return $this->save();
+    }
+
+    /**
      * @param $identifier
      * @return bool
      */
@@ -75,6 +94,33 @@ class StructureMap
     public function update(Structure $structure = null)
     {
 
+    }
+
+    /**
+     * Will return the entry specified by it's identifier.
+     * If none is found, false will be returned.
+     *
+     * @param $identifier
+     * @return bool|Structure
+     */
+    public function getEntry($identifier)
+    {
+        if (isset($this->map[$identifier])) {
+
+            // We got it, lets biuld a structure object
+            $entry = $this->map[$identifier];
+            $structure = new Structure($entry['cTime'],
+                $entry['identifier'],
+                $entry['path'],
+                $entry['type']);
+
+            // Return the structure DTO
+            return $structure;
+
+        } else {
+
+            return false;
+        }
     }
 
     /**
@@ -93,7 +139,7 @@ class StructureMap
         if ($identifier !== null && isset($this->map[$identifier])) {
 
             // Is the stored file time the same as directly from the file?
-            if ($this->map[$identifier]['ctime'] === filectime($this->map[$identifier]['path'])) {
+            if ($this->map[$identifier]['cTime'] === filectime($this->map[$identifier]['path'])) {
 
                 return true;
             }
@@ -219,10 +265,12 @@ class StructureMap
         foreach ($regex as $file) {
 
             $identifier = $this->findIdentifier($file[0]);
+
             if ($identifier !== false) {
 
-                $this->map[$identifier[1]] = array('path' => $file[0],
-                    'cTime' => filectime($file[0]),
+                $this->map[$identifier[1]] = array('cTime' => filectime($file[0]),
+                    'identifier' => $identifier[1],
+                    'path' => $file[0],
                     'type' => $identifier[0]);
             }
         }
@@ -239,7 +287,7 @@ class StructureMap
     {
 
         $rsc = fopen($file, 'r');
-        $className = $namespace = $code = $type = '';
+        $stuctureName = $namespace = $code = $type = '';
 
         for ($k = 0; $k < 5; $k++) {
 
@@ -276,7 +324,7 @@ class StructureMap
                 ) {
 
                     $type = 'class';
-                    $className = $tokens[$i][1];
+                    $stuctureName = $tokens[$i][1];
                     break 2;
 
                 } elseif ($tokens[$i - 2][0] === T_TRAIT
@@ -285,19 +333,28 @@ class StructureMap
                 ) {
 
                     $type = 'trait';
-                    $className = $tokens[$i][1];
+                    $stuctureName = $tokens[$i][1];
                     break 2;
 
                 }
             }
         }
-        if (empty($className)) {
+
+        // Check what we got and return it accordingly. We will return an ugly array of the sort
+        // array(<STRUCTURE_TYPE>, <STRUCTURE_NAME>).
+        if (empty($stuctureName)) {
 
             return false;
+
         } elseif (empty($namespace)) {
-            return $className;
+            // We got no namespace, so just use the structure name
+
+            return array($type, $stuctureName);
+
         } else {
-            return $namespace . '\\' . $className;
+            // We got both, so combine it.
+
+            return array($type, ltrim($namespace . '\\' . $stuctureName, '\\'));
         }
     }
 

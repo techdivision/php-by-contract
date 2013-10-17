@@ -48,7 +48,6 @@ class AutoLoader
     {
         $this->config = $config;
         $this->cache = $cache;
-        $this->proxyFactory = new ProxyFactory($cache);
     }
 
     /**
@@ -81,12 +80,13 @@ class AutoLoader
 
                 // Create our proxy class
                 $fileMap = new StructureMap($this->config['projectRoot']);
-                $proxyFactory = new ProxyFactory($fileMap);
-                $proxyFactory->createProxy($className);
+                $this->proxyFactory = new ProxyFactory($fileMap, $this->cache);
+                $this->proxyFactory->createProxy($className);
             }
 
             // Require the proxy class, it should have been created now
             $proxyFile = $this->proxyFactory->getProxyFileName($className);
+
             if (is_readable($proxyFile) === true) {
 
                 require $proxyFile;

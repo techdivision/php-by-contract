@@ -9,15 +9,15 @@ namespace TechDivision\PBC\Entities\Definitions;
  */
 class Structure
 {
-    /*
-     * @var string
-     */
-    private $type;
-
     /**
      * @var array
      */
     private $allowedTypes = array('class', 'interface', 'trait');
+
+    /**
+     * @var int
+     */
+    private $cTime;
 
     /**
      * @var string
@@ -29,10 +29,38 @@ class Structure
      */
     private $path;
 
-    /**
-     * @var int
+    /*
+     * @var string
      */
-    private $cTime;
+    private $type;
+
+    /**
+     * Default constructor.
+     *
+     * @param $cTime
+     * @param $identifier
+     * @param $path
+     * @param $type
+     *
+     * @throws  \InvalidArgumentException
+     */
+    public function __construct($cTime, $identifier, $path, $type)
+    {
+        // Set the attributes.
+        $this->cTime = $cTime;
+        $this->identifier = $identifier;
+        $this->path = $path;
+
+        // Check if we got an allowed value for the type.
+        $allowedTypes = array_flip($this->allowedTypes);
+        if (!isset($allowedTypes[$type])) {
+
+            throw new \InvalidArgumentException();
+        }
+
+        $this->type = $type;
+    }
+
 
     /**
      * @param int $cTime
