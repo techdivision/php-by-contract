@@ -8,6 +8,8 @@
  */
 namespace TechDivision\PBC\Entities\Definitions;
 
+use TechDivision\PBC\StructureMap;
+use TechDivision\PBC\Config;
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
@@ -116,8 +118,9 @@ class ClassDefinition
 
         // Now finalize them recursively
         $classParser = new ClassParser();
-        $cache = Cache::getInstance();
-        $files = $cache->getFiles();
+        $config = new Config();
+        $config = $config->getConfig('AutoLoader');
+        $cache = new StructureMap($config['projectRoot']);
         $ancestorDefinitions = array();
         foreach ($ancestors as $key => $ancestor) {
 
@@ -128,9 +131,10 @@ class ClassDefinition
             }
 
             // Do we know this file?
-            if (isset($files[$ancestor])) {
+            $file = $cache->getEntry($ancestor);
+            if ($file !== false) {
 
-                $ancestorDefinitions[$key] = $classParser->getDefinitionFromFile($files[$ancestor]['path'], $ancestor);
+                $ancestorDefinitions[$key] = $classParser->getDefinitionFromFile($file->getPath(), $ancestor);
                 $ancestorDefinitions[$key]->finalize();
             }
         }

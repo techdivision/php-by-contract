@@ -91,7 +91,7 @@ class ProxyFactory
             if ($tmp === true) {
 
                 // Now get our new file into the cacheMap
-                $this->cache->add(new Structure(filectime($filePath), $className, $filePath, 'class'));
+                $this->cache->add(new Structure(filectime($mapEntry->getPath()), $className, $filePath, 'class'));
 
                 if ($update === true) {
                     // If this was an update we might have to update possible children as well, as contracts are inherited
