@@ -9,12 +9,12 @@
 
 namespace TechDivision\PBC\Parser;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
-use TechDivision\PBC\Entities\Lists\ClassDefinitionList;
+use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 
 /**
  * Class FileParser
  */
-class FileParser
+class FileParser extends AbstractParser
 {
     /**
      * @param $file
@@ -41,21 +41,31 @@ class FileParser
         $fileDefinition->namespace = $this->getNamespace($tokens);
         $fileDefinition->usedNamespaces = $this->getUsedNamespaces($tokens);
 
-        // If the file does indeed contain valid PHP classes we can continue
-        if ($this->containsValidClass($file)) {
+        // If the file does indeed contain valid PHP structures we can continue.
+        // But first we have to check which one.
+        $structureType = $this->getStructureToken($tokens);
 
-            // Get our ClassParser to work
-            $classParser = new ClassParser();
-            $structureDefinitions = $classParser->getDefinitionListFromFile($file, $fileDefinition);
+        // Now we can check which kind of parser we need.
+        $parserName = ucfirst($structureType) . 'Parser';
+        $parser = new $parserName();
 
-            // Did we get the right thing?
-            if ($structureDefinitions instanceof StructureDefinitionList) {
+        $structureDefinitions = $parser->getDefinitionListFromFile($file, $fileDefinition);
 
-                $fileDefinition->classDefinitions = $structureDefinitions;
-            }
+        // Did we get the right thing?
+        if ($structureDefinitions instanceof StructureDefinitionList) {
+
+            $fileDefinition->structureDefinitions = $structureDefinitions;
         }
 
         return $fileDefinition;
+    }
+
+    /**
+     * @param $file
+     */
+    private function getStructureType($file)
+    {
+
     }
 
     /**

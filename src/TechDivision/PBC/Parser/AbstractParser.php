@@ -35,7 +35,7 @@ abstract class AbstractParser implements Parser
      * Will search for a certain token in a certain entity.
      *
      * This method will search the signature of either a class or a function for a certain token e.g. final.
-     * Will return true if the token is found, and false if not or an error occured.
+     * Will return true if the token is found, and false if not or an error occurred.
      *
      * @param $tokens
      * @param $searchedToken
@@ -80,4 +80,43 @@ abstract class AbstractParser implements Parser
         return false;
     }
 
+    /**
+     * Will check a token array for the occurrence of a certain on (class, interface or trait)
+     *
+     * @param $tokens
+     * @return bool
+     */
+    protected function getStructureToken($tokens)
+    {
+        // Check the tokens
+        $tokenCount = count($tokens);
+        for ($i = 0; $i < $tokenCount; $i++) {
+
+            switch ($tokens[$i][0]) {
+
+                case T_CLASS:
+
+                    return 'class';
+                    break;
+
+                case T_INTERFACE:
+
+                    return 'interface';
+                    break;
+
+                case T_TRAIT:
+
+                    return 'trait';
+                    break;
+
+                default:
+
+                    continue;
+                    break;
+            }
+        }
+
+        // We are still here? That should not be.
+        return false;
+    }
 }

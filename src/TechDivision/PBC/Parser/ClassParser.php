@@ -12,9 +12,8 @@ namespace TechDivision\PBC\Parser;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Definitions\AttributeDefinition;
-use TechDivision\PBC\Entities\Lists\ClassDefinitionList;
+use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
-use TokenReflection\Broker;
 
 /**
  * Class ClassParser
@@ -23,7 +22,7 @@ class ClassParser
 {
     /**
      * @param $file
-     * @return bool|ClassDefinitionList
+     * @return bool|StructureDefinitionList
      */
     public function getDefinitionListFromFile($file, FileDefinition $fileDefinition)
     {
@@ -36,12 +35,12 @@ class ClassParser
             return false;
         }
 
-        $classDefinitionList = new ClassDefinitionList();
+        $structureDefinitionList = new StructureDefinitionList();
         foreach ($tokens as $token) {
 
             try {
 
-                $classDefinitionList->add($this->getDefinitionFromTokens($token, $fileDefinition));
+                $structureDefinitionList->add($this->getDefinitionFromTokens($token, $fileDefinition));
 
             } catch (\UnexpectedValueException $e) {
                 // Just try the next one
@@ -50,7 +49,7 @@ class ClassParser
             }
         }
 
-        return $classDefinitionList;
+        return $structureDefinitionList;
     }
 
     /**
