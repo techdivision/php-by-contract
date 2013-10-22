@@ -81,6 +81,48 @@ abstract class AbstractParser implements Parser
     }
 
     /**
+     * @param $tokens
+     * @param $structureToken
+     * @return string
+     */
+    protected function getDocBlock($tokens, $structureToken)
+    {
+        // The general assumption is: if there is a doc block
+        // before the class definition, and the class header follows after it within 6 tokens, then it
+        // is the comment block for this class.
+        $docBlock = '';
+        $passedClass = false;
+        for ($i = 0; $i < count($tokens); $i++) {
+
+            // If we passed the class token
+            if ($tokens[$i][0] === $structureToken) {
+
+                $passedClass = true;
+            }
+
+            // If we got the docblock without passing the class before
+            if ($tokens[$i][0] === T_DOC_COMMENT && $passedClass === false) {
+
+                // Check if we are in front of a class definition
+                for ($j = $i + 1; $j < $i + 8; $j++) {
+
+                    if ($tokens[$j][0] === T_CLASS) {
+
+                        $docBlock = $tokens[$i][1];
+                        break;
+                    }
+                }
+
+                // Still here?
+                break;
+            }
+        }
+
+        // Return what we did or did not found
+        return $docBlock;
+    }
+
+    /**
      * Will check a token array for the occurrence of a certain on (class, interface or trait)
      *
      * @param $tokens
@@ -118,5 +160,135 @@ abstract class AbstractParser implements Parser
 
         // We are still here? That should not be.
         return false;
+    }
+
+    /**
+     * @param $tokens
+     * @return array|string
+     */
+    protected function getConstants($tokens)
+    {
+        // Check the tokens
+        $constants = array();
+        for ($i = 0; $i < count($tokens); $i++) {
+
+            // If we got the class name
+            if ($tokens[$i][0] === T_CONST) {
+
+                for ($j = $i + 1; $j < count($tokens); $j++) {
+
+                    if ($tokens[$j] === ';') {
+
+                        break;
+
+                    } elseif ($tokens[$j][0] === T_STRING) {
+
+                        $constants[$tokens[$j][1]] = '';
+
+                        for ($k = $j + 1; $k < count($tokens); $k++) {
+
+                            if ($tokens[$k] === ';') {
+
+                                break;
+
+                            } elseif (is_array($tokens[$k]) && $tokens[$k][0] !== '=') {
+
+                                $constants[$tokens[$j][1]] .= $tokens[$k][1];
+                            }
+                        }
+
+                        // Now trim what we got
+                        $constants[$tokens[$j][1]] = trim($constants[$tokens[$j][1]]);
+                    }
+                }
+            }
+        }
+
+        // Return what we did or did not found
+        return $constants;
+    }
+
+    /**
+     * @param $file
+     * @param $structureToken
+     * @return array|bool
+     */
+    protected function getStructureTokens($file, $structureToken)
+    {
+        // If the file is not readable we have lost
+        if (!is_readable($file)) {
+
+            return false;
+        }
+
+        // Get all tokens at first
+        $tokens = token_get_all(file_get_contents($file));
+
+        // Now iterate over the array and filter different classes from it
+        $result = array();
+        for ($i = 0; $i < count($tokens); $i++) {
+
+            // If we got a class keyword, we have to check how far the class extends,
+            // then copy the array withing that bounds
+            if (is_array($tokens[$i]) && $tokens[$i][0] === $structureToken) {
+
+                // The lower bound should be the last semicolon|closing curly bracket|PHP tag before the class
+                $lowerBound = 0;
+                for ($j = $i - 1; $j >= 0; $j--) {
+
+                    if ($tokens[$j] === ';' || $tokens[$j] === '}' ||
+                        is_array($tokens[$j]) && $tokens[$j][0] === T_OPEN_TAG
+                    ) {
+
+                        $lowerBound = $j;
+                        break;
+                    }
+                }
+
+                // The upper bound should be the first time the curly brackets are even again
+                $upperBound = count($tokens) - 1;
+                $bracketCounter = null;
+                for ($j = $i + 1; $j < count($tokens); $j++) {
+
+                    if ($tokens[$j] === '{') {
+
+                        // If we still got null set to 0
+                        if ($bracketCounter === null) {
+
+                            $bracketCounter = 0;
+                        }
+
+                        $bracketCounter++;
+
+                    } elseif ($tokens[$j] === '}') {
+
+                        // If we still got null set to 0
+                        if ($bracketCounter === null) {
+
+                            $bracketCounter = 0;
+                        }
+
+                        $bracketCounter--;
+                    }
+
+                    // Do we have an even amount of brackets yet?
+                    if ($bracketCounter === 0) {
+
+                        $upperBound = $j;
+                        break;
+                    }
+                }
+
+                $result[] = array_slice($tokens, $lowerBound, $upperBound - $lowerBound);
+            }
+        }
+
+        // Last line of defence; did we get something?
+        if (empty($result)) {
+
+            return false;
+        }
+
+        return $result;
     }
 }

@@ -2,17 +2,22 @@
 
 namespace TechDivision\PBC\Parser;
 
+use TechDivision\PBC\Entities\Definitions\InterfaceDefinition;
+use TechDivision\PBC\Entities\Definitions\FileDefinition;
+use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
+
 class InterfaceParser extends AbstractParser
 {
 
     /**
      * @param $file
+     * @param FileDefinition $fileDefinition
      * @return bool|StructureDefinitionList
      */
     public function getDefinitionListFromFile($file, FileDefinition $fileDefinition)
     {
         // Get all the token arrays for the different classes
-        $tokens = $this->getClassTokens($file);
+        $tokens = $this->getStructureTokens($file, T_INTERFACE);
 
         // Did we get the right thing?
         if (!is_array($tokens)) {
@@ -37,6 +42,80 @@ class InterfaceParser extends AbstractParser
         return $structureDefinitionList;
     }
 
+    /**
+     * @param $tokens
+     * @return string
+     */
+    private function getName($tokens)
+    {
+        // Check the tokens
+        $className = '';
+        for ($i = 0; $i < count($tokens); $i++) {
+
+            // If we got the class name
+            if ($tokens[$i][0] === T_INTERFACE) {
+
+                for ($j = $i + 1; $j < count($tokens); $j++) {
+
+                    if ($tokens[$j] === '{') {
+
+                        $className = $tokens[$i + 2][1];
+                    }
+                }
+            }
+        }
+
+        // Return what we did or did not found
+        return $className;
+    }
+
+    /**
+     * @param $tokens
+     * @return string
+     */
+    private function getParents($tokens)
+    {
+        // Check the tokens
+        $interfaceString = '';
+        $parents = array();
+        for ($i = 0; $i < count($tokens); $i++) {
+
+            // If we got the interface name
+            if ($tokens[$i][0] === T_EXTENDS) {
+
+                for ($j = $i + 1; $j < count($tokens); $j++) {
+
+                    if ($tokens[$j] === '{') {
+
+                        // We got everything
+                        break;
+
+                    } elseif ($tokens[$j][0] === T_STRING) {
+
+                        $interfaceString .= $tokens[$j][1];
+                    }
+                }
+            }
+        }
+
+        // Normally we will have one or several interface names separated by commas
+        $parents = explode(',', $interfaceString);
+
+        // Did we get something useful?
+        if (is_array($parents)) {
+
+            foreach ($parents as $key => $parent) {
+
+                $parents[$key] = trim($parent);
+            }
+
+            return $parents;
+
+        } else {
+
+            return false;
+        }
+    }
 
     /**
      * Returns a ClassDefinition from a token array.
@@ -46,69 +125,64 @@ class InterfaceParser extends AbstractParser
      *
      * @access private
      * @param $tokens
-     * @return ClassDefinition
+     * @return FileDefinition
      */
     private function getDefinitionFromTokens($tokens, FileDefinition $fileDefinition)
     {
         // First of all we need a new ClassDefinition to fill
-        $classDefinition = new ClassDefinition();
+        $interfaceDefinition = new InterfaceDefinition();
 
         // For our next step we would like to get the doc comment (if any)
-        $classDefinition->docBlock = $this->getDocBlock($tokens);
+        $interfaceDefinition->docBlock = $this->getDocBlock($tokens, T_INTERFACE);
 
         // So we got our docBlock, now we can parse the invariant annotations from it
         $annotationParser = new AnnotationParser();
-        $classDefinition->invariantConditions = $annotationParser->getConditions($classDefinition->docBlock, PBC_KEYWORD_INVARIANT);
+        $interfaceDefinition->invariantConditions = $annotationParser->getConditions($interfaceDefinition->docBlock, PBC_KEYWORD_INVARIANT);
 
         // Get the class identity
-        $classDefinition->isFinal = $this->isFinalClass($tokens);
-        $classDefinition->isAbstract = $this->isAbstractClass($tokens);
-        $classDefinition->name = $this->getClassName($tokens);
+        $interfaceDefinition->name = $this->getName($tokens);
 
         // Lets check if there is any inheritance, or if we implement any interfaces
 
-        $parentName = $this->getParent($tokens);
-        if ($parentName === '') {
+        $parentNames = $this->getParents($tokens);
+        if (count($fileDefinition->usedNamespaces) === 0) {
 
-            $classDefinition->extends = $parentName;
+            foreach ($parentNames as $parentName) {
 
-        } elseif (count($fileDefinition->usedNamespaces) === 0) {
+                if (strpos($parentName, '\\') !== false) {
 
-            if (strpos($parentName, '\\') !== false) {
+                    $interfaceDefinition->extends[] = $parentName;
 
-                $classDefinition->extends = $parentName;
+                } else {
 
-            } else {
-
-                $classDefinition->extends = '\\' . $fileDefinition->namespace . '\\' . $parentName;
+                    $interfaceDefinition->extends[] = '\\' . $fileDefinition->namespace . '\\' . $parentName;
+                }
             }
 
         } else {
 
-            foreach($fileDefinition->usedNamespaces as $alias) {
+            foreach ($fileDefinition->usedNamespaces as $alias) {
 
-                if (strpos($alias, $parentName) !== false) {
+                foreach ($parentNames as $parentName) {
 
-                    $classDefinition->extends = '\\' . $alias;
+                    if (strpos($alias, $parentName) !== false) {
+
+                        $interfaceDefinition->extends = '\\' . $alias;
+                    }
                 }
             }
         }
 
         // Clean possible double-\
-        $classDefinition->extends = str_replace('\\\\', '\\', $classDefinition->extends);
+        $interfaceDefinition->extends = str_replace('\\\\', '\\', $interfaceDefinition->extends);
 
-        $classDefinition->implements = $this->getInterfaces($tokens);
-
-        $classDefinition->constants = $this->getConstants($tokens);
-
-        // Lets get the attributes the class might have
-        $classDefinition->attributeDefinitions = $this->getAttributes($tokens);
+        $interfaceDefinition->constants = $this->getConstants($tokens);
 
         // Only thing still missing are the methods, so ramp up our FunctionParser
         $functionParser = new FunctionParser();
-        $classDefinition->functionDefinitions = $functionParser->getDefinitionListFromTokens($tokens);
+        $interfaceDefinition->functionDefinitions = $functionParser->getDefinitionListFromTokens($tokens);
 
-        return $classDefinition;
+        return $interfaceDefinition;
     }
 
 }

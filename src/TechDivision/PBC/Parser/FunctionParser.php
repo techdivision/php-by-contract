@@ -80,7 +80,7 @@ class FunctionParser extends AbstractParser
         $functionDefinition = new FunctionDefinition();
 
         // For our next step we would like to get the doc comment (if any)
-        $functionDefinition->docBlock = $this->getDocBlock($tokens);
+        $functionDefinition->docBlock = $this->getDocBlock($tokens, T_FUNCTION);
 
         // Get the function signature
         $functionDefinition->isFinal = $this->isFinalFunction($tokens);
@@ -233,47 +233,6 @@ class FunctionParser extends AbstractParser
      * @param $tokens
      * @return string
      */
-    private function getDocBlock(array $tokens)
-    {
-        // The general assumption is: if there is a doc block
-        // before the function definition, and the function header follows after it within 6 tokens, then it
-        // is the comment block for this function.
-        $docBlock = '';
-        $passedFunction = false;
-        for ($i = 0; $i < count($tokens); $i++) {
-
-            // If we passed the function token
-            if ($tokens[$i][0] === T_FUNCTION) {
-
-                $passedFunction = true;
-            }
-
-            // If we got the docblock without passing the function before
-            if ($tokens[$i][0] === T_DOC_COMMENT && $passedFunction === false) {
-
-                // Check if we are in front of a function definition
-                for ($j = $i + 1; $j < $i + 8; $j++) {
-
-                    if ($tokens[$j][0] === T_FUNCTION) {
-
-                        $docBlock = $tokens[$i][1];
-                        break;
-                    }
-                }
-
-                // Still here?
-                break;
-            }
-        }
-
-        // Return what we did or did not found
-        return $docBlock;
-    }
-
-    /**
-     * @param $tokens
-     * @return string
-     */
     private function getFunctionBody(array $tokens)
     {
         // We will iterate over the token array and collect everything from the first opening curly bracket until the last
@@ -329,8 +288,7 @@ class FunctionParser extends AbstractParser
     /**
      * @param $tokens
      * @return array|bool
-     *
-     * TODO inherit from AbstractParser
+     *s
      */
     private function getFunctionTokens(array $tokens)
     {

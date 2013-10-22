@@ -12,7 +12,7 @@ namespace TechDivision\PBC\Proxies;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Interfaces\Assertion;
-use TechDivision\PBC\Entities\Definitions\ClassDefinition;
+use TechDivision\PBC\Interfaces\StructureDefinition;
 use TechDivision\PBC\Parser\FileParser;
 use TechDivision\PBC\Interfaces\PBCCache;
 use TechDivision\PBC\Config;
@@ -70,21 +70,21 @@ class ProxyFactory
         // We know the class and we know the file it is in, so get our FileParser and have a blast
         $fileParser = new FileParser();
         $fileDefinition = $fileParser->getDefinitionFromFile($fileMap[$className]['path']);
-var_dump($fileDefinition);
+
         // So we got our FileDefinition, now lets check if there are multiple classes in there.
         // Iterate over all classes within the FileDefinition and create a file for each of them
         $classIterator = $fileDefinition->structureDefinitions->getIterator();
         for ($k = 0; $k < $classIterator->count(); $k++) {
 
-            $classDefinition = $classIterator->current();
-            $filePath = $this->createProxyFilePath($fileDefinition->namespace . '\\' . $classDefinition->name);
+            $structureDefinition = $classIterator->current();
+            $filePath = $this->createProxyFilePath($fileDefinition->namespace . '\\' . $structureDefinition->name);
 
-            $tmp = $this->createFileFromDefinitions($filePath, $fileDefinition, $classDefinition);
+            $tmp = $this->createFileFromDefinitions($filePath, $fileDefinition, $structureDefinition);
 
             if ($tmp === true) {
 
                 // Now get our new file into the cacheMap
-                $this->cache->add($className, $classDefinition, $filePath);
+                $this->cache->add($className, $structureDefinition, $filePath);
 
                 if ($update === true) {
                     // If this was an update we might have to update possible children as well, as contracts are inherited
@@ -120,18 +120,18 @@ var_dump($fileDefinition);
     /**
      * @param $targetFileName
      * @param FileDefinition $fileDefinition
-     * @param ClassDefinition $classDefinition
+     * @param StructureDefinition $structureDefinition
      * @return bool
      * @throws \Exception|PHPParser_Error
      */
-    private function createFileFromDefinitions($targetFileName, FileDefinition $fileDefinition, ClassDefinition $classDefinition)
+    private function createFileFromDefinitions($targetFileName, FileDefinition $fileDefinition, StructureDefinition $structureDefinition)
     {
         // This variable is used to determine if we need an invariant, as we might as well not.
         $invariantUsed = false;
         // Before using the definition we have to finalize it
-        $classDefinition->finalize();
+        $structureDefinition->finalize();
 
-        if ($classDefinition->invariantConditions->isEmpty() === false || $classDefinition->extends !== '') {
+        if ($structureDefinition->invariantConditions->isEmpty() === false || $structureDefinition->extends !== '') {
 
             $invariantUsed = true;
         }
@@ -160,29 +160,29 @@ var_dump($fileDefinition);
         }
 
         // Next build up the class header
-        $fileContent .= $classDefinition->docBlock;
+        $fileContent .= $structureDefinition->docBlock;
 
         // Now check if we need any keywords for the class identity
-        if ($classDefinition->isFinal) {
+        if ($structureDefinition->isFinal) {
 
             $fileContent .= 'final ';
         }
-        if ($classDefinition->isAbstract) {
+        if ($structureDefinition->isAbstract) {
 
             $fileContent .= 'abstract ';
         }
 
-        $fileContent .= 'class ' . $classDefinition->name;
+        $fileContent .= 'class ' . $structureDefinition->name;
 
         // Add any parent class or interfaces there might be.
-        if ($classDefinition->extends !== '') {
+        if ($structureDefinition->extends !== '') {
 
-            $fileContent .= ' extends ' . $classDefinition->extends;
+            $fileContent .= ' extends ' . $structureDefinition->extends;
         }
 
-        if (!empty($classDefinition->implements)) {
+        if (!empty($structureDefinition->implements)) {
 
-            $fileContent .= ' implements ' . implode(', ', $classDefinition->implements);
+            $fileContent .= ' implements ' . implode(', ', $structureDefinition->implements);
         }
 
         $fileContent .= '
@@ -190,7 +190,7 @@ var_dump($fileDefinition);
         ';
 
         // Lets fill in all the constants (if any).
-        foreach ($classDefinition->constants as $constant => $value) {
+        foreach ($structureDefinition->constants as $constant => $value) {
 
             $fileContent .= ' const ' . $constant . ' = ' . $value . ';
             ';
@@ -217,7 +217,7 @@ var_dump($fileDefinition);
             private $attributes = array(';
 
         // After iterate over the attributes and build up our array
-        $iterator = $classDefinition->attributeDefinitions->getIterator();
+        $iterator = $structureDefinition->attributeDefinitions->getIterator();
         for ($i = 0; $i < $iterator->count(); $i++) {
 
             // Get the current attribute for more easy access
@@ -244,7 +244,7 @@ var_dump($fileDefinition);
         ';
 
         // After that we should enter all the other attributes
-        $iterator = $classDefinition->attributeDefinitions->getIterator();
+        $iterator = $structureDefinition->attributeDefinitions->getIterator();
         for ($i = 0; $i < $iterator->count(); $i++) {
 
             // Get the current attribute for more easy access
@@ -276,7 +276,7 @@ var_dump($fileDefinition);
         if ($invariantUsed === true) {
             $fileContent .= 'protected function ' . PBC_CLASS_INVARIANT_NAME . '() {';
 
-            $fileContent .= $this->createInvariantCode($classDefinition);
+            $fileContent .= $this->createInvariantCode($structureDefinition);
 
             $fileContent .= '}
         ';
@@ -294,7 +294,7 @@ var_dump($fileDefinition);
             // Does this property even exist? If not, throw an exception
             if (!isset($this->attributes[$name])) {';
 
-        if ($classDefinition->extends !== '') {
+        if ($structureDefinition->extends !== '') {
 
             $fileContent .= 'return parent::__set($name, $value);';
 
@@ -352,7 +352,7 @@ var_dump($fileDefinition);
             // Does this property even exist? If not, throw an exception
             if (!isset($this->attributes[$name])) {';
 
-        if ($classDefinition->extends !== '') {
+        if ($structureDefinition->extends !== '') {
 
             $fileContent .= 'return parent::__get($name);';
 
@@ -394,7 +394,7 @@ var_dump($fileDefinition);
 
         // Create all the methods.
         // To do so we need the list of function definitions.
-        $functionDefinitionList = $classDefinition->functionDefinitions;
+        $functionDefinitionList = $structureDefinition->functionDefinitions;
 
         // Iterate over them and build up the methods.
         $functionIterator = $functionDefinitionList->getIterator();
@@ -660,14 +660,14 @@ var_dump($fileDefinition);
     }
 
     /**
-     * @param ClassDefinition $classDefinition
+     * @param StructureDefinition $structureDefinition
      * @return string
      */
-    private function createInvariantCode(ClassDefinition $classDefinition)
+    private function createInvariantCode(StructureDefinition $structureDefinition)
     {
         // We might have ancestral, interface and direct invariants, so collect them first so we can better handle them later
-        $invariants = $classDefinition->ancestralInvariants;
-        $invariants->add($classDefinition->invariantConditions);
+        $invariants = $structureDefinition->ancestralInvariants;
+        $invariants->add($structureDefinition->invariantConditions);
 
         $code = '';
 
@@ -694,7 +694,7 @@ var_dump($fileDefinition);
             $invariantIterator->next();
         }
 
-        if ($classDefinition->extends !== '') {
+        if ($structureDefinition->extends !== '') {
 
             $code .= 'parent::' . PBC_CLASS_INVARIANT_NAME . '();';
         }

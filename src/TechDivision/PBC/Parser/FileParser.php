@@ -8,6 +8,7 @@
  */
 
 namespace TechDivision\PBC\Parser;
+
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 
@@ -46,7 +47,7 @@ class FileParser extends AbstractParser
         $structureType = $this->getStructureToken($tokens);
 
         // Now we can check which kind of parser we need.
-        $parserName = ucfirst($structureType) . 'Parser';
+        $parserName = __NAMESPACE__ . '\\' . ucfirst($structureType) . 'Parser';
         $parser = new $parserName();
 
         $structureDefinitions = $parser->getDefinitionListFromFile($file, $fileDefinition);

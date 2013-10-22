@@ -10,4 +10,11 @@ interface StructureDefinition
      * @return array
      */
     public function getDependencies();
+
+    /**
+     * Will finalize a definition by resolving dependencies and inherited/implemented contracts.
+     *
+     * @return bool
+     */
+    public function finalize();
 }

@@ -12,6 +12,8 @@ use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Interfaces\StructureDefinition;
+use TechDivision\PBC\Parser\InterfaceParser;
+use TechDivision\PBC\Proxies\Cache;
 
 /**
  * Class InterfaceDefinition
@@ -69,5 +71,111 @@ class InterfaceDefinition implements StructureDefinition
     public function getDependencies()
     {
         return $this->extends;
+    }
+
+    /**
+     * Finalize this class definition
+     *
+     * Will make the final steps to complete the class definition.
+     * Mostly this consists of getting the ancestral invariants and
+     * method pre- and postconditions.
+     *
+     * @return  boolean
+     */
+    public function finalize()
+    {
+        // We have to get all ancestral interfaces
+        $ancestors = $this->extends;
+
+        // Do we even have something like that?
+        if (count($ancestors) === 0) {
+
+            return true;
+        }
+
+        // Now finalize them recursively
+        $interfaceParser = new InterfaceParser();
+        $cache = Cache::getInstance();
+        $files = $cache->getFiles();
+        $ancestorDefinitions = array();
+        foreach ($ancestors as $key => $ancestor) {
+
+            // Do we have this pestering leading \?
+            if (strpos($ancestor, '\\') === 0) {
+
+                $ancestor = ltrim($ancestor, '\\');
+            }
+
+            // Do we know this file?
+            if (isset($files[$ancestor])) {
+
+                $ancestorDefinitions[$key] = $interfaceParser->getDefinitionFromFile($files[$ancestor]['path'], $ancestor);
+                $ancestorDefinitions[$key]->finalize();
+            }
+        }
+
+        // Get all the ancestral method pre- and postconditions
+        $this->getAncestralConditions($ancestorDefinitions);
+
+        return true;
+    }
+
+    /**
+     * @param $ancestorDefinitions
+     * @return bool
+     */
+    protected function getAncestralConditions($ancestorDefinitions)
+    {
+        // Maybe we do not have to do anything
+        if (count($ancestorDefinitions) === 0) {
+
+            return false;
+        }
+
+        // We have to get a map of all the methods we have to know which got overridden
+        $methods = array();
+        if ($this->functionDefinitions->count() === 0) {
+
+            return false;
+
+        } else {
+
+            foreach($ancestorDefinitions as $ancestorDefinition) {
+
+                $functionIterator = $ancestorDefinition->functionDefinitions->getIterator();
+                for ($j = 0; $j < $functionIterator->count(); $j++) {
+
+                    // Do we have a method like that?
+                    $function = $this->functionDefinitions->get($functionIterator->current()->name);
+                    if ($function !== false) {
+
+                        // Get the pre- and postconditions of the ancestor
+                        if ($functionIterator->current()->preConditions->count() > 0) {
+
+                            $function->ancestralPreConditions->add($functionIterator->current()->preConditions);
+                        }
+                        if ($functionIterator->current()->postConditions->count() > 0) {
+
+                            $function->ancestralPostConditions->add($functionIterator->current()->postConditions);
+                        }
+
+                        // Check if we have to use the old keyword now
+                        if ($functionIterator->current()->usesOld === true) {
+
+                            $function->usesOld = true;
+                        }
+
+                        // Safe the enhanced functionDefinition back
+                        $this->functionDefinitions->set($function->name, $function);
+                    }
+
+                    // increment iterator
+                    $functionIterator->next();
+                }
+            }
+        }
+
+        // We are still here, seems good
+        return true;
     }
 }
