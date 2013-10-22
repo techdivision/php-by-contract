@@ -77,7 +77,6 @@ class InterfaceParser extends AbstractParser
     {
         // Check the tokens
         $interfaceString = '';
-        $parents = array();
         for ($i = 0; $i < count($tokens); $i++) {
 
             // If we got the interface name
@@ -107,6 +106,12 @@ class InterfaceParser extends AbstractParser
             foreach ($parents as $key => $parent) {
 
                 $parents[$key] = trim($parent);
+
+                // We do not want empty stuff
+                if (empty($parents[$key])) {
+
+                    unset($parents[$key]);
+                }
             }
 
             return $parents;

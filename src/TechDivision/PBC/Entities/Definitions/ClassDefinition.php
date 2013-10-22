@@ -13,6 +13,7 @@ use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Parser\ClassParser;
+use TechDivision\PBC\Parser\InterfaceParser;
 use TechDivision\PBC\Proxies\Cache;
 use TechDivision\PBC\Interfaces\StructureDefinition;
 
@@ -119,33 +120,52 @@ class ClassDefinition implements StructureDefinition
     public function finalize()
     {
         // We have to get all ancestral classes and interfaces
-        $ancestors = $this->implements;
-        $ancestors[] = $this->extends;
+        $ancestor = array();
+        if (!empty($this->implements)) {
 
-        // Do we even have something like that?
-        if (count($ancestors) === 0) {
+            $ancestors['interface'] = $this->implements;
+        }
+        if (!empty($this->extends)) {
+
+            $ancestors['class'][] = $this->extends;
+        }
+
+        // Is there anything left
+        if (empty($ancestors)) {
 
             return true;
         }
 
-        // Now finalize them recursively
-        $classParser = new ClassParser();
+        // Now finalize them recursively using the needed parsers
+        $parsers = array('interface' => new InterfaceParser(), 'class' => new ClassParser());
         $cache = Cache::getInstance();
         $files = $cache->getFiles();
         $ancestorDefinitions = array();
-        foreach ($ancestors as $key => $ancestor) {
+        foreach ($ancestors as $key => $ancestorList) {
 
-            // Do we have this pestering leading \?
-            if (strpos($ancestor, '\\') === 0) {
+            // If we don't have a parser for this data we can skip that turn
+            if (!isset($parsers[$key])) {
 
-                $ancestor = ltrim($ancestor, '\\');
+                continue;
+
+            } else {
+
+                $parser = $parsers[$key];
             }
 
-            // Do we know this file?
-            if (isset($files[$ancestor])) {
+            foreach ($ancestorList as $ancestor) {
+                // Do we have this pestering leading \?
+                if (strpos($ancestor, '\\') === 0) {
 
-                $ancestorDefinitions[$key] = $classParser->getDefinitionFromFile($files[$ancestor]['path'], $ancestor);
-                $ancestorDefinitions[$key]->finalize();
+                    $ancestor = ltrim($ancestor, '\\');
+                }
+
+                // Do we know this file?
+                if (isset($files[$ancestor])) {
+
+                    $ancestorDefinitions[$key] = $parser->getDefinitionFromFile($files[$ancestor]['path'], $ancestor);
+                    $ancestorDefinitions[$key]->finalize();
+                }
             }
         }
 
@@ -175,7 +195,7 @@ class ClassDefinition implements StructureDefinition
 
         } else {
 
-            foreach($ancestorDefinitions as $ancestorDefinition) {
+            foreach ($ancestorDefinitions as $ancestorDefinition) {
 
                 $functionIterator = $ancestorDefinition->functionDefinitions->getIterator();
                 for ($j = 0; $j < $functionIterator->count(); $j++) {
