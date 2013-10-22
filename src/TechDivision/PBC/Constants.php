@@ -17,3 +17,9 @@ define('PBC_MARK_CONTRACT_ENTRY', '$pbcContractEntry');
 define('PBC_PROXY_SUFFIX', 'PBCProxied');
 define('PBC_CLASS_INVARIANT_NAME', 'pbcClassInvariant');
 define('PBC_ORIGINAL_FUNCTION_SUFFIX', 'PBCOriginal');
+
+// We might not have a PHP > 5.3 on our hands.
+// To avoid parser errors we will define used constants here
+if (!defined('T_TRAIT')) {
+    define('T_TRAIT', 355);
+}
