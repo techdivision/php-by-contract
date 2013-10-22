@@ -88,7 +88,7 @@ class InterfaceDefinition implements StructureDefinition
         $ancestors = $this->extends;
 
         // Do we even have something like that?
-        if (count($ancestors) === 0) {
+        if (empty($ancestors)) {
 
             return true;
         }

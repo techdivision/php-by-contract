@@ -5,9 +5,57 @@ namespace TechDivision\PBC\Parser;
 use TechDivision\PBC\Entities\Definitions\InterfaceDefinition;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
+use TechDivision\PBC\Interfaces\StructureParser;
 
-class InterfaceParser extends AbstractParser
+class InterfaceParser extends AbstractParser implements StructureParser
 {
+
+    /**
+     * @param $file
+     * @param null $className
+     * @return bool|void
+     */
+    public function getDefinitionFromFile($file, $interfaceName = null)
+    {
+        $fileParser = new FileParser();
+        $fileDefinition = $fileParser->getDefinitionFromFile($file);
+
+        // First of all we need to get the class tokens
+        $tokens = $this->getStructureTokens($file, T_INTERFACE);
+
+        // Did we get something valueable?
+        if ($tokens === false) {
+
+            return false;
+
+        } elseif ($interfaceName === null && count($tokens) > 1) {
+            // If we did not get a class name and we got more than one class we can fail right here
+            return false;
+
+        } elseif (count($tokens) === 1) {
+            // We got what we came for
+
+            return $this->getDefinitionFromTokens($tokens[0], $fileDefinition);
+
+        } elseif (is_string($interfaceName) && count($tokens) > 1) {
+            // We are still here, but got a class name to look for
+
+            foreach ($tokens as $key => $token) {
+
+                // Now iterate over the array and search for the class we want
+                for ($i = 0; $i < count($token); $i++) {
+
+                    if (is_array($token[$i]) && $token[$i] === T_INTERFACE && $token[$i + 2] === $interfaceName) {
+
+                        return $this->getDefinitionFromTokens($tokens[$key], $fileDefinition);
+                    }
+                }
+            }
+        }
+
+        // Still here? Must be an error.
+        return false;
+    }
 
     /**
      * @param $file

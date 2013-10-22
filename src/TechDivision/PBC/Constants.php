@@ -10,7 +10,7 @@
 define('PBC_KEYWORD_PRE', '@requires');
 define('PBC_KEYWORD_POST', '@ensures');
 define('PBC_KEYWORD_INVARIANT', '@invariant');
-define('PBC_KEYWORD_OLD', '$this->pbcOld');
+define('PBC_KEYWORD_OLD', 'pbcOld');
 define('PBC_KEYWORD_RESULT', '$pbcResult');
 define('PBC_CONTRACT_DEPTH', 'pbcContractDepth');
 define('PBC_MARK_CONTRACT_ENTRY', '$pbcContractEntry');

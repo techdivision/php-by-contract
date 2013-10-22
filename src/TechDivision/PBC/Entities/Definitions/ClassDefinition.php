@@ -25,6 +25,11 @@ class ClassDefinition implements StructureDefinition
     /**
      * @var string
      */
+    public $namespace;
+
+    /**
+     * @var string
+     */
     public $docBlock;
 
     /**
@@ -165,6 +170,13 @@ class ClassDefinition implements StructureDefinition
 
                     $ancestorDefinitions[$key] = $parser->getDefinitionFromFile($files[$ancestor]['path'], $ancestor);
                     $ancestorDefinitions[$key]->finalize();
+
+                } elseif (isset($files[$this->namespace . '\\' . $ancestor])) {
+
+                    $ancestorDefinitions[$key] = $parser->getDefinitionFromFile($files[$this->namespace . '\\' . $ancestor]['path'],
+                        $ancestor);
+                    $ancestorDefinitions[$key]->finalize();
+
                 }
             }
         }

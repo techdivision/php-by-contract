@@ -14,11 +14,12 @@ use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Definitions\AttributeDefinition;
 use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
+use TechDivision\PBC\Interfaces\StructureParser;
 
 /**
  * Class ClassParser
  */
-class ClassParser extends AbstractParser
+class ClassParser extends AbstractParser implements StructureParser
 {
     /**
      * @param $file
@@ -116,6 +117,9 @@ class ClassParser extends AbstractParser
         // First of all we need a new ClassDefinition to fill
         $classDefinition = new ClassDefinition();
 
+        // File based namespaces do not make much sense, so hand it over here.
+        $classDefinition->namespace = $fileDefinition->namespace;
+
         // For our next step we would like to get the doc comment (if any)
         $classDefinition->docBlock = $this->getDocBlock($tokens, T_CLASS);
 
@@ -158,9 +162,15 @@ class ClassParser extends AbstractParser
         }
 
         // Clean possible double-\
-        $classDefinition->extends = str_replace('\\\\', '\\', $classDefinition->extends);
+        $classDefinition->extends = $this->resolveUsedNamespace($fileDefinition->usedNamespaces,
+            str_replace('\\\\', '\\', $classDefinition->extends));
 
-        $classDefinition->implements = $this->getInterfaces($tokens);
+        // Get all Interfaces and add their namespaces to them
+        $interfaces = array();
+        foreach ($this->getInterfaces($tokens) as $interface) {
+
+            $classDefinition->implements[] = $this->resolveUsedNamespace($fileDefinition->usedNamespaces, $interface);
+        }
 
         $classDefinition->constants = $this->getConstants($tokens);
 
@@ -239,7 +249,7 @@ class ClassParser extends AbstractParser
     private function getInterfaces($tokens)
     {
         // Check the tokens
-        $interfaces = '';
+        $interfaces = array();
         for ($i = 0; $i < count($tokens); $i++) {
 
             // If we got the class name

@@ -163,6 +163,48 @@ abstract class AbstractParser implements Parser
     }
 
     /**
+     * Will check if a certain structure was mentioned in one(!) use statement.
+     * If yo we will return true and might also remove the use statement from our collection.
+     *
+     * @param $usedNamespaces
+     * @param $structureName
+     * @param bool $remove
+     * @return bool
+     */
+    protected function resolveUsedNamespace(& $usedNamespaces, $structureName, $remove = true)
+    {
+        // Walk over all namespaces and if we find something we will act accordingly.
+        $result = $structureName;
+        $foundSomething = false;
+        foreach ($usedNamespaces as $key => $usedNamespace) {
+
+            // Check if the last part of the use statement is our structure
+            $tmp = explode('\\', $usedNamespace);
+            if (array_pop($tmp) === $structureName) {
+
+                // Should we remove it from the array? Did we succeed before too? If so we have to fail to not remove
+                // the wrong statement.
+                if ($remove === true) {
+
+                    if ($foundSomething === true) {
+
+                        return $structureName;
+                    }
+
+                    unset($usedNamespaces[$key]);
+                }
+
+                // Tell them we succeeded
+                $foundSomething = true;
+                $result = $usedNamespace . '\\' . $structureName;
+            }
+        }
+
+        // Still here? Return what we got.
+        return $result;
+    }
+
+    /**
      * @param $tokens
      * @return array|string
      */

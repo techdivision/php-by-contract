@@ -248,7 +248,7 @@ class ProxyFactory
             '/**
             * @var mixed
             */
-            private $pbcOld;';
+            private $' . PBC_KEYWORD_OLD . ';';
 
         // We should create attributes to store our attribute types
         $fileContent .=
@@ -487,7 +487,7 @@ class ProxyFactory
             // Do we have to keep an instance of $this to compare with old later?
             if ($functionDefinition->usesOld === true) {
 
-                $fileContent .= PBC_KEYWORD_OLD . ' = clone $this;';
+                $fileContent .= '$this->' . PBC_KEYWORD_OLD . ' = clone $this;';
             }
 
             // Now call the original method itself
