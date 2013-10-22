@@ -9,7 +9,10 @@
 
 namespace TechDivision\PBC\Proxies;
 
+use Doctrine\Common\Proxy\Exception\InvalidArgumentException;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
+use TechDivision\PBC\Entities\Definitions\ClassDefinition;
+use TechDivision\PBC\Entities\Definitions\InterfaceDefinition;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Interfaces\Assertion;
 use TechDivision\PBC\Interfaces\StructureDefinition;
@@ -121,10 +124,48 @@ class ProxyFactory
      * @param $targetFileName
      * @param FileDefinition $fileDefinition
      * @param StructureDefinition $structureDefinition
+     * @return mixed
+     * @throws \InvalidArgumentException
+     */
+    private function createFileFromDefinitions($targetFileName, FileDefinition $fileDefinition, StructureDefinition $structureDefinition)
+    {
+        // We have to check which structure type we got
+        $definitionType = get_class($structureDefinition);
+
+        // Call the method accordingly
+        $tmp = explode('\\', $definitionType);
+        $creationMethod = 'createFileFrom' . array_pop($tmp) . 's';
+
+        // Check if we got something
+        if (!method_exists($this, $creationMethod)) {
+
+            throw new \InvalidArgumentException();
+        }
+
+        return $this->$creationMethod($targetFileName, $fileDefinition, $structureDefinition);
+    }
+
+    /**
+     * We will just copy the file here until the autoloader got refactored.
+     * TODO remove when autoloader is able to recoginize and skip interfaces
+     *
+     * @param $targetFileName
+     * @param FileDefinition $fileDefinition
+     * @param InterfaceDefinition $structureDefinition
+     */
+    private function createFileFromInterfaceDefinitions($targetFileName, FileDefinition $fileDefinition, InterfaceDefinition $structureDefinition)
+    {
+        return (boolean) file_put_contents($targetFileName, file_get_contents($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name));
+    }
+
+    /**
+     * @param $targetFileName
+     * @param FileDefinition $fileDefinition
+     * @param ClassDefinition $structureDefinition
      * @return bool
      * @throws \Exception|PHPParser_Error
      */
-    private function createFileFromDefinitions($targetFileName, FileDefinition $fileDefinition, StructureDefinition $structureDefinition)
+    private function createFileFromClassDefinitions($targetFileName, FileDefinition $fileDefinition, ClassDefinition $structureDefinition)
     {
         // This variable is used to determine if we need an invariant, as we might as well not.
         $invariantUsed = false;

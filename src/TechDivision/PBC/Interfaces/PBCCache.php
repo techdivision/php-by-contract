@@ -2,13 +2,13 @@
 
 namespace TechDivision\PBC\Interfaces;
 
-use TechDivision\PBC\Entities\Definitions\ClassDefinition;
+use TechDivision\PBC\Interfaces\StructureDefinition;
 
 interface PBCCache
 {
     public function get();
 
-    public function add($classIdentifier, ClassDefinition $classDefinition, $fileName);
+    public function add($classIdentifier, StructureDefinition $structureDefinition, $fileName);
 
     public function isCached($className);
 

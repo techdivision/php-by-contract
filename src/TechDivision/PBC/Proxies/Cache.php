@@ -195,18 +195,17 @@ class Cache implements PBCCache
 
     /**
      * @param $classIdentifier
-     * @param ClassDefinition $classDefinition
+     * @param StructureDefinition $structureDefinition
      * @param $fileName
      * @return bool
      */
-    public function add($classIdentifier, ClassDefinition $classDefinition, $fileName)
+    public function add($classIdentifier, StructureDefinition $structureDefinition, $fileName)
     {
         // Add the entry
         $time = time();
 
         // Lets get all classes which depend on this one
-        $dependencies = $classDefinition->implements;
-        $dependencies[] = $classDefinition->extends;
+        $dependencies = $structureDefinition->getDependencies();
 
         $this->map[$classIdentifier] = array('version' => $time, 'path' => $fileName, 'dependencies' => $dependencies);
         $this->map['version'] = $time;
