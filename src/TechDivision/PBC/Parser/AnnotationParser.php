@@ -140,9 +140,17 @@ class AnnotationParser extends AbstractParser
             }
         }
 
-        $variable = $this->filterVariable($docString);
-        $type = $this->filterType($docString);
-        $class = $this->filterClass($docString);
+        // If we got invalid arguments then we will fail
+        try {
+
+            $variable = $this->filterVariable($docString);
+            $type = $this->filterType($docString);
+            $class = $this->filterClass($docString);
+
+        } catch (\InvalidArgumentException $e) {
+
+            return false;
+        }
 
         switch ($usedAnnotation) {
             // We got something which can only contain type information
@@ -187,106 +195,10 @@ class AnnotationParser extends AbstractParser
             case PBC_KEYWORD_INVARIANT:
 
                 $assertion = new RawAssertion(trim(str_replace($usedAnnotation, '', $docString)));
-
-                /*$operand = $this->filterOperand($docString);
-                $operators = $this->filterOperators($docString, $operand);
-                $combinators = $this->filterCombinators($docString);
-
-                // Now we have to check what we got
-                // First of all handle if we got a simple type
-                if ($type !== false) {
-
-                    $assertionType = 'TechDivision\PBC\Entities\Assertions\TypeAssertion';
-
-                } elseif ($class !== false) {
-
-                    $assertionType = 'TechDivision\PBC\Entities\Assertions\InstanceAssertion';
-
-                } elseif ($operand !== false && $operators !== false && $combinators === false) {
-
-                    $assertionType = 'TechDivision\PBC\Entities\Assertions\BasicAssertion';
-
-                } elseif ($operand !== false && $operators !== false && $combinators !== false) {
-
-                    $assertionType = 'TechDivision\PBC\Entities\Assertions\ChainedAssertion';
-
-                } else {
-
-                    return false;
-                }
-
-                // We handled what kind of assertion we need, now check what we will assert
-                if ($assertionType === 'TechDivision\PBC\Entities\Assertions\BasicAssertion') {
-
-                    $assertion = new $assertionType($operators[0], $operators[1], $operand);
-
-                } elseif ($assertionType === 'TechDivision\PBC\Entities\Assertions\ChainedAssertion') {
-
-                    $assertion = $this->createChainedAssertion($docString, $usedAnnotation);
-
-                } else {
-
-                    if ($variable !== false) {
-
-                        $assertion = new $assertionType($variable, $type);
-
-                    } elseif ($usedAnnotation === '@return') {
-
-                        $assertion = new $assertionType(PBC_KEYWORD_RESULT, $type);
-
-                    } else {
-
-                        return false;
-                    }
-
-                }
-                break;
-
-            default:
-
-                return false;
-                break;*/
         }
 
         return $assertion;
     }
-
-    /**
-     * @param $docString
-     * @param $usedAnnotation
-     * @return ChainedAssertion
-     */
-    private function createChainedAssertion($docString, $usedAnnotation)
-    {
-        // We do not need the annotation identifier anymore.
-        $docString = str_replace($usedAnnotation, '', $docString);
-
-        // First of all we have to get all combinators
-        $combinators = $this->filterCombinators($docString);
-
-        // The combinators are fetched in the order they appear in. Let's use that to split the docString by.
-        $assertionStrings = array();
-        foreach($combinators as $combinator) {
-
-            // Get the part before the first combinator
-            $assertionStrings[] = $tmp = stristr($docString, $combinator, true);
-            // Make sure to cut the original string, or we might have copies.
-            $docString = str_ireplace($tmp . $combinator, '', $docString);
-        }
-        // Do not forget to check the piece which is left after the last combinator was checked
-        $assertionStrings[] = $docString;
-
-        // Now that we got all assertionStrings we have to create the proper assertions from them
-        $assertions = new AssertionList();
-        foreach($assertionStrings as $assertionString) {
-
-            $assertions->add($this->parseAssertion($assertionString, $usedAnnotation));
-        }
-
-        // return the complete ChainedAssertion
-        return new ChainedAssertion($assertions, $combinators);
-    }
-
 
     /**
      * @param $docString
@@ -315,8 +227,8 @@ class AnnotationParser extends AbstractParser
 
     /**
      * @param $docString
-     *
-     * @return bool
+     * @return bool|string
+     * @throws \InvalidArgumentException
      */
     private function filterType($docString)
     {
@@ -332,45 +244,15 @@ class AnnotationParser extends AbstractParser
             if (isset($validTypes[$stringPiece])) {
 
                 return $stringPiece;
+
+            } elseif ($stringPiece === 'mixed') {
+
+                throw new \InvalidArgumentException;
             }
         }
 
         // We found nothing; tell them.
         return false;
-    }
-
-    /**
-     * @param $docString
-     *
-     * @return bool
-     */
-    private function filterCombinators($docString)
-    {
-        // Explode the string to get the different pieces
-        $explodedString = explode(' ', $docString);
-        $combinators = array();
-
-        // Filter for the first variable. The first as there might be a variable name in any following description
-        $validCombinators = array_flip(array('and', '&&', 'or', '||'));
-        foreach ($explodedString as $stringPiece) {
-
-            // Check if we got a variable
-            $stringPiece = strtolower(trim($stringPiece));
-            if (isset($validCombinators[$stringPiece])) {
-
-                $combinators[] = $stringPiece;
-            }
-        }
-
-        // We found nothing; tell them.
-        if (count($combinators) === 0) {
-
-            return false;
-
-        } else {
-
-            return $combinators;
-        }
     }
 
     /**
@@ -396,84 +278,6 @@ class AnnotationParser extends AbstractParser
 
             // If we got "void" we do not need to bother
             if ($stringPiece !== 'void') {
-
-                return $stringPiece;
-            }
-        }
-
-        // We found nothing; tell them.
-        return false;
-    }
-
-    /**
-     * @param $docString
-     * @param $operand
-     * @return array|bool
-     */
-    private function filterOperators($docString, $operand)
-    {
-        // To savely get everything we will trust in the PHP tokens
-        $tokens = token_get_all('<?php ' . $docString);
-
-        for ($i = 0; $i < count($tokens); $i++) {
-
-            if (is_array($tokens[$i]) && $tokens[$i][1] === $operand && is_array($tokens[$i - 2]) && is_array($tokens[$i + 2])) {
-
-                // There is a special case, as we could use $this
-                if ($tokens[$i - 4][1] === '$this') {
-
-                    return array(trim('$this->' . $tokens[$i - 2][1]), trim($tokens[$i + 2][1]));
-
-                } else {
-
-                    return array(trim($tokens[$i - 2][1]), trim($tokens[$i + 2][1]));
-                }
-
-            } else if ($tokens[$i] === $operand && is_array($tokens[$i - 2]) && is_array($tokens[$i + 2])) {
-
-                // There is a special case, as we could use $this
-                if ($tokens[$i - 4][1] === '$this') {
-
-                    return array(trim('$this->' . $tokens[$i - 2][1]), trim($tokens[$i + 2][1]));
-
-                } else {
-
-                    return array(trim($tokens[$i - 2][1]), trim($tokens[$i + 2][1]));
-                }
-            }
-        }
-
-        // We found nothing; tell them.
-        return false;
-    }
-
-    /**
-     * @param $docString
-     *
-     * @return bool
-     */
-    private function filterOperand($docString)
-    {
-        $validOperands = array(
-            '==' => '!=',
-            '===' => '!==',
-            '<>' => '==',
-            '<' => '>=',
-            '>' => '<=',
-            '<=' => '>',
-            '>=' => '<',
-            '!=' => '==',
-            '!==' => '==='
-        );
-
-        // Explode the string to get the different pieces
-        $explodedString = explode(' ', $docString);
-
-        // Filter for the first variable. The first as there might be a variable name in any following description
-        foreach ($explodedString as $stringPiece) {
-
-            // Check if we got a valid operand
-            if (isset($validOperands[$stringPiece])) {
 
                 return $stringPiece;
             }

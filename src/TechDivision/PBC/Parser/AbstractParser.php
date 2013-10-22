@@ -106,7 +106,7 @@ abstract class AbstractParser implements Parser
                 // Check if we are in front of a class definition
                 for ($j = $i + 1; $j < $i + 8; $j++) {
 
-                    if ($tokens[$j][0] === T_CLASS) {
+                    if ($tokens[$j][0] === $structureToken) {
 
                         $docBlock = $tokens[$i][1];
                         break;
