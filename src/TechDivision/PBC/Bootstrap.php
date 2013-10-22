@@ -27,7 +27,7 @@ use TechDivision\PBC\Config;
 
 // We have to register our autoLoader to put our proxies in place
 $config = new Config();
-$config = $config->getConfig('AutoLoader');
+$config = $config->getConfig();
 
 $autoLoader = new AutoLoader($config);
 $autoLoader->register();

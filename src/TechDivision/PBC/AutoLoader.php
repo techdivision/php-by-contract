@@ -60,16 +60,16 @@ class AutoLoader
     {
         // Do we have the file in our cache dir?
         $cachePath = __DIR__ . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php';
-        if (is_readable($cachePath)) {
+        if ($this->config['Environment'] !== 'development' && is_readable($cachePath)) {
 
             require $cachePath;
         }
 
         // Decide if we need to query the proxy factory
         $queryProxy = true;
-        if (isset($this->config['omit'])) {
+        if (isset($this->config['AutoLoader']['omit'])) {
 
-            foreach ($this->config['omit'] as $omitted) {
+            foreach ($this->config['AutoLoader']['omit'] as $omitted) {
 
                 // If our class name begins with the omitted part e.g. it's namespace
                 if (strpos($className, $omitted) === 0) {
@@ -86,12 +86,12 @@ class AutoLoader
             // Still here? Then we have to check the cache.
             if ($this->cache === null) {
 
-                $this->cache = Cache::getInstance($this->config['projectRoot']);
+                $this->cache = Cache::getInstance($this->config['AutoLoader']['projectRoot']);
             }
             $this->proxyFactory = new ProxyFactory($this->cache);
 
             // If we do not have the class in our proxy cache
-            if ($this->cache->isCached($className) === false) {
+            if ($this->config['Environment'] === 'development' || $this->cache->isCached($className) === false) {
 
                 // Create our proxy class
                 $this->proxyFactory->createProxy($className);

@@ -48,6 +48,18 @@ class Config implements PBCConfig
             'logger' => ''
         );
 
+        /**
+         * Here you can specify the environment in which php-by-contract operates.
+         * See possible options below.
+         *
+         * 'development' will omit caching of structures.
+         *
+         * 'production' will utilize the full potential and omit error output others than
+         * specified in 'Enforcement''processing'.
+         */
+        $this->config['Environment'] = 'development';
+
+
         // Validate the configuration.
         $this->validate();
     }
