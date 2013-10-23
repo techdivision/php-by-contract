@@ -20,16 +20,16 @@ class InterfaceParser extends AbstractParser implements StructureParser
         $fileParser = new FileParser();
         $fileDefinition = $fileParser->getDefinitionFromFile($file);
 
-        // First of all we need to get the class tokens
+        // First of all we need to get the interface tokens
         $tokens = $this->getStructureTokens($file, T_INTERFACE);
 
-        // Did we get something valueable?
+        // Did we get something valuable?
         if ($tokens === false) {
 
             return false;
 
         } elseif ($interfaceName === null && count($tokens) > 1) {
-            // If we did not get a class name and we got more than one class we can fail right here
+            // If we did not get an interface name and we got more than one class we can fail right here
             return false;
 
         } elseif (count($tokens) === 1) {
@@ -38,11 +38,11 @@ class InterfaceParser extends AbstractParser implements StructureParser
             return $this->getDefinitionFromTokens($tokens[0], $fileDefinition);
 
         } elseif (is_string($interfaceName) && count($tokens) > 1) {
-            // We are still here, but got a class name to look for
+            // We are still here, but got an interface name to look for
 
             foreach ($tokens as $key => $token) {
 
-                // Now iterate over the array and search for the class we want
+                // Now iterate over the array and search for the interface we want
                 for ($i = 0; $i < count($token); $i++) {
 
                     if (is_array($token[$i]) && $token[$i] === T_INTERFACE && $token[$i + 2] === $interfaceName) {

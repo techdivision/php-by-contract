@@ -57,7 +57,7 @@ class Config implements PBCConfig
          * 'production' will utilize the full potential and omit error output others than
          * specified in 'Enforcement''processing'.
          */
-        $this->config['Environment'] = 'production';
+        $this->config['Environment'] = 'development';
 
 
         // Validate the configuration.

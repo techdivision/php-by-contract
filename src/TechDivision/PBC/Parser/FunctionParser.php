@@ -28,7 +28,7 @@ class FunctionParser extends AbstractParser
         // First of all we need to get the function tokens
         $tokens = $this->getFunctionTokens($tokens);
 
-        // Did we get something valueable?
+        // Did we get something valuable?
         $functionDefinitionList = new FunctionDefinitionList();
         if ($tokens === false) {
 
@@ -83,9 +83,9 @@ class FunctionParser extends AbstractParser
         $functionDefinition->docBlock = $this->getDocBlock($tokens, T_FUNCTION);
 
         // Get the function signature
-        $functionDefinition->isFinal = $this->isFinalFunction($tokens);
+        $functionDefinition->isFinal = $this->hasSignatureToken($tokens, T_FINAL, T_FUNCTION);
         $functionDefinition->visibility = $this->getFunctionVisibility($tokens);
-        $functionDefinition->isStatic = $this->isStaticFunction($tokens);
+        $functionDefinition->isStatic = $this->hasSignatureToken($tokens, T_STATIC, T_FUNCTION);
         $functionDefinition->name = $this->getFunctionName($tokens);
 
         // Lets also get out parameters
@@ -213,24 +213,6 @@ class FunctionParser extends AbstractParser
 
     /**
      * @param $tokens
-     * @return bool
-     */
-    private function isFinalFunction(array $tokens)
-    {
-        return $this->hasSignatureToken($tokens, T_FINAL, T_FUNCTION);
-    }
-
-    /**
-     * @param $tokens
-     * @return bool
-     */
-    private function isStaticFunction(array $tokens)
-    {
-        return $this->hasSignatureToken($tokens, T_STATIC, T_FUNCTION);
-    }
-
-    /**
-     * @param $tokens
      * @return string
      */
     private function getFunctionBody(array $tokens)
@@ -313,7 +295,9 @@ class FunctionParser extends AbstractParser
                     }
                 }
 
-                // The upper bound should be the first time the curly brackets are even again
+                // The upper bound should be the first time the curly brackets are even again or the first occurrence
+                // of the semicolon. The semicolon is important, as we have to get function declarations in interfaces
+                // as well.
                 $upperBound = count($tokens) - 1;
                 $bracketCounter = null;
                 for ($j = $i + 1; $j < count($tokens); $j++) {
@@ -337,6 +321,13 @@ class FunctionParser extends AbstractParser
                         }
 
                         $bracketCounter--;
+                    }
+
+                    // Did we reach a semicolon before reaching a opening curly bracket?
+                    if ($bracketCounter === null && $tokens[$j] === ';') {
+
+                        $upperBound = $j + 1;
+                        break;
                     }
 
                     // Do we have an even amount of brackets yet?
