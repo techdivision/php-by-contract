@@ -19,19 +19,12 @@ class StructureMap
     /**
      * @var string
      */
-    protected $rootPath;
+    protected $rootPathes;
 
     /**
      * @var string
      */
     protected $mapPath;
-
-    /**
-     * Directory where serialized maps are stored.
-     *
-     * @var string
-     */
-    const MAP_DIR = __DIR__;
 
     /**
      * @var array
@@ -42,11 +35,18 @@ class StructureMap
      * @param string $rootPath
      * @param array $omittedPathes
      */
-    public function __construct($rootPath, $omittedPathes = array())
+    public function __construct($rootPathes, $omittedPathes = array())
     {
+        // As we do accept arrays we have to be sure that we got one. If not we convert it.
+        if (!is_array($rootPathes)) {
+
+            $rootPathes = array($rootPathes);
+        }
+
         // Set the rootPath and calculate the path to the map file
-        $this->rootPath = $rootPath;
-        $this->mapPath = self::MAP_DIR . DIRECTORY_SEPARATOR . md5($rootPath);
+        $this->rootPathes = $rootPathes;
+
+        $this->mapPath = PBC_MAP_DIR . DIRECTORY_SEPARATOR . md5(implode('', $rootPathes));
 
         // Set the omitted pathes
         $this->omittedPathes = $omittedPathes;
@@ -241,11 +241,21 @@ class StructureMap
      */
     private function generate()
     {
-        // Get an iterator over all files in the root path
-        $directory = new \RecursiveDirectoryIterator($this->rootPath);
-        $iterator = new \RecursiveIteratorIterator($directory);
+        // As we might have several rootPathes we have to create several RecursiveDirectoryIterators.
+        $directoryIterators = array();
+        foreach ($this->rootPathes as $rootPath) {
 
-        // Lets prepare the patter based on the existance of omitted pathes.
+            $directoryIterators[] = new \RecursiveDirectoryIterator($rootPath);
+        }
+
+        // We got them all, now append them onto a new RecursiveIteratorIterator and return it.
+        $recursiveIterator = new \AppendIterator();
+        foreach($directoryIterators as $directoryIterator) {
+
+            $recursiveIterator->append(new \RecursiveIteratorIterator( $directoryIterator ));
+        }
+
+        // Lets prepare the patter based on the existence of omitted pathes.
         if (!empty($this->omittedPathes)) {
 
             $pattern = '/[^' . str_replace('/', '\/', implode($this->omittedPathes, '|')) . ']\.php$/i';
@@ -255,9 +265,9 @@ class StructureMap
             $pattern = '/^.+\.php$/i';
         }
 
-        $regex = new \RegexIterator($iterator, $pattern, \RecursiveRegexIterator::GET_MATCH);
+        $regexIterator = new \RegexIterator($recursiveIterator, $pattern, \RecursiveRegexIterator::GET_MATCH);
 
-        foreach ($regex as $file) {
+        foreach ($regexIterator as $file) {
 
             $identifier = $this->findIdentifier($file[0]);
 
