@@ -96,7 +96,7 @@ final class BasicTestClass
     /**
      * Will break the invariant
      */
-    private function invariantBreaker()
+    private function invariantBreaker($test = array())
     {
         $this->motd = 'We are doomed!';
     }

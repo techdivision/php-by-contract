@@ -121,18 +121,33 @@ class FunctionParser extends AbstractParser
             // If we got the function definition, no scan everything from the first ( to the next )
             if ($tokens[$i][0] === T_FUNCTION) {
 
-                $bracketPassed = false;
+                $bracketPassed = null;
                 for ($j = $i; $j < count($tokens); $j++) {
 
-                    // If we got the function definition, no scan everything from the first ( to the next )
+                    // If we got the function definition, no scan everything from the first ( to the closing )
                     if ($tokens[$j] === '(') {
 
-                        $bracketPassed = true;
+                        if ($bracketPassed === null) {
+
+                            $bracketPassed = 0;
+                            // We do not want to get this token as well.
+                            continue;
+
+                        } else {
+
+                            $bracketPassed ++;
+                        }
                     }
 
-                    if ($bracketPassed === true) {
+                    // We got A closing bracket, decrease the counter
+                    if ($tokens[$j] === ')') {
 
-                        // Collect wo we get
+                        $bracketPassed --;
+                    }
+
+                    if ($bracketPassed >= 0 && $bracketPassed !== null) {
+
+                        // Collect what we get
                         if (is_array($tokens[$j])) {
 
                             $parameterString .= $tokens[$j][1];
@@ -141,19 +156,16 @@ class FunctionParser extends AbstractParser
 
                             $parameterString .= $tokens[$j];
                         }
-                    }
-
-                    // If we got the closing bracket we can leave both loops
-                    if ($tokens[$j] === ')') {
+                    } elseif ($bracketPassed !== null) {
+                        // If we got the closing bracket we can leave both loops
 
                         break 2;
                     }
                 }
             }
         }
-
+        
         // Now lets analyse what we got
-        $parameterString = str_replace(array('(', ')'), '', $parameterString);
         $parameterStrings = explode(',', $parameterString);
         foreach ($parameterStrings as $param) {
 
