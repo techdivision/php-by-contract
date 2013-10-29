@@ -8,6 +8,8 @@
  */
 namespace TechDivision\PBC\Entities\Definitions;
 
+use TechDivision\PBC\StructureMap;
+use TechDivision\PBC\Config;
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
@@ -143,8 +145,10 @@ class ClassDefinition implements StructureDefinition
 
         // Now finalize them recursively using the needed parsers
         $parsers = array('interface' => new InterfaceParser(), 'class' => new ClassParser());
-        $cache = Cache::getInstance();
-        $files = $cache->getFiles();
+        $config = new Config();
+        $config = $config->getConfig('AutoLoader');
+        $cache = new StructureMap($config['projectRoot']);
+
         $ancestorDefinitions = array();
         foreach ($ancestors as $key => $ancestorList) {
 
@@ -158,26 +162,12 @@ class ClassDefinition implements StructureDefinition
                 $parser = $parsers[$key];
             }
 
-            foreach ($ancestorList as $ancestor) {
-                // Do we have this pestering leading \?
-                if (strpos($ancestor, '\\') === 0) {
+            // Do we know this file?
+            $file = $cache->getEntry($ancestor);
+            if ($file !== false) {
 
-                    $ancestor = ltrim($ancestor, '\\');
-                }
-
-                // Do we know this file?
-                if (isset($files[$ancestor])) {
-
-                    $ancestorDefinitions[$key] = $parser->getDefinitionFromFile($files[$ancestor]['path'], $ancestor);
-                    $ancestorDefinitions[$key]->finalize();
-
-                } elseif (isset($files[$this->namespace . '\\' . $ancestor])) {
-
-                    $ancestorDefinitions[$key] = $parser->getDefinitionFromFile($files[$this->namespace . '\\' . $ancestor]['path'],
-                        $ancestor);
-                    $ancestorDefinitions[$key]->finalize();
-
-                }
+                $ancestorDefinitions[$key] = $parser->getDefinitionFromFile($file->getPath(), $ancestor);
+                $ancestorDefinitions[$key]->finalize();
             }
         }
 

@@ -1,17 +1,8 @@
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 25.06.13
- * Time: 17:13
- * To change this template use File | Settings | File Templates.
- */
 
 namespace TechDivision\PBC;
 
 use TechDivision\PBC\Proxies\ProxyFactory;
-use TechDivision\PBC\Interfaces\PBCCache;
-use TechDivision\PBC\Proxies\Cache;
 
 /**
  * Class AutoLoader
@@ -26,7 +17,7 @@ class AutoLoader
     private $config;
 
     /**
-     * @var Interfaces\PBCCache
+     * @var CacheMap
      */
     private $cache;
 
@@ -43,9 +34,9 @@ class AutoLoader
 
     /**
      * @param $config
-     * @param PBCCache $cache
+     * @param $cache
      */
-    public function __construct($config, PBCCache $cache = null)
+    public function __construct($config, $cache)
     {
         $this->config = $config;
         $this->cache = $cache;
@@ -86,24 +77,23 @@ class AutoLoader
             // Still here? Then we have to check the cache.
             if ($this->cache === null) {
 
-                $this->cache = Cache::getInstance($this->config['AutoLoader']['projectRoot']);
+                $this->cache = new CacheMap($this->config['AutoLoader']['projectRoot']);
             }
-            $this->proxyFactory = new ProxyFactory($this->cache);
+            $fileMap = new StructureMap($this->config['AutoLoader']['projectRoot']);
+            $this->proxyFactory = new ProxyFactory($fileMap, $this->cache);
 
             // If we do not have the class in our proxy cache
-            if ($this->config['Environment'] === 'development' || $this->cache->isCached($className) === false) {
+            if ($this->config['Environment'] === 'development' ||
+                $this->cache->entryExists($className) === false ||
+                $this->cache->isCurrent($className) === false) {
 
                 // Create our proxy class
                 $this->proxyFactory->createProxy($className);
-
-            } elseif ($this->cache->isCurrent($className) === false) {
-
-                // Update our proxy class
-                $this->proxyFactory->updateProxy($className);
             }
 
             // Require the proxy class, it should have been created now
             $proxyFile = $this->proxyFactory->getProxyFileName($className);
+
             if (is_readable($proxyFile) === true) {
 
                 require $proxyFile;

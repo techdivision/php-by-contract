@@ -16,6 +16,7 @@ use TechDivision\PBC\Entities\Definitions\InterfaceDefinition;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Interfaces\Assertion;
 use TechDivision\PBC\Interfaces\StructureDefinition;
+use TechDivision\PBC\Entities\Definitions\Structure;
 use TechDivision\PBC\Parser\FileParser;
 use TechDivision\PBC\Interfaces\PBCCache;
 use TechDivision\PBC\Config;
@@ -32,6 +33,11 @@ class ProxyFactory
     private $cache;
 
     /**
+     * @var
+     */
+    private $structureMap;
+
+    /**
      * @var array
      */
     private $config;
@@ -39,8 +45,9 @@ class ProxyFactory
     /**
      * @param PBCCache $cache
      */
-    public function __construct(PBCCache $cache)
+    public function __construct($structureMap, $cache)
     {
+        $this->structureMap = $structureMap;
         $this->cache = $cache;
 
         $config = new Config();
@@ -64,20 +71,21 @@ class ProxyFactory
     public function createProxy($className, $update = false)
     {
         // If we do not know the file we can forget it
-        $fileMap = $this->cache->getFiles();
-        if (isset($fileMap[$className]['path']) === false) {
+        $mapEntry = $this->structureMap->getEntry($className);
+        if (!$mapEntry instanceof Structure) {
 
             return false;
         }
 
         // We know the class and we know the file it is in, so get our FileParser and have a blast
         $fileParser = new FileParser();
-        $fileDefinition = $fileParser->getDefinitionFromFile($fileMap[$className]['path']);
+        $fileDefinition = $fileParser->getDefinitionFromFile($mapEntry->getPath());
 
         // So we got our FileDefinition, now lets check if there are multiple classes in there.
         // Iterate over all classes within the FileDefinition and create a file for each of them
         $classIterator = $fileDefinition->structureDefinitions->getIterator();
         for ($k = 0; $k < $classIterator->count(); $k++) {
+
 
             $structureDefinition = $classIterator->current();
             $filePath = $this->createProxyFilePath($fileDefinition->namespace . '\\' . $structureDefinition->name);
@@ -87,7 +95,7 @@ class ProxyFactory
             if ($tmp === true) {
 
                 // Now get our new file into the cacheMap
-                $this->cache->add($className, $structureDefinition, $filePath);
+                $this->cache->add(new Structure(filectime($mapEntry->getPath()), $className, $filePath, 'class'));
 
                 if ($update === true) {
                     // If this was an update we might have to update possible children as well, as contracts are inherited
@@ -803,12 +811,13 @@ class ProxyFactory
      */
     public function getProxyFileName($className)
     {
-        $cacheMap = $this->cache->get();
-        if (!isset($cacheMap[$className]) || !isset($cacheMap[$className]['path'])) {
+        $mapEntry = $this->cache->getEntry($className);
+
+        if (!$mapEntry instanceof Structure) {
 
             return false;
         }
 
-        return $cacheMap[$className]['path'];
+        return $mapEntry->getPath();
     }
 }
