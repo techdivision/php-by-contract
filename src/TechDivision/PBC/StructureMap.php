@@ -100,7 +100,7 @@ class StructureMap
      */
     public function getEntry($identifier)
     {
-        if (isset($this->map[$identifier])) {
+        if (is_string($identifier) && isset($this->map[$identifier])) {
 
             // We got it, lets biuld a structure object
             $entry = $this->map[$identifier];
@@ -328,6 +328,15 @@ class StructureMap
                 ) {
 
                     $type = 'trait';
+                    $stuctureName = $tokens[$i][1];
+                    break 2;
+
+                } elseif ($tokens[$i - 2][0] === T_INTERFACE
+                    && $tokens[$i - 1][0] === T_WHITESPACE
+                    && $tokens[$i][0] === T_STRING
+                ) {
+
+                    $type = 'interface';
                     $stuctureName = $tokens[$i][1];
                     break 2;
 

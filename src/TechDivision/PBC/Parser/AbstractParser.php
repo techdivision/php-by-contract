@@ -164,7 +164,7 @@ abstract class AbstractParser implements Parser
 
     /**
      * Will check if a certain structure was mentioned in one(!) use statement.
-     * If yo we will return true and might also remove the use statement from our collection.
+     * If we will return true we might also remove the use statement from our collection.
      *
      * @param $usedNamespaces
      * @param $structureName

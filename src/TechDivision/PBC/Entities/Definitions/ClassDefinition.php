@@ -162,12 +162,26 @@ class ClassDefinition implements StructureDefinition
                 $parser = $parsers[$key];
             }
 
-            // Do we know this file?
-            $file = $cache->getEntry($ancestor);
-            if ($file !== false) {
+            foreach ($ancestorList as $ancestor) {
 
-                $ancestorDefinitions[$key] = $parser->getDefinitionFromFile($file->getPath(), $ancestor);
-                $ancestorDefinitions[$key]->finalize();
+                // Do we know this file?
+                $file = $cache->getEntry($ancestor);
+                if ($file !== false) {
+
+                    $ancestorDefinitions[$key] = $parser->getDefinitionFromFile($file->getPath(), $ancestor);
+                    $ancestorDefinitions[$key]->finalize();
+
+                } else {
+                    // Maybe the class is in the same namespace as we are?
+
+                    $file = $cache->getEntry($this->namespace . '\\' . $ancestor);
+                    if ($file !== false) {
+
+                        $ancestorDefinitions[$key] = $parser->getDefinitionFromFile($file->getPath(), $ancestor);
+                        $ancestorDefinitions[$key]->finalize();
+
+                    }
+                }
             }
         }
 

@@ -169,7 +169,7 @@ class CacheMap extends StructureMap
      */
     public function remove($identifier)
     {
-        if (isset($this->map[$identifier])) {
+        if (is_string($identifier) && isset($this->map[$identifier])) {
 
             unset($this->map[$identifier]);
             return true;
