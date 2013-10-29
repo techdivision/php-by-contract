@@ -196,7 +196,7 @@ abstract class AbstractParser implements Parser
 
                 // Tell them we succeeded
                 $foundSomething = true;
-                $result = $usedNamespace . '\\' . $structureName;
+                $result = implode('\\', $tmp) . '\\' . $structureName;
             }
         }
 
