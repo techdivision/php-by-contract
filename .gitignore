@@ -9,7 +9,7 @@ src/TechDivision/PBC/Proxies/fileMap
 
 # temporary entry to keep the pushed version on production environment
 # TODO remove if needed
-src/TechDivision/PBC/Config
+#src/TechDivision/PBC/Config
 
 # the apple directory description
 .DS_Store

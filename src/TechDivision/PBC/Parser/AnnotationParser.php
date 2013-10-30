@@ -25,6 +25,9 @@ class AnnotationParser extends AbstractParser
     private $config;
 
     /**
+     * All simple data types which are supported by PHP
+     * and have a is_... function.
+     *
      * @var array
      */
     private $validSimpleTypes = array(
@@ -43,6 +46,15 @@ class AnnotationParser extends AbstractParser
         'resource',
         'scalar',
         'string'
+    );
+
+    /**
+     * All simple data types which are known but are aliased without an is_... function.
+     *
+     * @var array
+     */
+    private $simpleTypeMappings = array(
+        'boolean' => 'bool'
     );
 
     public function __construct()
@@ -244,6 +256,10 @@ class AnnotationParser extends AbstractParser
             if (isset($validTypes[$stringPiece])) {
 
                 return $stringPiece;
+
+            } elseif (isset($this->simpleTypeMappings[$stringPiece])) {
+
+                return $this->simpleTypeMappings[$stringPiece];
 
             } elseif ($stringPiece === 'mixed') {
 
