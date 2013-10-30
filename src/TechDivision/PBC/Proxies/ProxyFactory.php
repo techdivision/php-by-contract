@@ -9,7 +9,7 @@
 
 namespace TechDivision\PBC\Proxies;
 
-use Doctrine\Common\Proxy\Exception\InvalidArgumentException;
+use TechDivision\PBC\CacheMap;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Entities\Definitions\InterfaceDefinition;
@@ -18,8 +18,8 @@ use TechDivision\PBC\Interfaces\Assertion;
 use TechDivision\PBC\Interfaces\StructureDefinition;
 use TechDivision\PBC\Entities\Definitions\Structure;
 use TechDivision\PBC\Parser\FileParser;
-use TechDivision\PBC\Interfaces\PBCCache;
 use TechDivision\PBC\Config;
+use TechDivision\PBC\StructureMap;
 
 /**
  * Class ProxyFactory
@@ -28,12 +28,12 @@ class ProxyFactory
 {
 
     /**
-     * @var \TechDivision\PBC\Interfaces\PBCCache
+     * @var \TechDivision\PBC\CacheMap
      */
     private $cache;
 
     /**
-     * @var
+     * @var \TechDivision\PBC\StructureMap
      */
     private $structureMap;
 
@@ -43,9 +43,10 @@ class ProxyFactory
     private $config;
 
     /**
-     * @param PBCCache $cache
+     * @param $structureMap
+     * @param $cache
      */
-    public function __construct($structureMap, $cache)
+    public function __construct(StructureMap $structureMap, CacheMap $cache)
     {
         $this->structureMap = $structureMap;
         $this->cache = $cache;
@@ -117,7 +118,6 @@ class ProxyFactory
     }
 
     /**
-     * @param $fileName
      * @param $className
      * @return string
      */
@@ -741,11 +741,6 @@ class ProxyFactory
             }
             // increment the outer loop
             $invariantIterator->next();
-        }
-
-        if ($structureDefinition->extends !== '') {
-
-            $code .= 'parent::' . PBC_CLASS_INVARIANT_NAME . '();';
         }
 
         return $code;

@@ -21,12 +21,13 @@ class Config implements PBCConfig
          *
          * 'omit' lets you specify namespaces which are not parsed or check for contracts.
          *
-         * 'projectRoot' specifies the root of your project. All enclosed non-omitted classes will be parsed.
+         * 'projectRoot' specifies the root of your project. All enclosed php structures such as classes, interfaces
+         * and traits will be included in the autoload and parsing process.
          */
         $this->config['AutoLoader'] = array(
             'omit' => array('TechDivision\PBC', 'PHPUnit', 'PHPParser', 'Symfony\Component', 'Psr\Log'),
-            'projectRoot' => array(realpath(dirname(__FILE__) . '/../../../tests/TechDivision/PBC/data/'),
-                realpath(dirname(__FILE__) . '/Parser/'))
+            'projectRoot' => __DIR__ . DIRECTORY_SEPARATOR . '..' .
+                DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..'
         );
 
         /**
