@@ -22,12 +22,8 @@ require_once 'Constants.php';
 require_once $vendorDir . 'autoload.php';
 
 use TechDivision\PBC\AutoLoader;
-use TechDivision\PBC\CacheMap;
-use TechDivision\PBC\Config;
 
 // We have to register our autoLoader to put our proxies in place
-$config = new Config();gettype($config);
-$cache = new CacheMap(PBC_CACHE_DIR, $config);
-$autoLoader = new AutoLoader($config, $cache);
+$autoLoader = new AutoLoader();
 $autoLoader->register();
 

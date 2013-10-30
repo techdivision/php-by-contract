@@ -4,6 +4,9 @@ namespace TechDivision\PBC;
 
 use TechDivision\PBC\Proxies\ProxyFactory;
 
+// Load the constants if not already done
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'Constants.php';
+
 /**
  * Class AutoLoader
  *
@@ -34,13 +37,12 @@ class AutoLoader
 
 
     /**
-     * @param $config
-     * @param $cache
+     * Default constructor
      */
-    public function __construct(Config $config, $cache)
+    public function __construct()
     {
-        $this->config = $config;
-        $this->cache = $cache;
+        $this->config = new Config();
+        $this->cache = null;
     }
 
     /**
@@ -60,6 +62,9 @@ class AutoLoader
 
         // There was no file in our cache dir, so lets hope we know the original path of the file.
         $autoLoaderConfig = $this->config->getConfig('AutoLoader');
+
+        // We also require the classes of our maps as we do not have proper autoloading in place
+        require_once __DIR__ . DIRECTORY_SEPARATOR . 'StructureMap.php';
         $structureMap = new StructureMap($autoLoaderConfig['projectRoot'], $this->config);
         $file = $structureMap->getEntry($className);
 
@@ -94,6 +99,8 @@ class AutoLoader
         // Get a current cache instance if we do not have one already.
         if ($this->cache === null) {
 
+            // We also require the classes of our maps as we do not have proper autoloading in place
+            require_once __DIR__ . DIRECTORY_SEPARATOR . 'CacheMap.php';
             $this->cache = new CacheMap(PBC_CACHE_DIR, $this->config);
         }
         $this->proxyFactory = new ProxyFactory($structureMap, $this->cache);
@@ -122,10 +129,10 @@ class AutoLoader
     /**
      *
      */
-    public function register()
+    public function register($throws = true)
     {
         // We want to let our autoloader be the first in line so we can react on loads and create/return our proxies.
         // So lets use the prepend parameter here.
-        spl_autoload_register(array($this, self::OUR_LOADER), true, true);
+        spl_autoload_register(array($this, self::OUR_LOADER), $throws, true);
     }
 }
