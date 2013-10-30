@@ -90,7 +90,7 @@ class Config implements PBCConfig
      *
      * @return array
      */
-    public function getConfig($aspect = NULL)
+    public function getConfig($aspect = null)
     {
         if (!is_null($aspect) && isset($this->config[$aspect])) {
 

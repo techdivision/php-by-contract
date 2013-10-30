@@ -35,21 +35,26 @@ class Structure
     private $type;
 
     /**
-     * Default constructor.
-     *
+     * @var boolean
+     */
+    private $hasContracts;
+
+    /**
      * @param $cTime
      * @param $identifier
      * @param $path
      * @param $type
+     * @param $hasContracts
      *
-     * @throws  \InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
-    public function __construct($cTime, $identifier, $path, $type)
+    public function __construct($cTime, $identifier, $path, $type, $hasContracts = true)
     {
         // Set the attributes.
         $this->cTime = $cTime;
         $this->identifier = $identifier;
         $this->path = $path;
+        $this->hasContracts = $hasContracts;
 
         // Check if we got an allowed value for the type.
         $allowedTypes = array_flip($this->allowedTypes);
@@ -133,5 +138,11 @@ class Structure
         return $this->type;
     }
 
-
+    /**
+     * @return bool
+     */
+    public function hasContracts()
+    {
+        return (bool) $this->hasContracts;
+    }
 }

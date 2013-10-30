@@ -135,6 +135,8 @@ class FileParser extends AbstractParser
         return $namespaces;
     }
 
+
+
     /**
      * @param $file
      * @return bool

@@ -17,7 +17,7 @@ class StructureMap
     protected $map = array();
 
     /**
-     * @var string
+     * @var array
      */
     protected $rootPathes;
 
@@ -32,10 +32,16 @@ class StructureMap
     protected $omittedPathes;
 
     /**
-     * @param string $rootPath
+     * @var Config
+     */
+    protected $config;
+
+    /**
+     * @param $rootPathes
+     * @param Config $config
      * @param array $omittedPathes
      */
-    public function __construct($rootPathes, $omittedPathes = array())
+    public function __construct($rootPathes, Config $config = null, $omittedPathes = array())
     {
         // As we do accept arrays we have to be sure that we got one. If not we convert it.
         if (!is_array($rootPathes)) {
@@ -43,9 +49,13 @@ class StructureMap
             $rootPathes = array($rootPathes);
         }
 
+        // Save the config for later use.
+        $this->config = $config;
+
         // Set the rootPath and calculate the path to the map file
         $this->rootPathes = $rootPathes;
 
+        // Build up the path of the serialized map.
         $this->mapPath = PBC_MAP_DIR . DIRECTORY_SEPARATOR . md5(implode('', $rootPathes));
 
         // Set the omitted pathes
@@ -71,7 +81,8 @@ class StructureMap
         $this->map[$structure->getIdentifier()] = array('cTime' => $structure->getCTime(),
             'identifier' => $structure->getIdentifier(),
             'path' => $structure->getPath(),
-            'type' => $structure->getType());
+            'type' => $structure->getType(),
+            'hasContracts' => $structure->hasContracts());
 
         // Persist the map
         return $this->save();
@@ -107,7 +118,8 @@ class StructureMap
             $structure = new Structure($entry['cTime'],
                 $entry['identifier'],
                 $entry['path'],
-                $entry['type']);
+                $entry['type'],
+                $entry['hasContracts']);
 
             // Return the structure DTO
             return $structure;
@@ -250,9 +262,9 @@ class StructureMap
 
         // We got them all, now append them onto a new RecursiveIteratorIterator and return it.
         $recursiveIterator = new \AppendIterator();
-        foreach($directoryIterators as $directoryIterator) {
+        foreach ($directoryIterators as $directoryIterator) {
 
-            $recursiveIterator->append(new \RecursiveIteratorIterator( $directoryIterator ));
+            $recursiveIterator->append(new \RecursiveIteratorIterator($directoryIterator));
         }
 
         // Lets prepare the patter based on the existence of omitted pathes.
@@ -269,6 +281,7 @@ class StructureMap
 
         foreach ($regexIterator as $file) {
 
+            // Get the identifiers if any.
             $identifier = $this->findIdentifier($file[0]);
 
             if ($identifier !== false) {
@@ -276,12 +289,58 @@ class StructureMap
                 $this->map[$identifier[1]] = array('cTime' => filectime($file[0]),
                     'identifier' => $identifier[1],
                     'path' => $file[0],
-                    'type' => $identifier[0]);
+                    'type' => $identifier[0],
+                    'hasContracts' => $this->findContracts($file[0]));
             }
         }
 
         // Save for later reuse.
         $this->save();
+    }
+
+    /**
+     * @param $file
+     * @return bool
+     */
+    protected function findContracts($file)
+    {
+        // We need to get our array of needles
+        $needles = array(PBC_KEYWORD_INVARIANT, PBC_KEYWORD_POST, PBC_KEYWORD_PRE);
+
+        // If we have to enforce things like @param or @returns, we have to be more sensitive
+        $enforcementConfig = $this->config->getConfig('Enforcement');
+        if ($enforcementConfig['enforceDefaultTypeSafety'] === true) {
+
+            $needles[] = '@var';
+            $needles[] = '@param';
+            $needles[] = '@return';
+        }
+
+        // Open the file and search it piece by piece until we find something or the file ends.
+        $rsc = fopen($file, 'r');
+        $recent = '';
+        while (!feof($rsc)) {
+
+            // Get a current chunk
+            $current = fread($rsc, 512);
+
+            // We also check the last chunk as well, to avoid cutting the only needle we have in two.
+            $haystack = $recent . $current;
+            foreach ($needles as $needle) {
+
+                // If we found something we can return true
+                if (strpos($haystack, $needle) !== false) {
+
+                    return true;
+                }
+            }
+
+            // Set recent for the next iteration
+            $recent = $current;
+        }
+
+        // Still here? So nothing was found.
+        return false;
     }
 
     /**

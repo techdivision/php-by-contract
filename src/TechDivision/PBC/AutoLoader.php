@@ -6,13 +6,14 @@ use TechDivision\PBC\Proxies\ProxyFactory;
 
 /**
  * Class AutoLoader
+ *
  * @package TechDivision\PBC
  */
 class AutoLoader
 {
 
     /**
-     * @var array
+     * @var Config
      */
     private $config;
 
@@ -25,7 +26,7 @@ class AutoLoader
      * @var Proxies\ProxyFactory
      */
     private $proxyFactory;
-    
+
     /**
      * @const
      */
@@ -36,7 +37,7 @@ class AutoLoader
      * @param $config
      * @param $cache
      */
-    public function __construct($config, $cache)
+    public function __construct(Config $config, $cache)
     {
         $this->config = $config;
         $this->cache = $cache;
@@ -49,47 +50,56 @@ class AutoLoader
      */
     public function loadClass($className)
     {
-        // Do we have the file in our cache dir?
+        // Do we have the file in our cache dir? If we are in development mode we have to ignore this.
         $cachePath = __DIR__ . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php';
-        if ($this->config['Environment'] !== 'development' && is_readable($cachePath)) {
+        if ($this->config->getConfig('Environment') !== 'development' && is_readable($cachePath)) {
 
             require $cachePath;
+            return true;
         }
 
-        // Decide if we need to query the proxy factory
-        $queryProxy = true;
-        if (isset($this->config['AutoLoader']['omit'])) {
+        // There was no file in our cache dir, so lets hope we know the original path of the file.
+        $autoLoaderConfig = $this->config->getConfig('AutoLoader');
+        $structureMap = new StructureMap($autoLoaderConfig['projectRoot'], $this->config);
+        $file = $structureMap->getEntry($className);
 
-            foreach ($this->config['AutoLoader']['omit'] as $omitted) {
+        // Did we get something? If not return false.
+        if ($file === false) {
+
+            return false;
+        }
+
+        // Might the class be a omitted one? If so we can require the original.
+        if (isset($autoLoaderConfig['omit'])) {
+
+            foreach ($autoLoaderConfig['omit'] as $omitted) {
 
                 // If our class name begins with the omitted part e.g. it's namespace
                 if (strpos($className, $omitted) === 0) {
 
-                    $queryProxy = false;
-                    break;
+                    require $file->getPath();
+                    return true;
                 }
             }
         }
 
-        // Do need to query our ProxyFactory?
-        if ($queryProxy == true) {
+        // We are still here, so we know the class and it is not omitted. Does it contain contracts then?
+        if ($file->hasContracts() === false) {
 
-            // Still here? Then we have to check the cache.
-            if ($this->cache === null) {
+            require $file->getPath();
+            return true;
+        }
 
-                $this->cache = new CacheMap($this->config['AutoLoader']['projectRoot']);
-            }
-            $fileMap = new StructureMap($this->config['AutoLoader']['projectRoot']);
-            $this->proxyFactory = new ProxyFactory($fileMap, $this->cache);
+        // So we have to create a new class definition for this original class.
+        // Get a current cache instance if we do not have one already.
+        if ($this->cache === null) {
 
-            // If we do not have the class in our proxy cache
-            if ($this->config['Environment'] === 'development' ||
-                $this->cache->entryExists($className) === false ||
-                $this->cache->isCurrent($className) === false) {
+            $this->cache = new CacheMap(PBC_CACHE_DIR, $this->config);
+        }
+        $this->proxyFactory = new ProxyFactory($structureMap, $this->cache);
 
-                // Create our proxy class
-                $this->proxyFactory->createProxy($className);
-            }
+        // Create the new class definition
+        if ($this->proxyFactory->createProxy($className) === true) {
 
             // Require the proxy class, it should have been created now
             $proxyFile = $this->proxyFactory->getProxyFileName($className);
@@ -99,8 +109,13 @@ class AutoLoader
                 require $proxyFile;
                 return true;
             }
+
+        } else {
+
+            return false;
         }
 
+        // Still here? That sounds like bad news!
         return false;
     }
 
