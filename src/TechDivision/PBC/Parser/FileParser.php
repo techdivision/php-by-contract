@@ -48,6 +48,14 @@ class FileParser extends AbstractParser
 
         // Now we can check which kind of parser we need.
         $parserName = __NAMESPACE__ . '\\' . ucfirst($structureType) . 'Parser';
+
+        // Does this parser exist?
+        if (!class_exists($parserName)) {
+
+            return false;
+        }
+
+        // Still here? Create an instance of this parser.
         $parser = new $parserName();
 
         $structureDefinitions = $parser->getDefinitionListFromFile($file, $fileDefinition);
@@ -59,14 +67,6 @@ class FileParser extends AbstractParser
         }
 
         return $fileDefinition;
-    }
-
-    /**
-     * @param $file
-     */
-    private function getStructureType($file)
-    {
-
     }
 
     /**
@@ -99,6 +99,26 @@ class FileParser extends AbstractParser
 
         // Return what we did or did not found
         return substr($namespace, 1);
+    }
+
+    /**
+     * Will return all entries as full DTOs
+     *
+     * @return array
+     */
+    public function getEntries() {
+
+        $entries = array();
+        foreach ($this->map as $entry) {
+
+            $entries[] = new Structure($entry['cTime'],
+                $entry['identifier'],
+                $entry['path'],
+                $entry['type'],
+                $entry['hasContracts']);
+        }
+
+        return $entries;
     }
 
     /**
