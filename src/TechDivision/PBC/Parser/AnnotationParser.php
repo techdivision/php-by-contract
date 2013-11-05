@@ -89,7 +89,7 @@ class AnnotationParser extends AbstractParser
 
             } else {
 
-                $regex = '/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n';
+                $regex = '/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n/s';
             }
 
             preg_match_all($regex, $docBlock, $rawConditions);
@@ -103,7 +103,7 @@ class AnnotationParser extends AbstractParser
 
             } else {
 
-                $regex = '/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n';
+                $regex = '/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n/s';
             }
 
             preg_match_all($regex, $docBlock, $rawConditions);
