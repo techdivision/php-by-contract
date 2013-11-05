@@ -53,7 +53,7 @@ class AutoLoader
     public function loadClass($className)
     {
         // Do we have the file in our cache dir? If we are in development mode we have to ignore this.
-        $cachePath = __DIR__ . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php';
+        $cachePath = PBC_CACHE_DIR . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php';
         if ($this->config->getConfig('Environment') !== 'development' && is_readable($cachePath)) {
 
             require $cachePath;
