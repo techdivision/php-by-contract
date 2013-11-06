@@ -547,7 +547,7 @@ class ProxyFactory
         // PrettyPrint it so humans can read it
         $parser = new \PHPParser_Parser(new \PHPParser_Lexer);
         $prettyPrinter = new \PHPParser_PrettyPrinter_Default;
-/*
+
         try {
             // parse
             $stmts = $parser->parse($fileContent);
@@ -558,7 +558,7 @@ class ProxyFactory
 
             throw $e;
         }
-*/
+
         // Return if we succeeded or not
         return (boolean)file_put_contents($targetFileName, $fileContent);
     }

@@ -76,10 +76,10 @@ class Config implements PBCConfig
 
             // Instantiate our logger candidate
             $loggerCandidate = $this->config['Enforcement']['logger'];
-            $loggerCandidate = new $loggerCandidate;
+            $loggerInterfaces = class_implements($loggerCandidate);
 
-            // Does it implement the PSR-3   interface?
-            if (!$loggerCandidate instanceof LoggerInterface) {
+            // Does it implement the PSR-3 interface?
+            if (!isset($loggerInterfaces['Psr\Log\LoggerInterface'])) {
 
                 // Logger does not satisfy PSR-3, lets set processing to none
                 $this->config['Enforcement']['processing'] = 'none';
