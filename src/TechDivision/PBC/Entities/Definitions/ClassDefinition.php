@@ -127,7 +127,7 @@ class ClassDefinition implements StructureDefinition
     public function finalize()
     {
         // We have to get all ancestral classes and interfaces
-        $ancestor = array();
+        $ancestors = array();
         if (!empty($this->implements)) {
 
             $ancestors['interface'] = $this->implements;

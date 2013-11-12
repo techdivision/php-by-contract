@@ -1,16 +1,26 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 20.06.13
- * Time: 14:47
- * To change this template use File | Settings | File Templates.
+ * TechDivision\PBC\Entities\Lists\AbstractTypedList
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  */
 
 namespace TechDivision\PBC\Entities\Lists;
 
 use TechDivision\PBC\Interfaces\TypedList;
 
+/**
+ * @package     TechDivision\PBC
+ * @subpackage  Entities
+ * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
+ * @license     http://opensource.org/licenses/osl-3.0.php
+ *              Open Software License (OSL 3.0)
+ * @author      Bernhard Wick <b.wick@techdivision.com>
+ */
 abstract class AbstractTypedList implements TypedList
 {
     /**
@@ -143,6 +153,8 @@ abstract class AbstractTypedList implements TypedList
 
     /**
      * @param TypedList $foreignList
+     * @throws \Exception
+     * @throws \UnexpectedValueException
      */
     public function attach(TypedList $foreignList)
     {
