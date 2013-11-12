@@ -93,7 +93,7 @@ class FunctionParser extends AbstractParser
 
         // So we got our docBlock, now we can parse the precondition annotations from it
         $annotationParser = new AnnotationParser();
-        $functionDefinition->preConditions = $annotationParser->getConditions($functionDefinition->docBlock, PBC_KEYWORD_PRE);
+        $functionDefinition->preconditions = $annotationParser->getConditions($functionDefinition->docBlock, PBC_KEYWORD_PRE);
 
         // Does this method require the use of our "old" mechanism?
         $functionDefinition->usesOld = $this->usesKeyword($functionDefinition->docBlock, PBC_KEYWORD_OLD);
@@ -102,7 +102,7 @@ class FunctionParser extends AbstractParser
         $functionDefinition->body = $this->getFunctionBody($tokens);
 
         // So we got our docBlock, now we can parse the postcondition annotations from it
-        $functionDefinition->postConditions = $annotationParser->getConditions($functionDefinition->docBlock, PBC_KEYWORD_POST);
+        $functionDefinition->postconditions = $annotationParser->getConditions($functionDefinition->docBlock, PBC_KEYWORD_POST);
 
         return $functionDefinition;
     }
