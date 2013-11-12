@@ -50,12 +50,12 @@ class FunctionDefinition
     /**
      * @var AssertionList
      */
-    public $preConditions;
+    public $preconditions;
 
     /**
      * @var TypedListList
      */
-    public $ancestralPreConditions;
+    public $ancestralPreconditions;
 
     /**
      * @var boolean
@@ -70,12 +70,12 @@ class FunctionDefinition
     /**
      * @var AssertionList
      */
-    public $postConditions;
+    public $postconditions;
 
     /**
      * @var TypedListList
      */
-    public $ancestralPostConditions;
+    public $ancestralPostconditions;
 
     /**
      * Default constructor
@@ -88,11 +88,11 @@ class FunctionDefinition
         $this->isStatic = false;
         $this->name = '';
         $this->parameterDefinitions = array();
-        $this->preConditions = new AssertionList();
-        $this->ancestralPreConditions = new TypedListList();
+        $this->preconditions = new AssertionList();
+        $this->ancestralPreconditions = new TypedListList();
         $this->usesOld = false;
         $this->body = '';
-        $this->postConditions = new AssertionList();
-        $this->ancestralPostConditions = new TypedListList();
+        $this->postconditions = new AssertionList();
+        $this->ancestralPostconditions = new TypedListList();
     }
 }

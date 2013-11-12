@@ -12,12 +12,12 @@ namespace TechDivision\PBC\Exceptions;
 use TechDivision\PBC\Interfaces\PBCException;
 
 /**
- * Class PreConditionAvailabilityException
+ * Class PreconditionAvailabilityException
  *
  * This exception might be thrown if a precondition checks assertions that the client does not have influence on.
  *
  * @package TechDivision\PBC\Exceptions
  */
-class PreConditionAvailabilityException extends \Exception implements PBCException {
+class PreconditionAvailabilityException extends \Exception implements PBCException {
 
 }

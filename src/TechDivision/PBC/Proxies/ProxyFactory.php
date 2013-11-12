@@ -196,8 +196,8 @@ class ProxyFactory
         }
 
         // Tell them to use our exception namespaces
-        $fileContent .= 'use TechDivision\PBC\Exceptions\BrokenPreConditionException;
-        use TechDivision\PBC\Exceptions\BrokenPostConditionException;
+        $fileContent .= 'use TechDivision\PBC\Exceptions\BrokenPreconditionException;
+        use TechDivision\PBC\Exceptions\BrokenPostconditionException;
         use TechDivision\PBC\Exceptions\BrokenInvariantException;
         ';
 
@@ -486,11 +486,11 @@ class ProxyFactory
             }
 
             // Here we need the combined preconditions, so gather them first
-            $preConditions = $functionDefinition->ancestralPreConditions;
-            $preConditions->add($functionDefinition->preConditions);
+            $preconditions = $functionDefinition->ancestralPreconditions;
+            $preconditions->add($functionDefinition->preconditions);
 
             // And now let our helper method render the code
-            $fileContent .= $this->generateAroundAdviceCode($preConditions, $functionDefinition->name, 'precondition');
+            $fileContent .= $this->generateAroundAdviceCode($preconditions, $functionDefinition->name, 'precondition');
 
             // Do we have to keep an instance of $this to compare with old later?
             if ($functionDefinition->usesOld === true) {
@@ -511,11 +511,11 @@ class ProxyFactory
             }
 
             // Here we need the combined preconditions, so gather them first
-            $postConditions = $functionDefinition->ancestralPostConditions;
-            $postConditions->add($functionDefinition->postConditions);
+            $postconditions = $functionDefinition->ancestralPostconditions;
+            $postconditions->add($functionDefinition->postconditions);
 
             // And now let our helper method render the code
-            $fileContent .= $this->generateAroundAdviceCode($postConditions, $functionDefinition->name, 'postcondition');
+            $fileContent .= $this->generateAroundAdviceCode($postconditions, $functionDefinition->name, 'postcondition');
 
             // Last of all check if our invariant holds, but only if we need it
             if ($functionDefinition->visibility !== 'private') {
@@ -582,12 +582,12 @@ class ProxyFactory
 
                     case 'precondition':
 
-                        $exception = 'BrokenPreConditionException';
+                        $exception = 'BrokenPreconditionException';
                         break;
 
                     case 'postcondition':
 
-                        $exception = 'BrokenPostConditionException';
+                        $exception = 'BrokenPostconditionException';
                         break;
 
                     case 'invariant':

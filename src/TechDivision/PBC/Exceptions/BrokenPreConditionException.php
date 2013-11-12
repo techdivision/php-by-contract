@@ -12,12 +12,12 @@ namespace TechDivision\PBC\Exceptions;
 use TechDivision\PBC\Interfaces\PBCException;
 
 /**
- * Class BrokenPreConditionException
+ * Class BrokenPreconditionException
  *
  * This exception might be thrown if a certain precondition gets broken during runtime.
  *
  * @package TechDivision\PBC\Exceptions
  */
-class BrokenPreConditionException extends \Exception implements PBCException {
+class BrokenPreconditionException extends \Exception implements PBCException {
 
 }

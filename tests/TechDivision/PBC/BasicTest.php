@@ -59,7 +59,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
         } catch (Exception $e) {}
 
         // Did we get the right $e?
-        $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreConditionException", $e);
+        $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
 
         $e = null;
         try {
@@ -69,7 +69,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
         } catch (Exception $e) {}
 
         // Did we get the right $e?
-        $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreConditionException", $e);
+        $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
 
         $e = null;
         try {
@@ -79,7 +79,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
         } catch (Exception $e) {}
 
         // Did we get the right $e?
-        $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreConditionException", $e);
+        $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
     }
 
     /**

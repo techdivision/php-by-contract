@@ -152,11 +152,11 @@ class InterfaceDefinition implements StructureDefinition
                         // Get the pre- and postconditions of the ancestor
                         if ($functionIterator->current()->preConditions->count() > 0) {
 
-                            $function->ancestralPreConditions->add($functionIterator->current()->preConditions);
+                            $function->ancestralPreconditions->add($functionIterator->current()->preconditions);
                         }
                         if ($functionIterator->current()->postConditions->count() > 0) {
 
-                            $function->ancestralPostConditions->add($functionIterator->current()->postConditions);
+                            $function->ancestralPostconditions->add($functionIterator->current()->postconditions);
                         }
 
                         // Check if we have to use the old keyword now
