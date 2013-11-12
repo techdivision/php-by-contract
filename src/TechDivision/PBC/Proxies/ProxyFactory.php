@@ -19,6 +19,7 @@ use TechDivision\PBC\Interfaces\StructureDefinition;
 use TechDivision\PBC\Entities\Definitions\Structure;
 use TechDivision\PBC\Parser\FileParser;
 use TechDivision\PBC\Config;
+use TechDivision\PBC\StreamFilters\SkeletonFilter;
 use TechDivision\PBC\StructureMap;
 
 /**
@@ -180,6 +181,20 @@ class ProxyFactory
         // Before using the definition we have to finalize it
         $structureDefinition->finalize();
 
+        stream_filter_register('SkeletonFilter', 'TechDivision\PBC\StreamFilters\SkeletonFilter');
+        stream_filter_register('PreconditionFilter', 'TechDivision\PBC\StreamFilters\PreconditionFilter');
+        stream_filter_register('BeautifyFilter', 'TechDivision\PBC\StreamFilters\BeautifyFilter');
+
+        $res = fopen($this->createProxyFilePath($structureDefinition->namespace . '\\' . $structureDefinition->name), 'w+');
+
+        stream_filter_append($res, 'SkeletonFilter', STREAM_FILTER_WRITE, $structureDefinition->functionDefinitions);
+        stream_filter_append($res, 'PreconditionFilter', STREAM_FILTER_WRITE, $structureDefinition->functionDefinitions);
+        stream_filter_append($res, 'BeautifyFilter', STREAM_FILTER_WRITE, $this->config);
+
+        fwrite($res, file_get_contents($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name));
+
+
+/*
         if ($structureDefinition->invariantConditions->isEmpty() === false || $structureDefinition->extends !== '') {
 
             $invariantUsed = true;
@@ -249,20 +264,20 @@ class ProxyFactory
         $fileContent .=
             '/**
             * @var int
-            */
+            *//*
             protected $' . PBC_CONTRACT_DEPTH . ' = 0;';
 
         $fileContent .=
             '/**
             * @var mixed
-            */
+            *//*
             private $' . PBC_KEYWORD_OLD . ';';
 
         // We should create attributes to store our attribute types
         $fileContent .=
             '/**
             * @var array
-            */
+            *//*
             private $attributes = array(';
 
         // After iterate over the attributes and build up our array
@@ -337,7 +352,7 @@ class ProxyFactory
          * Magic function to forward writing property access calls if within visibility boundaries.
          *
          * @throws InvalidArgumentException
-         */
+         *//*
         public function __set($name, $value)
         {
             // Does this property even exist? If not, throw an exception
@@ -395,7 +410,7 @@ class ProxyFactory
          * Magic function to forward reading property access calls if within visibility boundaries.
          *
          * @throws InvalidArgumentException
-         */
+         *//*
         public function __get($name)
         {
             // Does this property even exist? If not, throw an exception
@@ -559,8 +574,8 @@ class ProxyFactory
             throw $e;
         }
 
-        // Return if we succeeded or not
-        return (boolean)file_put_contents($targetFileName, $fileContent);
+        */// Return if we succeeded or not
+        return true;
     }
 
     /**

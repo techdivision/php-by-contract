@@ -19,4 +19,6 @@ interface StreamFilter
     public function getFilterName();
 
     public function getFilterOrder();
+
+    public function dependenciesMet();
 }

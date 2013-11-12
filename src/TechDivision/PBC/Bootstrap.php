@@ -17,8 +17,7 @@ if (is_dir(__DIR__ . "/../../../vendor")) {
     $vendorDir = __DIR__ . "/../../vendor/";
 }
 
-// Load the constants
-require_once 'Constants.php';
+// Include the composer autoloader as a fallback
 require_once $vendorDir . 'autoload.php';
 
 use TechDivision\PBC\AutoLoader;

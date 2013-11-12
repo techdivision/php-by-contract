@@ -1,6 +1,6 @@
 <?php
 /**
- * TechDivision\PBC\StreamFilters\AbstractFilter
+ * TechDivision\PBC\Exceptions\GeneratorException
  *
  * NOTICE OF LICENSE
  *
@@ -9,30 +9,18 @@
  * http://opensource.org/licenses/osl-3.0.php
  */
 
-namespace TechDivision\PBC\StreamFilters;
+namespace TechDivision\PBC\Exceptions;
 
-use TechDivision\PBC\Interfaces\StreamFilter;
+use TechDivision\PBC\Interfaces\PBCException;
 
 /**
  * @package     TechDivision\PBC
- * @subpackage  StreamFilters
+ * @subpackage  Exceptions
  * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
  * @license     http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
  * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-abstract class AbstractFilter extends \php_user_filter implements StreamFilter
-{
-    /**
-     * @var string
-     */
-    public $filtername = __CLASS__;
+class GeneratorException extends \Exception implements PBCException {
 
-    /**
-     * @return string
-     */
-    public function getFilterName()
-    {
-        return $this->filterName;
-    }
 }
