@@ -99,6 +99,14 @@ class SkeletonFilter extends AbstractFilter
 
                         throw new GeneratorException();
                     }
+
+                    // Get the code for our contract depth attribute
+                    // We do this here, as this point is only passed once!
+                    $depthCode = $this->generateDepthCode();
+
+                    // Insert the code
+                    // We also have to insert our contract depth attribute
+                    $bucket->data = str_replace($functionHook, $functionHook . $depthCode, $bucket->data);
                 }
 
                 // Did we find a function? If so check if we know that thing and insert the code of its preconditions.
@@ -143,6 +151,20 @@ class SkeletonFilter extends AbstractFilter
     }
 
     /**
+     * @return string
+     */
+    private function generateDepthCode()
+    {
+        $code = '
+        /**
+         *  @var int
+         */
+         private $' . PBC_CONTRACT_DEPTH . ';';
+
+        return $code;
+    }
+
+    /**
      * @param   FunctionDefinition $functionDefinition
      * @return  string
      */
@@ -153,22 +175,19 @@ class SkeletonFilter extends AbstractFilter
 
         // No just place all the placeholder for other filters to come
         $code .= '{' .
-            PBC_INVARIANT_PLACEHOLDER .
-            PBC_PRECONDITION_PLACEHOLDER;
+            PBC_INVARIANT_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
+            '$this->' . PBC_CONTRACT_DEPTH . '++;' .
+            PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
+            PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
 
-        // Build up the call to the original function
-        if ($functionDefinition->isStatic) {
-
-            $code .= PBC_KEYWORD_RESULT . ' = self::' . $functionDefinition->getHeader('call', true) . ';';
-
-        } else {
-
-            $code .= PBC_KEYWORD_RESULT . ' = $this->' . $functionDefinition->getHeader('call', true) . ';';
-        }
+        // Build up the call to the original function.
+        // We use self:: instead of $this-> to not call the child implementation by accident!
+        $code .= PBC_KEYWORD_RESULT . ' = self::' . $functionDefinition->getHeader('call', true) . ';';
 
         // No just place all the other placeholder for other filters to come
-        $code .= PBC_POSTCONDITION_PLACEHOLDER .
-            PBC_INVARIANT_PLACEHOLDER .
+        $code .= PBC_POSTCONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
+            PBC_INVARIANT_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
+            '$this->' . PBC_CONTRACT_DEPTH . '--;' .
             'return ' . PBC_KEYWORD_RESULT . ';}';
 
         return $code;

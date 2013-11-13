@@ -11,6 +11,7 @@ namespace TechDivision\PBC\Entities\Definitions;
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
+use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Interfaces\StructureDefinition;
 use TechDivision\PBC\Parser\InterfaceParser;
 use TechDivision\PBC\Proxies\Cache;
@@ -46,6 +47,11 @@ class InterfaceDefinition implements StructureDefinition
     public $invariantConditions;
 
     /**
+     * @var TypedListList
+     */
+    public $ancestralInvariants;
+
+    /**
      * @var FunctionDefinitionList
      */
     public $functionDefinitions;
@@ -60,7 +66,27 @@ class InterfaceDefinition implements StructureDefinition
         $this->extends = '';
         $this->constants = array();
         $this->invariantConditions = new AssertionList();
+        $this->ancestralInvariants = new TypedListList();
         $this->functionDefinitions = new FunctionDefinitionList();
+    }
+
+    /**
+     * @return TypedListList
+     */
+    public function getInvariants()
+    {
+        $invariants = $this->ancestralInvariants;
+        $invariants->add($this->invariantConditions);
+
+        return $invariants;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasParents()
+    {
+        return !empty($this->extends);
     }
 
     /**

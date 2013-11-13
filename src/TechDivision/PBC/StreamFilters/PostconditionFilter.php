@@ -1,6 +1,6 @@
 <?php
 /**
- * TechDivision\PBC\StreamFilters\PreconditionFilter
+ * TechDivision\PBC\StreamFilters\PostconditionFilter
  *
  * NOTICE OF LICENSE
  *
@@ -23,13 +23,12 @@ use TechDivision\PBC\Entities\Lists\TypedListList;
  *              Open Software License (OSL 3.0)
  * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-class PreconditionFilter extends AbstractFilter
+class PostconditionFilter
 {
-
     /**
- * @const   int
- */
-    const FILTER_ORDER = 1;
+     * @const   int
+     */
+    const FILTER_ORDER = 2;
 
     /**
      * @var array
@@ -62,7 +61,7 @@ class PreconditionFilter extends AbstractFilter
      */
     public function dependenciesMet()
     {
-        var_dump($this);
+        throw new \Exception();
     }
 
     /**
@@ -99,11 +98,15 @@ class PreconditionFilter extends AbstractFilter
 
                     } else {
 
+                        // If we use the old notation we have to insert the statement to make a copy
+                        $bucket->data = str_replace(PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->name .
+                            PBC_PLACEHOLDER_CLOSE, $this->generateOldCode(), $bucket->data);
+
                         // Get the code for the assertions
-                        $code = $this->generateCode($functionDefinition->getPreconditions());
+                        $code = $this->generateCode($functionDefinition->getPostconditions());
 
                         // Insert the code
-                        $bucket->data = str_replace(PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->name .
+                        $bucket->data = str_replace(PBC_POSTCONDITION_PLACEHOLDER . $functionDefinition->name .
                             PBC_PLACEHOLDER_CLOSE, $code, $bucket->data);
 
                         // "Destroy" code and function definition
@@ -122,16 +125,24 @@ class PreconditionFilter extends AbstractFilter
     }
 
     /**
+     * Will return code to create an entry for the old object state.
+     *
+     * @return string
+     */
+    private function generateOldCode()
+    {
+        return PBC_KEYWORD_OLD . ' = clone $this;';
+    }
+
+    /**
      * @param TypedListList $assertionLists
      * @return string
      */
     private function generateCode(TypedListList $assertionLists)
     {
         // We only use contracting if we're not inside another contract already
-        $code = '/* BEGIN OF PRECONDITION ENFORCEMENT */
-        if ($this->' . PBC_CONTRACT_DEPTH . ' < 2) {
-            $passedOne = false;' .
-            PBC_FAILURE_VARIABLE . ' = array();';
+        $code = '/* BEGIN OF POSTCONDITION ENFORCEMENT */
+        if ($this->' . PBC_CONTRACT_DEPTH . ' < 2) {';
 
         // We need a counter to check how much conditions we got
         $conditionCounter = 0;
@@ -154,37 +165,33 @@ class PreconditionFilter extends AbstractFilter
 
                 $codeFragment[] = $assertionIterator->current()->getString();
 
+                // Forward the iterator and tell them we got a condition
                 $assertionIterator->next();
+                $conditionCounter++;
             }
 
-            // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
-            $conditionCounter++;
+            // Lets insert the condition check (if there have been any)
+            if (!empty($codeFragment)) {
 
-            // Code to catch failed assertions
-            $code .= 'if ($passedOne === false && !((' .
-                implode(') && (', $codeFragment) . '))){' .
-                PBC_FAILURE_VARIABLE . '[] = \'(' . str_replace('\'', '"', implode(') && (', $codeFragment)) . ')\';
-                } else {$passedOne = true;}';
+                $code .= 'if (!((' . implode(') && (', $codeFragment) . '))){' .
+                    PBC_FAILURE_VARIABLE . ' = \'(' . str_replace('\'', '"', implode(') && (', $codeFragment)) . ')\';' .
+                    PBC_PROCESSING_PLACEHOLDER . 'postcondition' . PBC_PLACEHOLDER_CLOSE . '}';
+            }
 
             // increment the outer loop
             $listIterator->next();
         }
 
-        // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
-        $code .= 'if ($passedOne === false){' .
-            PBC_PROCESSING_PLACEHOLDER . 'precondition' . PBC_PLACEHOLDER_CLOSE . '
-            }';
-
         // Closing bracket for contract depth check
-        $code .= '}
-            /* END OF PRECONDITION ENFORCEMENT */';
+        $code .= '}' .
+            '/* END OF POSTCONDITION ENFORCEMENT */';
 
-        // If there were no assertions we will just return a comment
+        // Did we get anything at all? If not only give back a comment.
         if ($conditionCounter === 0) {
 
-            return '/* No preconditions for this function/method */';
+            $code = '/* No postconditions for this function/method */';
         }
 
         return $code;
     }
-}
+} 

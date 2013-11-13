@@ -103,6 +103,25 @@ class ClassDefinition implements StructureDefinition
     }
 
     /**
+     * @return bool
+     */
+    public function hasParents()
+    {
+        return !empty($this->extends);
+    }
+
+    /**
+     * @return TypedListList
+     */
+    public function getInvariants()
+    {
+        $invariants = $this->ancestralInvariants;
+        $invariants->add($this->invariantConditions);
+
+        return $invariants;
+    }
+
+    /**
      * Will return a list of all dependencies eg. parent class, interfaces and traits.
      *
      * @return array

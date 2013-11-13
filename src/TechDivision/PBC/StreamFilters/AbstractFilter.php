@@ -11,6 +11,7 @@
 
 namespace TechDivision\PBC\StreamFilters;
 
+use TechDivision\PBC\Exceptions\GeneratorException;
 use TechDivision\PBC\Interfaces\StreamFilter;
 
 /**

@@ -18,8 +18,6 @@ class StackSale
     {
         $someStrings = array('sdfsafsf', 'rzutrzutfzj', 'OUHuISGZduisd0', 'skfse', 'd', 'fdghdfg', 'srfxcf');
 
-        $someObjects = array(new \Exception(), new \Exception(), new \Exception());
-
         // Do some string stuff
         $stringStack = new StringStack();
         // push the strings into the stack

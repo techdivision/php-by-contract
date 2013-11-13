@@ -17,4 +17,19 @@ interface StructureDefinition
      * @return bool
      */
     public function finalize();
+
+    /**
+     * Will return true if the structure has (a) parent structure(s).
+     * Will return false if not.
+     *
+     * @return bool
+     */
+    public function hasParents();
+
+    /**
+     * Will return all invariants of a structure.
+     *
+     * @return TypedListLists
+     */
+    public function getInvariants();
 }

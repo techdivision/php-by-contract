@@ -24,7 +24,7 @@ abstract class AbstractStack
 
     /**
      * @requires $this->size() >= 1
-     * @ensures $this->size() === $this->pbcOld->size()
+     * @ensures $this->size() === $pbcOld->size()
      */
     public function peek()
     {
@@ -36,8 +36,8 @@ abstract class AbstractStack
 
     /**
      * @requires $this->size() >= 1
-     * @ensures $this->size() == $this->pbcOld->size() - 1
-     * @ensures $pbcResult == $this->pbcOld->peek()
+     * @ensures $this->size() == $pbcOld->size() - 1
+     * @ensures $pbcResult == $pbcOld->peek()
      */
     public function pop()
     {
@@ -45,7 +45,7 @@ abstract class AbstractStack
     }
 
     /**
-     * @ensures $this->size() == $this->pbcOld->size() + 1
+     * @ensures $this->size() == $pbcOld->size() + 1
      * @ensures $this->peek() == $obj
      */
     public function push($obj)

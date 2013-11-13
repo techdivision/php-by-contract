@@ -11,6 +11,7 @@
 
 namespace TechDivision\PBC\StreamFilters;
 
+use TechDivision\PBC\Exceptions\ExceptionFactory;
 use TechDivision\PBC\Exceptions\GeneratorException;
 
 /**
@@ -75,24 +76,31 @@ class ProcessingFilter
      */
     public function filter($in, $out, &$consumed, $closing)
     {
+        // Lets check if we got the config we wanted
+        $config = $this->params;
+        if (!is_array($config) || !isset($config['processing'])) {
+
+            throw new GeneratorException();
+        }
+
+        // Get the code for the processing
+        $preconditionCode = $this->generateCode($config, 'precondition');
+        $postconditionCode = $this->generateCode($config, 'postcondition');
+        $invariantCode = $this->generateCode($config, 'invariant');
+
         // Get our buckets from the stream
         while ($bucket = stream_bucket_make_writeable($in)) {
 
-            // Lets check if we got the config we wanted
-            $config = $this->params;
-            if (!is_array($config) || !isset($config['processing'])) {
-
-                throw new GeneratorException();
-            }
-
             // Get the code for the assertions
-            $code = $this->generateCode($config);
+            $preconditionCode = $this->generateCode($config, 'precondition');
+            $postconditionCode = $this->generateCode($config, 'postcondition');
+            $invariantCode = $this->generateCode($config, 'invariant');
 
             // Insert the code
-            $bucket->data = str_replace(PBC_PROCESSING_PLACEHOLDER, $code, $bucket->data);
-
-            // "Destroy" the code
-            $code = null;
+            $bucket->data = str_replace(array(PBC_PROCESSING_PLACEHOLDER . 'precondition' .PBC_PLACEHOLDER_CLOSE,
+                    PBC_PROCESSING_PLACEHOLDER . 'postcondition' .PBC_PLACEHOLDER_CLOSE,
+                    PBC_PROCESSING_PLACEHOLDER . 'invariant' .PBC_PLACEHOLDER_CLOSE),
+                array($preconditionCode, $postconditionCode, $invariantCode), $bucket->data);
 
             // Tell them how much we already processed, and stuff it back into the output
             $consumed += $bucket->datalen;
@@ -104,43 +112,27 @@ class ProcessingFilter
 
     /**
      * @param $config
+     * @param $for
      * @return string
      */
-    private function generateCode($config)
+    private function generateCode($config, $for)
     {
         $code = '';
+
+        // Code defining the place the error happened
+        $place = '" . __CLASS__ . "::" . __METHOD__ . "';
 
         // What kind of reaction should we create?
         switch ($config['processing']) {
 
             case 'exception':
 
-                // What kind of exception do we need?
-                switch ($for) {
+                $exceptionFactory = new ExceptionFactory();
+                $exception = $exceptionFactory->getClassName($for);
 
-                    case 'precondition':
-
-                        $exception = 'BrokenPreconditionException';
-                        break;
-
-                    case 'postcondition':
-
-                        $exception = 'BrokenPostconditionException';
-                        break;
-
-                    case 'invariant':
-
-                        $exception = 'BrokenInvariantException';
-                        break;
-
-                    default:
-
-                        $exception = '\Exception';
-                        break;
-                }
                 // Create the code
                 $code .= '$this->' . PBC_CONTRACT_DEPTH . '--;
-                throw new ' . $exception . '(\'' . $message . '\');';
+                throw new ' . $exception . '("Failed ' . PBC_FAILURE_VARIABLE . ' in ' . $place . '");';
 
                 break;
 
@@ -148,7 +140,7 @@ class ProcessingFilter
 
                 // Create the code
                 $code .= '$logger = new \\' . $config['logger'] . '();
-                $logger->error(\'Broken ' . $for . ' with message: ' . $message . ' in \' . __METHOD__);';
+                $logger->error("Broken ' . $for . ' with message: ' . PBC_FAILURE_VARIABLE . ' in ' . $place . '");';
                 break;
 
             default:

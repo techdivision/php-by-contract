@@ -176,20 +176,24 @@ class ProxyFactory
      */
     private function createFileFromClassDefinitions($targetFileName, FileDefinition $fileDefinition, ClassDefinition $structureDefinition)
     {
-        // This variable is used to determine if we need an invariant, as we might as well not.
-        $invariantUsed = false;
         // Before using the definition we have to finalize it
         $structureDefinition->finalize();
 
         stream_filter_register('SkeletonFilter', 'TechDivision\PBC\StreamFilters\SkeletonFilter');
         stream_filter_register('PreconditionFilter', 'TechDivision\PBC\StreamFilters\PreconditionFilter');
+        stream_filter_register('PostconditionFilter', 'TechDivision\PBC\StreamFilters\PostconditionFilter');
+        stream_filter_register('InvariantFilter', 'TechDivision\PBC\StreamFilters\InvariantFilter');
+        stream_filter_register('ProcessingFilter', 'TechDivision\PBC\StreamFilters\ProcessingFilter');
         stream_filter_register('BeautifyFilter', 'TechDivision\PBC\StreamFilters\BeautifyFilter');
 
         $res = fopen($this->createProxyFilePath($structureDefinition->namespace . '\\' . $structureDefinition->name), 'w+');
 
         stream_filter_append($res, 'SkeletonFilter', STREAM_FILTER_WRITE, $structureDefinition->functionDefinitions);
         stream_filter_append($res, 'PreconditionFilter', STREAM_FILTER_WRITE, $structureDefinition->functionDefinitions);
-        stream_filter_append($res, 'BeautifyFilter', STREAM_FILTER_WRITE, $this->config);
+        stream_filter_append($res, 'PostconditionFilter', STREAM_FILTER_WRITE, $structureDefinition->functionDefinitions);
+        //stream_filter_append($res, 'InvariantFilter', STREAM_FILTER_WRITE, $structureDefinition);
+        //stream_filter_append($res, 'ProcessingFilter', STREAM_FILTER_WRITE, $this->config);
+        //stream_filter_append($res, 'BeautifyFilter', STREAM_FILTER_WRITE, $this->config);
 
         fwrite($res, file_get_contents($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name));
 
