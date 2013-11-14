@@ -172,6 +172,7 @@ class PreconditionFilter extends AbstractFilter
 
         // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
         $code .= 'if ($passedOne === false){' .
+            PBC_FAILURE_VARIABLE . ' = implode(" and ", ' . PBC_FAILURE_VARIABLE .');' .
             PBC_PROCESSING_PLACEHOLDER . 'precondition' . PBC_PLACEHOLDER_CLOSE . '
             }';
 

@@ -159,7 +159,7 @@ class SkeletonFilter extends AbstractFilter
         /**
          *  @var int
          */
-         private $' . PBC_CONTRACT_DEPTH . ';';
+         private $' . PBC_CONTRACT_DEPTH . ' = 0;';
 
         return $code;
     }
@@ -174,10 +174,16 @@ class SkeletonFilter extends AbstractFilter
         $code = $functionDefinition->getHeader('definition');
 
         // No just place all the placeholder for other filters to come
-        $code .= '{' .
-            PBC_INVARIANT_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
-            '$this->' . PBC_CONTRACT_DEPTH . '++;' .
-            PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
+        $code .= '{';
+
+        // Invariant is not needed in private functions
+        if ($functionDefinition->visibility !== 'private') {
+
+            $code .= PBC_INVARIANT_PLACEHOLDER . 'entry' . PBC_PLACEHOLDER_CLOSE .
+                '$this->' . PBC_CONTRACT_DEPTH . '++;';
+        }
+
+        $code .= PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
             PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
 
         // Build up the call to the original function.
@@ -185,10 +191,16 @@ class SkeletonFilter extends AbstractFilter
         $code .= PBC_KEYWORD_RESULT . ' = self::' . $functionDefinition->getHeader('call', true) . ';';
 
         // No just place all the other placeholder for other filters to come
-        $code .= PBC_POSTCONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
-            PBC_INVARIANT_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
-            '$this->' . PBC_CONTRACT_DEPTH . '--;' .
-            'return ' . PBC_KEYWORD_RESULT . ';}';
+        $code .= PBC_POSTCONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
+
+        // Invariant is not needed in private functions
+        if ($functionDefinition->visibility !== 'private') {
+
+            $code .= PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE .
+                '$this->' . PBC_CONTRACT_DEPTH . '--;';
+        }
+
+        $code .= 'return ' . PBC_KEYWORD_RESULT . ';}';
 
         return $code;
     }

@@ -12,6 +12,7 @@
 namespace TechDivision\PBC\StreamFilters;
 
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
+use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Exceptions\GeneratorException;
 use TechDivision\PBC\Interfaces\StructureDefinition;
 
@@ -74,7 +75,7 @@ class InvariantFilter
      */
     public function filter($in, $out, &$consumed, $closing)
     {
-       /* $structureDefinition = $this->params;
+        $structureDefinition = $this->params;
 
         // As we have to make severe changes to the system we might ensure we need to first.
         // If there is no invariant for this or any ancestral structures we might skip this step entirely.
@@ -89,69 +90,84 @@ class InvariantFilter
         $functionHook = '';
         while ($bucket = stream_bucket_make_writeable($in)) {
 
-            // Get the tokens
-            $tokens = token_get_all($bucket->data);
+            // We only have to do that once!
+            if (empty($functionHook)) {
 
-            // Go through the tokens and check what we found
-            $tokensCount = count($tokens);
-            for ($i = 0; $i < $tokensCount; $i++) {
+                // Get the tokens
+                $tokens = token_get_all($bucket->data);
 
-                // We need something to hook into, right after class header seems fine
-                if (is_array($tokens[$i]) && $tokens[$i][0] === T_CLASS) {
+                // Go through the tokens and check what we found
+                $tokensCount = count($tokens);
+                for ($i = 0; $i < $tokensCount; $i++) {
 
-                    for ($j = $i; $j < $tokensCount; $j++) {
+                    // We need something to hook into, right after class header seems fine
+                    if (is_array($tokens[$i]) && $tokens[$i][0] === T_CLASS) {
 
-                        if (is_array($tokens[$j])) {
+                        for ($j = $i; $j < $tokensCount; $j++) {
 
-                            $functionHook .= $tokens[$j][1];
+                            if (is_array($tokens[$j])) {
 
-                        } else {
+                                $functionHook .= $tokens[$j][1];
 
-                            $functionHook .= $tokens[$j];
+                            } else {
+
+                                $functionHook .= $tokens[$j];
+                            }
+
+                            // If we got the opening bracket we can break
+                            if ($tokens[$j] === '{') {
+
+                                break;
+                            }
                         }
 
-                        // If we got the opening bracket we can break
-                        if ($tokens[$j] === '{') {
+                        // If the function hook is empty we failed and should stop what we are doing
+                        if (empty($functionHook)) {
+
+                            throw new GeneratorException();
+
+                        } else {
 
                             break;
                         }
                     }
-
-                    // If the function hook is empty we failed and should stop what we are doing
-                    if (empty($functionHook)) {
-
-                        throw new GeneratorException();
-                    }
                 }
 
                 // Get the code for our attribute storage
-               // $attributeCode = $this->generateAttributeCode($structureDefinition->attributeDefinitions);
+                $attributeCode = $this->generateAttributeCode($structureDefinition->attributeDefinitions);
 
                 // Get the code for our __set() method
-               // $setCode = $this->generateSetCode($structureDefinition->hasParents());
+                $setCode = $this->generateSetCode($structureDefinition->hasParents());
 
                 // Get the code for our __get() method
-                //$getCode = $this->generateGetCode($structureDefinition->hasParents());
+                $getCode = $this->generateGetCode($structureDefinition->hasParents());
 
                 // Get the code for the assertions
-                //$code = $this->generateFunctionCode($invariants);
+                $code = $this->generateFunctionCode($invariants);
 
                 // Insert the code
-                /*$bucket->data = str_replace($functionHook, array($functionHook . $attributeCode,
+                $bucket->data = str_replace(array($functionHook,
+                    $functionHook,
+                    $functionHook,
+                    $functionHook), array($functionHook . $attributeCode,
                     $functionHook . $setCode,
                     $functionHook . $getCode,
-                    $functionHook . $code), $bucket->data);*//*
-
-                // "Destroy" code and function definition
-                $code = null;
-                $structureDefinition = null;
-
+                    $functionHook . $code), $bucket->data);
             }
+
+            // We need the code to call the invariant
+            $callCodeEntry = $this->generateInvariantCall('entry');
+            $callCodeExit = $this->generateInvariantCall('exit');
+
+            // Insert the code
+            $bucket->data = str_replace(array(PBC_INVARIANT_PLACEHOLDER . 'entry' . PBC_PLACEHOLDER_CLOSE,
+                PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE), array($callCodeEntry,
+                $callCodeExit), $bucket->data);
 
             // Tell them how much we already processed, and stuff it back into the output
             $consumed += $bucket->datalen;
             stream_bucket_append($out, $bucket);
-        }*/
+        }
 
         return PSFS_PASS_ON;
     }
@@ -196,35 +212,6 @@ class InvariantFilter
         $code .= ');
         ';
 
-        // After that we should enter all the other attributes
-        $iterator = $attributeDefinitions->getIterator();
-        for ($i = 0; $i < $iterator->count(); $i++) {
-
-            // Get the current attribute for more easy access
-            $attribute = $iterator->current();
-
-            $code .= 'private ';
-
-            // Now check if we need any keywords for the variable identity
-            if ($attribute->isStatic) {
-
-                $code .= 'static ';
-            }
-
-            $code .= $attribute->name;
-
-            // Do we have a default value
-            if ($attribute->defaultValue !== null) {
-
-                $code .= ' = ' . $attribute->defaultValue;
-            }
-
-            $code .= ';';
-
-            // Move the iterator
-            $iterator->next();
-        }
-
         return $code;
     }
 
@@ -238,7 +225,7 @@ class InvariantFilter
          * Magic function to forward writing property access calls if within visibility boundaries.
          *
          * @throws InvalidArgumentException
-         *//*
+         */
         public function __set($name, $value)
         {
             // Does this property even exist? If not, throw an exception
@@ -268,7 +255,7 @@ class InvariantFilter
          * Magic function to forward reading property access calls if within visibility boundaries.
          *
          * @throws InvalidArgumentException
-         *//*
+         */
         public function __get($name)
         {
             // Does this property even exist? If not, throw an exception
@@ -284,6 +271,35 @@ class InvariantFilter
         }
 
         $code .= '}}';
+
+        return $code;
+    }
+
+    /**
+     * @param $position
+     * @return string
+     */
+    private function generateInvariantCall($position)
+    {
+        $allowed_positions = array_flip(array('entry', 'exit'));
+
+        if (!isset($allowed_positions[$position])) {
+
+            return '';
+        }
+
+        // Decide how our if statement should look depending on the position of the invariant
+        $code = '';
+        if ($position === 'entry') {
+
+            $code = 'if ($this->' . PBC_CONTRACT_DEPTH . ' === 0) {
+            $this->' . PBC_CLASS_INVARIANT_NAME . '();}';
+
+        } elseif ($position === 'exit') {
+
+            $code = 'if ($this->' . PBC_CONTRACT_DEPTH . ' === 1) {
+            $this->' . PBC_CLASS_INVARIANT_NAME . '();}';
+        }
 
         return $code;
     }
