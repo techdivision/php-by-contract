@@ -7,13 +7,8 @@ namespace Wicked\salesman\Sales\Stack;
  *
  * @invariant is_array($this->container)
  */
-abstract class AbstractStack
+class AbstractStack
 {
-    /**
-     * @var array
-     */
-    protected $container = array();
-
     /**
      * @ensures is_int($pbcResult)
      */
