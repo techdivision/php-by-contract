@@ -9,8 +9,8 @@
 
 namespace TechDivision\PBC;
 
-use TechDivision\PBC\Proxies\Cache;
-use TechDivision\PBC\Proxies\ProxyFactory;
+use TechDivision\PBC\CacheMap;
+use TechDivision\PBC\Generator;
 
 require_once __DIR__ . '/Bootstrap.php';
 
@@ -21,9 +21,14 @@ require_once __DIR__ . '/Bootstrap.php';
 class Exporter
 {
     /**
-     * @var Cache
+     * @var CacheMap
      */
     private $cache;
+
+    /**
+     * @var StructureMap
+     */
+    private $structureMap;
 
     /**
      * @param $source
@@ -48,7 +53,11 @@ class Exporter
 
         // We are still here so everything seems to be according to plan
         // We should clean our fileMap
-        $this->cache = Cache::getInstance(dirname($source));
+        $this->cache = new CacheMap('PBC_CACHE_DIR');
+
+        $config = new Config();
+        $config = $config->getConfig('AutoLoader');
+        $this->structureMap = new StructureMap($config['projectRoot']);
 
         // Get all files within this dir
         $tmpFiles = $this->cache->getFiles();
@@ -133,12 +142,12 @@ class Exporter
      */
     private function getFreshlyParsedFiles(array $fileList)
     {
-        // Get a proxy factory and use it!
-        $proxyFactory = new ProxyFactory($this->cache);
+        // Get a code generator and use it!
+        $generator = new Generator($this->structureMap, $this->cache);
 
         foreach($fileList as $class => $file) {
 
-            $proxyFactory->createProxy($class);
+            $generator->createProxy($class);
         }
 
         // Now everything should be cached ;)

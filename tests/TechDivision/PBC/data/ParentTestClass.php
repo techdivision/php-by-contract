@@ -5,6 +5,7 @@
  *
  * @invariant $this->size() >= 0
  * @invariant $this->size() < 100
+ * @invariant $this->elements !== null
  */
 class ParentTestClass
 {

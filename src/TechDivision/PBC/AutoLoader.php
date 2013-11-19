@@ -2,7 +2,7 @@
 
 namespace TechDivision\PBC;
 
-use TechDivision\PBC\Proxies\ProxyFactory;
+use TechDivision\PBC\Generator;
 
 // Load the constants if not already done
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'Constants.php';
@@ -26,9 +26,9 @@ class AutoLoader
     private $cache;
 
     /**
-     * @var Proxies\ProxyFactory
+     * @var Generator
      */
-    private $proxyFactory;
+    private $generator;
 
     /**
      * @const
@@ -103,17 +103,17 @@ class AutoLoader
             require_once __DIR__ . DIRECTORY_SEPARATOR . 'CacheMap.php';
             $this->cache = new CacheMap(PBC_CACHE_DIR, $this->config);
         }
-        $this->proxyFactory = new ProxyFactory($structureMap, $this->cache);
+        $this->generator = new Generator($structureMap, $this->cache);
 
         // Create the new class definition
-        if ($this->proxyFactory->createProxy($className) === true) {
+        if ($this->generator->createProxy($className) === true) {
 
-            // Require the proxy class, it should have been created now
-            $proxyFile = $this->proxyFactory->getProxyFileName($className);
+            // Require the new class, it should have been created now
+            $file = $this->generator->getProxyFileName($className);
 
-            if (is_readable($proxyFile) === true) {
+            if (is_readable($file) === true) {
 
-                require $proxyFile;
+                require $file;
                 return true;
             }
 

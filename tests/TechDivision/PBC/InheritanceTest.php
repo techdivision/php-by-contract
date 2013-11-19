@@ -16,6 +16,19 @@ class InheritanceTest extends PHPUnit_Framework_TestCase {
     public function testInheritance()
     {
         $testClass = new ChildTestClass();
+
+
+        // These should fail
+        $e = null;
+        try {
+
+            $testClass->pop();
+
+        } catch (Exception $e) {}
+
+        // Did we get the right $e?
+        $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
+
     }
 
 }

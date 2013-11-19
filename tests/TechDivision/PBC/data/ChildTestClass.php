@@ -2,12 +2,16 @@
 
 /**
  * Class ChildTestClass
- *
- * @invariant $this->elements !== null
  */
 class ChildTestClass extends ParentTestClass
 {
     protected $elements;
+
+    public function __construct()
+    {
+        $this->elements = array();
+    }
+
 
     public function size()
     {

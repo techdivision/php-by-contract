@@ -22,8 +22,8 @@ define('PBC_CLASS_INVARIANT_NAME', 'pbcClassInvariant');
 define('PBC_ORIGINAL_FUNCTION_SUFFIX', 'PBCOriginal');
 
 // Constants to configure our structure maps and caches
-define('PBC_MAP_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'Proxies' . DIRECTORY_SEPARATOR . 'cache');
-define('PBC_CACHE_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'Proxies' . DIRECTORY_SEPARATOR . 'cache');
+define('PBC_MAP_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'cache');
+define('PBC_CACHE_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'cache');
 
 // Will be used as placeholder for code procession
 define('PBC_PROCESSING_PLACEHOLDER', '/* PBC_PROCESSING_PLACEHOLDER ');

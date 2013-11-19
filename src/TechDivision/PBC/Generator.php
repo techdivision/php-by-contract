@@ -7,7 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-namespace TechDivision\PBC\Proxies;
+namespace TechDivision\PBC;
 
 use TechDivision\PBC\CacheMap;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
@@ -23,9 +23,9 @@ use TechDivision\PBC\StreamFilters\SkeletonFilter;
 use TechDivision\PBC\StructureMap;
 
 /**
- * Class ProxyFactory
+ * Class Generator
  */
-class ProxyFactory
+class Generator
 {
 
     /**
