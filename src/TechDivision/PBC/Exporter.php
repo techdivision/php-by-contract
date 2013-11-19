@@ -9,9 +9,6 @@
 
 namespace TechDivision\PBC;
 
-use TechDivision\PBC\CacheMap;
-use TechDivision\PBC\Generator;
-
 require_once __DIR__ . '/Bootstrap.php';
 
 /**

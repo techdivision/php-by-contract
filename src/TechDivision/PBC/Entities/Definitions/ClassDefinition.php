@@ -135,12 +135,28 @@ class ClassDefinition implements StructureDefinition
     }
 
     /**
+     *
+     */
+    private function finalizeChildren()
+    {
+        $iterator = $this->functionDefinitions->getIterator();
+        for ($i = 0; $iterator->count(); $i++) {
+
+            $iterator->current()->finalize();
+
+            $iterator->next();
+        }
+
+    }
+
+    /**
      * Finalize this class definition
      *
      * Will make the final steps to complete the class definition.
      * Mostly this consists of getting the ancestral invariants and
      * method pre- and postconditions.
      *
+     * @param   boolean
      * @return  boolean
      */
     public function finalize()
@@ -184,6 +200,7 @@ class ClassDefinition implements StructureDefinition
             foreach ($ancestorList as $ancestor) {
 
                 // Do we know this file?
+                $ancestor = trim($ancestor, '\\');
                 $file = $cache->getEntry($ancestor);
                 if ($file !== false) {
 
@@ -237,6 +254,7 @@ class ClassDefinition implements StructureDefinition
 
                     // Do we have a method like that?
                     $function = $this->functionDefinitions->get($functionIterator->current()->name);
+
                     if ($function !== false) {
 
                         // Get the pre- and postconditions of the ancestor

@@ -2,8 +2,6 @@
 
 namespace TechDivision\PBC;
 
-use TechDivision\PBC\Generator;
-
 // Load the constants if not already done
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'Constants.php';
 
