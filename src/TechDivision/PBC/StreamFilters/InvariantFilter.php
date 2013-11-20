@@ -24,7 +24,7 @@ use TechDivision\PBC\Interfaces\StructureDefinition;
  *              Open Software License (OSL 3.0)
  * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-class InvariantFilter
+class InvariantFilter extends AbstractFilter
 {
     /**
      * @const   int
@@ -84,6 +84,28 @@ class InvariantFilter
 
             // Nothing to do here
             return PSFS_PASS_ON;
+        }
+
+        // After iterate over the attributes and build up our array of attributes we have to include in our
+        // checking mechanism.
+        $obsoleteProperties = array();
+        $propertyReplacements = array();
+        $iterator = $structureDefinition->attributeDefinitions->getIterator();
+        for ($i = 0; $i < $iterator->count(); $i++) {
+
+            // Get the current attribute for more easy access
+            $attribute = $iterator->current();
+
+            // Only enter the attribute if it is used in an invariant and it is not private
+            if ($attribute->inInvariant && $attribute->visibility !== 'private') {
+
+                // Build up our regex expression to filter them out
+                $obsoleteProperties[] = '/' . $attribute->visibility .'.*?\\' . $attribute->name . '/';
+                $propertyReplacements[] = 'private ' . $attribute->name;
+            }
+
+            // Move the iterator
+            $iterator->next();
         }
 
         // Get our buckets from the stream
@@ -164,6 +186,9 @@ class InvariantFilter
                 PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE), array($callCodeEntry,
                 $callCodeExit), $bucket->data);
 
+            // Remove all the properties we will take care of with our magic setter and getter
+            $bucket->data = preg_replace($obsoleteProperties, $propertyReplacements, $bucket->data, 1);
+
             // Tell them how much we already processed, and stuff it back into the output
             $consumed += $bucket->datalen;
             stream_bucket_append($out, $bucket);
@@ -241,7 +266,14 @@ class InvariantFilter
 
         } else {
 
-            $code .= 'throw new \InvalidArgumentException;';
+            $code .= 'if (property_exists($this, $name)) {
+
+                throw new \InvalidArgumentException;
+            } else {
+
+                throw new \TechDivision\PBC\Exceptions\MissingPropertyException("Property $name does not exist in " .
+                    __CLASS__);
+            }';
         }
 
         $code .= '}
@@ -305,7 +337,14 @@ class InvariantFilter
 
         } else {
 
-            $code .= 'throw new \InvalidArgumentException;';
+            $code .= 'if (property_exists($this, $name)) {
+
+                throw new \InvalidArgumentException;
+            } else {
+
+                throw new \TechDivision\PBC\Exceptions\MissingPropertyException("Property $name does not exist in " .
+                    __CLASS__);
+            }';
         }
 
         $code .= '}

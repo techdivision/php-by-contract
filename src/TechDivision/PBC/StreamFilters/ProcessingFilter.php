@@ -22,7 +22,7 @@ use TechDivision\PBC\Exceptions\GeneratorException;
  *              Open Software License (OSL 3.0)
  * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-class ProcessingFilter
+class ProcessingFilter extends AbstractFilter
 {
 
     /**
@@ -132,7 +132,7 @@ class ProcessingFilter
 
                 // Create the code
                 $code .= '$this->' . PBC_CONTRACT_DEPTH . '--;
-                throw new ' . $exception . '("Failed ' . PBC_FAILURE_VARIABLE . ' in ' . $place . '");';
+                throw new \\' . $exception . '("Failed ' . PBC_FAILURE_VARIABLE . ' in ' . $place . '");';
 
                 break;
 

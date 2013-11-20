@@ -424,6 +424,7 @@ class ClassParser extends AbstractParser implements StructureParser
             for ($i = 0; $i < $attributeIterator->count(); $i++) {
 
                 // Do we have any of these attributes in our invariants?
+                $invariantIterator = $invariants->getIterator();
                 for ($j = 0; $j < $invariantCount; $j++) {
 
                     if (strpos($invariantIterator->current()->getString(),

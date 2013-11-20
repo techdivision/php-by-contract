@@ -14,6 +14,7 @@ require __DIR__ . '/RealTest.php';
 require __DIR__ . '/InheritanceTest.php';
 require __DIR__ . '/StackTest.php';
 require __DIR__ . '/InterfaceTest.php';
+require __DIR__ . '/PropertyTest.php';
 
 class AllTests
 {
@@ -26,6 +27,7 @@ class AllTests
         $suite->addTestSuite('InheritanceTest');
         $suite->addTestSuite('StackTest');
         $suite->addTestSuite('InterfaceTest');
+        $suite->addTestSuite('PropertyTest');
 
         return $suite;
     }

@@ -184,7 +184,6 @@ class Generator
         stream_filter_register('PostconditionFilter', 'TechDivision\PBC\StreamFilters\PostconditionFilter');
         stream_filter_register('InvariantFilter', 'TechDivision\PBC\StreamFilters\InvariantFilter');
         stream_filter_register('ProcessingFilter', 'TechDivision\PBC\StreamFilters\ProcessingFilter');
-        stream_filter_register('BeautifyFilter', 'TechDivision\PBC\StreamFilters\BeautifyFilter');
 
         $res = fopen($this->createProxyFilePath($structureDefinition->namespace . '\\' . $structureDefinition->name), 'w+');
 
@@ -193,7 +192,6 @@ class Generator
         stream_filter_append($res, 'PostconditionFilter', STREAM_FILTER_WRITE, $structureDefinition->functionDefinitions);
         stream_filter_append($res, 'InvariantFilter', STREAM_FILTER_WRITE, $structureDefinition);
         stream_filter_append($res, 'ProcessingFilter', STREAM_FILTER_WRITE, $this->config);
-        //stream_filter_append($res, 'BeautifyFilter', STREAM_FILTER_WRITE, $this->config);
 
         $tmp = fwrite($res, file_get_contents($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name));
 

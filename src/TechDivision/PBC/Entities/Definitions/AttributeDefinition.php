@@ -79,9 +79,7 @@ class AttributeDefinition implements Definition
             $stringParts[] = '= ' . $this->defaultValue;
         }
 
-        // And don't forget the trailing semicolon + linebreak
-        $stringParts[] = ';';
-
-        return implode(' ', $stringParts);
+        // And don't forget the trailing semicolon
+        return implode(' ', $stringParts) . ';';
     }
 }

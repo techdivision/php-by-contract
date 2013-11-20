@@ -23,7 +23,7 @@ use TechDivision\PBC\Entities\Lists\TypedListList;
  *              Open Software License (OSL 3.0)
  * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-class PostconditionFilter
+class PostconditionFilter extends AbstractFilter
 {
     /**
      * @const   int
