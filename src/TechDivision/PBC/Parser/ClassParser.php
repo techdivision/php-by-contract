@@ -12,6 +12,7 @@ namespace TechDivision\PBC\Parser;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Definitions\AttributeDefinition;
+use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Interfaces\StructureParser;
@@ -162,8 +163,8 @@ class ClassParser extends AbstractParser implements StructureParser
         }
 
         // Clean possible double-\
-        $classDefinition->extends = $this->resolveUsedNamespace($fileDefinition->usedNamespaces,
-            str_replace('\\\\', '\\', $classDefinition->extends));
+        $classDefinition->extends = trim($this->resolveUsedNamespace($fileDefinition->usedNamespaces,
+            str_replace('\\\\', '\\', $classDefinition->extends)), '\\');
 
         // Get all Interfaces and add their namespaces to them
         $interfaces = array();
@@ -175,7 +176,7 @@ class ClassParser extends AbstractParser implements StructureParser
         $classDefinition->constants = $this->getConstants($tokens);
 
         // Lets get the attributes the class might have
-        $classDefinition->attributeDefinitions = $this->getAttributes($tokens);
+        $classDefinition->attributeDefinitions = $this->getAttributes($tokens, $classDefinition->invariantConditions);
 
         // Only thing still missing are the methods, so ramp up our FunctionParser
         $functionParser = new FunctionParser();
@@ -358,9 +359,10 @@ class ClassParser extends AbstractParser implements StructureParser
      *
      * @access private
      * @param array $tokens
+     * @param AssertionList $invariants
      * @return AttributeDefinitionList
      */
-    private function getAttributes(array $tokens)
+    private function getAttributes(array $tokens, AssertionList $invariants = null)
     {
         // Check the tokens
         $attributes = new AttributeDefinitionList();
@@ -409,6 +411,32 @@ class ClassParser extends AbstractParser implements StructureParser
                         break;
                     }
                 }
+            }
+        }
+
+        // If we got invariants we will check if our attributes are used in invariants
+        if ($invariants !== null) {
+
+            // Lets iterate over all the attributes and check them against the invariants we got
+            $invariantIterator = $invariants->getIterator();
+            $invariantCount = $invariantIterator->count();
+            $attributeIterator = $attributes->getIterator();
+            for ($i = 0; $i < $attributeIterator->count(); $i++) {
+
+                // Do we have any of these attributes in our invariants?
+                for ($j = 0; $j < $invariantCount; $j++) {
+
+                    if (strpos($invariantIterator->current()->getString(),
+                            '$this->' . ltrim($attributeIterator->current()->name, '$')) !== false) {
+
+                        // Tell them we were mentioned and persist it
+                        $attributeIterator->current()->inInvariant = true;
+                    }
+
+                    $invariantIterator->next();
+                }
+
+                $attributeIterator->next();
             }
         }
 

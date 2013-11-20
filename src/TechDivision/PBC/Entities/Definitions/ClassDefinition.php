@@ -135,21 +135,6 @@ class ClassDefinition implements StructureDefinition
     }
 
     /**
-     *
-     */
-    private function finalizeChildren()
-    {
-        $iterator = $this->functionDefinitions->getIterator();
-        for ($i = 0; $iterator->count(); $i++) {
-
-            $iterator->current()->finalize();
-
-            $iterator->next();
-        }
-
-    }
-
-    /**
      * Finalize this class definition
      *
      * Will make the final steps to complete the class definition.
@@ -200,7 +185,6 @@ class ClassDefinition implements StructureDefinition
             foreach ($ancestorList as $ancestor) {
 
                 // Do we know this file?
-                $ancestor = trim($ancestor, '\\');
                 $file = $cache->getEntry($ancestor);
                 if ($file !== false) {
 
@@ -240,7 +224,6 @@ class ClassDefinition implements StructureDefinition
         }
 
         // We have to get a map of all the methods we have to know which got overridden
-        $methods = array();
         if ($this->functionDefinitions->count() === 0) {
 
             return false;

@@ -10,6 +10,11 @@ namespace Wicked\salesman\Sales\Stack;
 class AbstractStack
 {
     /**
+     * @var array
+     */
+    protected $container = array();
+
+    /**
      * @ensures is_int($pbcResult)
      */
     public function size()

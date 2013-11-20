@@ -74,6 +74,36 @@ class StructureMap
     }
 
     /**
+     * Will return all entries in our map.
+     *
+     * @param bool $contracted
+     * @return Structure
+     */
+    public function getEntries($contracted = false)
+    {
+        // Our structures
+        $structures = array();
+
+        foreach ($this->map as $entry) {
+
+            // If we only need contracted only
+            if ($contracted === true && $entry['hasContracts'] === false) {
+
+                continue;
+            }
+
+            $structures[] = new Structure($entry['cTime'],
+                $entry['identifier'],
+                $entry['path'],
+                $entry['type'],
+                $entry['hasContracts']);
+        }
+
+        // Return the structure DTOs
+        return $structures;
+    }
+
+    /**
      * Will add a structure entry to the map.
      *
      * @param Structure $structure
@@ -135,7 +165,7 @@ class StructureMap
     }
 
     /**
-     * Checks if the entry for a certain structure is current if a one was specified.
+     * Checks if the entry for a certain structure is current if one was specified.
      * If not it will check if the whole map is current.
      *
      * @param null|string $structure

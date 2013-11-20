@@ -192,19 +192,23 @@ class InvariantFilter
             // Get the current attribute for more easy access
             $attribute = $iterator->current();
 
-            $code .= '"' . substr($attribute->name, 1) . '"';
-            $code .= ' => array("visibility" => "' . $attribute->visibility . '", ';
+            // Only enter the attribute if it is used in an invariant and it is not private
+            if ($attribute->inInvariant && $attribute->visibility !== 'private') {
 
-            // Now check if we need any keywords for the variable identity
-            if ($attribute->isStatic) {
+                $code .= '"' . substr($attribute->name, 1) . '"';
+                $code .= ' => array("visibility" => "' . $attribute->visibility . '", ';
 
-                $code .= '"static" => true';
+                // Now check if we need any keywords for the variable identity
+                if ($attribute->isStatic) {
 
-            } else {
+                    $code .= '"static" => true';
 
-                $code .= '"static" => false';
+                } else {
+
+                    $code .= '"static" => false';
+                }
+                $code .= '),';
             }
-            $code .= '),';
 
             // Move the iterator
             $iterator->next();
@@ -240,7 +244,41 @@ class InvariantFilter
             $code .= 'throw new \InvalidArgumentException;';
         }
 
-        $code .= '}}';
+        $code .= '}
+        // Check if the invariant holds
+            ' . PBC_INVARIANT_PLACEHOLDER . 'entry' . PBC_PLACEHOLDER_CLOSE .
+            '$this->' . PBC_CONTRACT_DEPTH . '++;
+
+            // Now check what kind of visibility we would have
+            $attribute = $this->attributes[$name];
+            switch ($attribute["visibility"]) {
+
+                case "protected" :
+
+                    if (is_subclass_of(get_called_class(), __CLASS__)) {
+
+                        $this->$name = $value;
+
+                    } else {
+
+                        throw new \InvalidArgumentException;
+                    }
+                    break;
+
+                case "public" :
+
+                    $this->$name = $value;
+                    break;
+
+                default :
+
+                    throw new \InvalidArgumentException;
+                    break;
+            }
+
+            // Check if the invariant holds
+            ' . PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE .
+            '$this->' . PBC_CONTRACT_DEPTH . '--;}';
 
         return $code;
     }
@@ -270,7 +308,34 @@ class InvariantFilter
             $code .= 'throw new \InvalidArgumentException;';
         }
 
-        $code .= '}}';
+        $code .= '}
+
+        // Now check what kind of visibility we would have
+        $attribute = $this->attributes[$name];
+        switch ($attribute["visibility"]) {
+
+            case "protected" :
+
+                if (is_subclass_of(get_called_class(), __CLASS__)) {
+
+                    return $this->$name;
+
+                } else {
+
+                    throw new \InvalidArgumentException;
+                }
+                break;
+
+            case "public" :
+
+                return $this->$name;
+                break;
+
+            default :
+
+                throw new \InvalidArgumentException;
+                break;
+        }}';
 
         return $code;
     }

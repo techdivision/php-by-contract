@@ -36,6 +36,13 @@ class AttributeDefinition implements Definition
     public $defaultValue;
 
     /**
+     * Is this attribute part of the invariant?
+     *
+     * @var bool
+     */
+    public $inInvariant;
+
+    /**
      * Default constructor
      */
     public function __construct()
@@ -44,6 +51,7 @@ class AttributeDefinition implements Definition
         $this->isStatic = false;
         $this->name = '';
         $this->defaultValue = null;
+        $this->inInvariant = false;
     }
 
     /**
@@ -66,11 +74,13 @@ class AttributeDefinition implements Definition
         $stringParts[] = $this->name;
 
         // Add any default value we might get
-        $stringParts[] = $this->defaultValue;
+        if ($this->defaultValue !== null) {
+
+            $stringParts[] = '= ' . $this->defaultValue;
+        }
 
         // And don't forget the trailing semicolon + linebreak
-        $stringParts[] = ';
-        ';
+        $stringParts[] = ';';
 
         return implode(' ', $stringParts);
     }
