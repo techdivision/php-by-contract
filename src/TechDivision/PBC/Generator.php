@@ -52,8 +52,8 @@ class Generator
         $this->structureMap = $structureMap;
         $this->cache = $cache;
 
-        $config = new Config();
-        $this->config = $config->getConfig('Enforcement');
+        $config = Config::getInstance();
+        $this->config = $config->getConfig('enforcement');
     }
 
     /**

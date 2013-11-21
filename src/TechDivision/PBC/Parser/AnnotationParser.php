@@ -59,8 +59,8 @@ class AnnotationParser extends AbstractParser
 
     public function __construct()
     {
-        $config = new Config();
-        $this->config = $config->getConfig('Enforcement');
+        $config = Config::getInstance();
+        $this->config = $config->getConfig('enforcement');
     }
 
     /**
@@ -83,7 +83,7 @@ class AnnotationParser extends AbstractParser
         if ($conditionKeyword === PBC_KEYWORD_POST) {
 
             // Check if we need @return as well
-            if ($this->config['enforceDefaultTypeSafety'] === true) {
+            if ($this->config['enforce-default-type-safety'] === true) {
 
                 $regex = '/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n|' . '@return' . '.+?\n/s';
 
@@ -97,7 +97,7 @@ class AnnotationParser extends AbstractParser
         } elseif ($conditionKeyword === PBC_KEYWORD_PRE) {
 
             // Check if we need @return as well
-            if ($this->config['enforceDefaultTypeSafety'] === true) {
+            if ($this->config['enforce-default-type-safety'] === true) {
 
                 $regex = '/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n|' . '@param' . '.+?\n/s';
 

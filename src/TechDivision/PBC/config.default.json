@@ -1,0 +1,37 @@
+{
+    "environment": "production",
+
+    "cache": {
+
+        "dir": "./cache"
+    },
+
+    "autoloader": {
+
+        "omit": [
+            "TechDivision\\PBC",
+            "PHPUnit",
+            "PHPParser",
+            "Psr\\Log"
+        ]
+    },
+
+    "enforcement": {
+
+        "enforce-default-type-safety": true,
+        "processing": "exception"
+    },
+
+    "project-dirs": [
+        {
+            "dir": "./../../..",
+            "enforce-default-type-safety": true,
+            "processing": "exception",
+            "cache": {
+
+                "dir": "./cache/libs"
+            }
+        }
+
+    ]
+}

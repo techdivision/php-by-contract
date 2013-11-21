@@ -1,0 +1,29 @@
+{
+    "environment": "production",
+
+    "cache": {
+
+        "dir": "./cache/test"
+    },
+
+    "autoloader": {
+
+        "omit": [
+            "TechDivision\\PBC",
+            "PHPUnit",
+            "PHPParser",
+            "Psr\\Log"
+        ]
+    },
+
+    "enforcement": {
+
+        "enforce-default-type-safety": false,
+        "processing": "logger"
+    },
+
+    "project-dirs": [
+        "/opt/appserver/app/code",
+        "/opt/appserver/webapps"
+    ]
+}

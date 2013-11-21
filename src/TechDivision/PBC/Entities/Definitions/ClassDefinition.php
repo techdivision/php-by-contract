@@ -165,9 +165,8 @@ class ClassDefinition implements StructureDefinition
 
         // Now finalize them recursively using the needed parsers
         $parsers = array('interface' => new InterfaceParser(), 'class' => new ClassParser());
-        $config = new Config();
-        $autoLoaderConfig = $config->getConfig('AutoLoader');
-        $cache = new StructureMap($autoLoaderConfig['projectRoot'], $config);
+        $config = Config::getInstance();
+        $cache = new StructureMap($config->getConfig('project-dirs'), $config);
 
         $ancestorDefinitions = array();
         foreach ($ancestors as $key => $ancestorList) {

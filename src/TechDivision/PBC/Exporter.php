@@ -52,9 +52,9 @@ class Exporter
         // We should clean our fileMap
         $this->cache = new CacheMap('PBC_CACHE_DIR');
 
-        $config = new Config();
-        $config = $config->getConfig('AutoLoader');
-        $this->structureMap = new StructureMap($config['projectRoot']);
+        $config = Config::getInstance();
+        $this->config = $config->getConfig('autoloader');
+        $this->structureMap = new StructureMap($config['project-dirs']);
 
         // Get all files within this dir
         $tmpFiles = $this->cache->getFiles();

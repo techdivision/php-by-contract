@@ -39,7 +39,7 @@ class AutoLoader
      */
     public function __construct()
     {
-        $this->config = new Config();
+        $this->config = Config::getInstance();
         $this->cache = null;
     }
 
@@ -52,18 +52,18 @@ class AutoLoader
     {
         // Do we have the file in our cache dir? If we are in development mode we have to ignore this.
         $cachePath = PBC_CACHE_DIR . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php';
-        if ($this->config->getConfig('Environment') !== 'development' && is_readable($cachePath)) {
+        if ($this->config->getConfig('environment') !== 'development' && is_readable($cachePath)) {
 
             require $cachePath;
             return true;
         }
 
         // There was no file in our cache dir, so lets hope we know the original path of the file.
-        $autoLoaderConfig = $this->config->getConfig('AutoLoader');
+        $autoLoaderConfig = $this->config->getConfig('autoloader');
 
         // We also require the classes of our maps as we do not have proper autoloading in place
         require_once __DIR__ . DIRECTORY_SEPARATOR . 'StructureMap.php';
-        $structureMap = new StructureMap($autoLoaderConfig['projectRoot'], $this->config);
+        $structureMap = new StructureMap($this->config->getConfig('project-dirs'), $this->config);
         $file = $structureMap->getEntry($className);
 
         // Did we get something? If not return false.

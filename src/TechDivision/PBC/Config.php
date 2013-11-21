@@ -14,63 +14,80 @@ use Psr\Log\LoggerInterface;
 
 class Config implements PBCConfig
 {
-    public function __construct()
+
+    /**
+     * @var null|Config
+     */
+    private static $instances = array();
+
+    /**
+     * @const   string
+     */
+    const DEFAULT_CONFIG = 'config.default.json';
+
+    /**
+     * @var array
+     */
+    protected $config = array();
+
+    /**
+     *
+     */
+    private function __construct()
     {
-        /**
-         * Specify which classes are affected by the library's autoloading process.
-         *
-         * 'omit' lets you specify namespaces which are not parsed or check for contracts.
-         *
-         * 'projectRoot' specifies the root of your project. All enclosed php structures such as classes, interfaces
-         * and traits will be included in the autoload and parsing process.
-         */
-        $this->config['AutoLoader'] = array(
-            'omit' => array('TechDivision\PBC', 'PHPUnit', 'PHPParser', 'Symfony\Component', 'Psr\Log'),
-            'projectRoot' => __DIR__ . DIRECTORY_SEPARATOR . '..' .
-                DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..'
-        );
+        if ($this->validate(__DIR__ . DIRECTORY_SEPARATOR . self::DEFAULT_CONFIG)) {
 
-        /**
-         * Specify how and what to enforce in therms of contracts.
-         *
-         * 'enforceDefaultTypeSafety' (true|false) states if type hints with @param and @return should be considered
-         *      pre- or postconditions in terms of a variable type check
-         *
-         * 'processing' ('exception'|'logging') states how the library should react in case of a contract
-         *      violation. If 'logging' is chosen, the config entry 'logger' has to be filled correctly.
-         *
-         * 'logger' specify a logging class using its fully qualified name. The class has to be PSR-3 compliant and
-         *      should therefore implement the Psr\Log\LoggerInterface interface which comes with this library.
-         *      (See also https://github.com/php-fig/log)
-         *      If the specified class does not satisfy our needs 'processing' will default to 'none'
-         */
-        $this->config['Enforcement'] = array(
-            'enforceDefaultTypeSafety' => true,
-            'processing' => 'exception',
-            'logger' => ''
-        );
+            $this->load(__DIR__ . DIRECTORY_SEPARATOR . self::DEFAULT_CONFIG);
 
-        /**
-         * Here you can specify the environment in which php-by-contract operates.
-         * See possible options below.
-         *
-         * 'development' will omit caching of structures.
-         *
-         * 'production' will utilize the full potential and omit error output others than
-         * specified in 'Enforcement''processing'.
-         */
-        $this->config['Environment'] = 'production';
+        } else {
 
+            throw new \Exception('Invalid default configuration.');
+        }
+    }
 
-        // Validate the configuration.
-        $this->validate();
+    /**
+     * @param string $context
+     * @return Config
+     */
+    public static function getInstance($context = '')
+    {
+        if (!isset(self::$instances[$context])) {
+
+            self::$instances[$context] = new self();
+        }
+
+        return self::$instances[$context];
+    }
+
+    /**
+     * @param   string $file
+     * @throws \Exception
+     */
+    public function load($file)
+    {
+        // Do we load a valid config?
+        if (!$this->validate($file)) {
+
+            throw new \Exception('Attempt to load invalid configuration file.');
+
+        }
+
+        $configCandidate = json_decode(file_get_contents($file), true);
+
+        // Did we even get an array?
+        if (!is_array($configCandidate)) {
+
+            throw new \Exception('Could not parse configuration file ' . $file);
+        }
+
+        $this->config = array_replace_recursive($this->config, $configCandidate);
     }
 
     /**
      *
      */
-    private function validate()
-    {
+    public function validate($file)
+    { /*
         // Check if we have to use a logger, and if so check if it complies with PSR-3.
         if ($this->config['Enforcement']['processing'] === 'logging') {
 
@@ -85,7 +102,7 @@ class Config implements PBCConfig
                 $this->config['Enforcement']['processing'] = 'exception';
             }
         }
-
+        */
         // There was no error till now, so return true.
         return true;
     }

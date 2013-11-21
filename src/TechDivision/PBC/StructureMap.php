@@ -53,6 +53,15 @@ class StructureMap
             $rootPathes = array($rootPathes);
         }
 
+        // We might have further configuration within the directory configurations
+        foreach ($rootPathes as $key => $rootPath) {
+
+            if (is_array($rootPath) && isset($rootPath['dir'])) {
+
+                $rootPathes[$key] = $rootPath['dir'];
+            }
+        }
+
         // Save the config for later use.
         $this->config = $config;
 
@@ -342,8 +351,8 @@ class StructureMap
         $needles = array(PBC_KEYWORD_INVARIANT, PBC_KEYWORD_POST, PBC_KEYWORD_PRE);
 
         // If we have to enforce things like @param or @returns, we have to be more sensitive
-        $enforcementConfig = $this->config->getConfig('Enforcement');
-        if ($enforcementConfig['enforceDefaultTypeSafety'] === true) {
+        $enforcementConfig = $this->config->getConfig('enforcement');
+        if ($enforcementConfig['enforce-default-type-safety'] === true) {
 
             $needles[] = '@var';
             $needles[] = '@param';

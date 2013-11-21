@@ -31,9 +31,9 @@ class AllTests
         $suite->addTestSuite('PropertyTest');
 
         // Basic type safety test only makes sense if we enforce it
-        $config = new Config();
-        $enforcementConfig = $config->getConfig('Enforcement');
-        if ($enforcementConfig['enforceDefaultTypeSafety']) {
+        $config = Config::getInstance();
+        $enforcementConfig = $config->getConfig('enforcement');
+        if ($enforcementConfig['enforce-default-type-safety']) {
 
             $suite->addTestSuite('TypeSafetyTest');
         }
