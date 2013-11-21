@@ -58,7 +58,7 @@ class StructureMap
 
             if (is_array($rootPath) && isset($rootPath['dir'])) {
 
-                $rootPathes[$key] = $rootPath['dir'];
+                $rootPathes[$key] = realpath($rootPath['dir']);
             }
         }
 
