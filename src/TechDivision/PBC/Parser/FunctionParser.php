@@ -167,7 +167,13 @@ class FunctionParser extends AbstractParser
 
         // Now lets analyse what we got
         $parameterStrings = explode(',', $parameterString);
-        foreach ($parameterStrings as $param) {
+        foreach ($parameterStrings as $key => $param) {
+
+            if ($this->getBracketCount($param, '(') > 0) {
+
+                $param = $param . ', ' . $parameterStrings[$key + 1];
+                unset($parameterStrings[$key + 1]);
+            }
 
             $param = trim($param);
             $paramPieces = explode('$', $param);

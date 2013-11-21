@@ -36,7 +36,7 @@ class Config implements PBCConfig
          * 'enforceDefaultTypeSafety' (true|false) states if type hints with @param and @return should be considered
          *      pre- or postconditions in terms of a variable type check
          *
-         * 'processing' ('exception'|'logging'|'none') states how the library should react in case of a contract
+         * 'processing' ('exception'|'logging') states how the library should react in case of a contract
          *      violation. If 'logging' is chosen, the config entry 'logger' has to be filled correctly.
          *
          * 'logger' specify a logging class using its fully qualified name. The class has to be PSR-3 compliant and
@@ -81,8 +81,8 @@ class Config implements PBCConfig
             // Does it implement the PSR-3 interface?
             if (!isset($loggerInterfaces['Psr\Log\LoggerInterface'])) {
 
-                // Logger does not satisfy PSR-3, lets set processing to none
-                $this->config['Enforcement']['processing'] = 'none';
+                // Logger does not satisfy PSR-3, lets set processing to exception
+                $this->config['Enforcement']['processing'] = 'exception';
             }
         }
 

@@ -81,6 +81,34 @@ abstract class AbstractParser implements Parser
     }
 
     /**
+     * @param $string
+     * @param $bracket
+     * @return bool|int
+     */
+    protected function getBracketCount($string, $bracket)
+    {
+        $roundBrackets = array_flip(array('(', ')'));
+        $curlyBrackets = array_flip(array('{', '}'));
+
+        if (isset($roundBrackets[$bracket])) {
+
+            $openingBracket = '(';
+            $closingBracket = ')';
+
+        } elseif (isset($curlyBrackets[$bracket])) {
+
+            $openingBracket = '{';
+            $closingBracket = '}';
+
+        } else {
+
+            return false;
+        }
+
+        return substr_count($string, $openingBracket) - substr_count($string, $closingBracket);
+    }
+
+    /**
      * @param $tokens
      * @param $structureToken
      * @return string

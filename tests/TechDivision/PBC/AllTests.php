@@ -15,6 +15,7 @@ require __DIR__ . '/InheritanceTest.php';
 require __DIR__ . '/StackTest.php';
 require __DIR__ . '/InterfaceTest.php';
 require __DIR__ . '/PropertyTest.php';
+require __DIR__ . '/TypeSafetyTest.php';
 
 class AllTests
 {
@@ -28,6 +29,14 @@ class AllTests
         $suite->addTestSuite('StackTest');
         $suite->addTestSuite('InterfaceTest');
         $suite->addTestSuite('PropertyTest');
+
+        // Basic type safety test only makes sense if we enforce it
+        $config = new Config();
+        $enforcementConfig = $config->getConfig('Enforcement');
+        if ($enforcementConfig['enforceDefaultTypeSafety']) {
+
+            $suite->addTestSuite('TypeSafetyTest');
+        }
 
         return $suite;
     }
