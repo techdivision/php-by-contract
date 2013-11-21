@@ -26,11 +26,7 @@
         {
             "dir": "./../../..",
             "enforce-default-type-safety": true,
-            "processing": "exception",
-            "cache": {
-
-                "dir": "./cache/libs"
-            }
+            "processing": "exception"
         }
 
     ]
