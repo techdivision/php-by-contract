@@ -24,7 +24,7 @@
 
     "project-dirs": [
         {
-            "dir": "./../../..",
+            "dir": "./../../../tests",
             "enforce-default-type-safety": true,
             "processing": "exception"
         }
