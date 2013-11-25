@@ -3,6 +3,7 @@
 namespace TechDivision\PBC;
 
 use TechDivision\PBC\Entities\Definitions\Structure;
+use TechDivision\PBC\Exceptions\CacheException;
 
 // We might run into a situation where we do not have proper autoloading in place here. So require our DTO.
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'Entities' . DIRECTORY_SEPARATOR .
@@ -121,11 +122,13 @@ class StructureMap
     public function add(Structure $structure)
     {
         // The the entry
-        $this->map[$structure->getIdentifier()] = array('cTime' => $structure->getCTime(),
+        $this->map[$structure->getIdentifier()] = array(
+            'cTime' => $structure->getCTime(),
             'identifier' => $structure->getIdentifier(),
             'path' => $structure->getPath(),
             'type' => $structure->getType(),
-            'hasContracts' => $structure->hasContracts());
+            'hasContracts' => $structure->hasContracts()
+        );
 
         // Persist the map
         return $this->save();
@@ -300,14 +303,19 @@ class StructureMap
         $directoryIterators = array();
         foreach ($this->rootPathes as $rootPath) {
 
-            $directoryIterators[] = new \RecursiveDirectoryIterator($rootPath);
+            $directoryIterators[] = new \RecursiveDirectoryIterator($rootPath,
+                \RecursiveDirectoryIterator::KEY_AS_PATHNAME);
         }
 
         // We got them all, now append them onto a new RecursiveIteratorIterator and return it.
         $recursiveIterator = new \AppendIterator();
         foreach ($directoryIterators as $directoryIterator) {
 
-            $recursiveIterator->append(new \RecursiveIteratorIterator($directoryIterator));
+            $recursiveIterator->append(
+                new \RecursiveIteratorIterator($directoryIterator,
+                    \RecursiveIteratorIterator::SELF_FIRST,
+                    \RecursiveIteratorIterator::CATCH_GET_CHILD)
+            );
         }
 
         // Lets prepare the patter based on the existence of omitted pathes.
@@ -329,11 +337,13 @@ class StructureMap
 
             if ($identifier !== false) {
 
-                $this->map[$identifier[1]] = array('cTime' => filectime($file[0]),
+                $this->map[$identifier[1]] = array(
+                    'cTime' => filectime($file[0]),
                     'identifier' => $identifier[1],
                     'path' => $file[0],
                     'type' => $identifier[0],
-                    'hasContracts' => $this->findContracts($file[0]));
+                    'hasContracts' => $this->findContracts($file[0])
+                );
             }
         }
 
@@ -388,12 +398,19 @@ class StructureMap
 
     /**
      * @param $file
-     * @return bool|string
+     * @return array|bool
+     * @throws Exceptions\CacheException
      */
     protected function findIdentifier($file)
     {
 
         $rsc = fopen($file, 'r');
+
+        if ($rsc === false) {
+
+            throw new CacheException();
+        }
+
         $stuctureName = $namespace = $code = $type = '';
 
         for ($k = 0; $k < 5; $k++) {
