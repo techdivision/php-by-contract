@@ -188,6 +188,13 @@ class ClassDefinition implements StructureDefinition
                 if ($file !== false) {
 
                     $ancestorDefinitions[$key] = $parser->getDefinitionFromFile($file->getPath(), $ancestor);
+
+                    if (!$ancestorDefinitions[$key] instanceof StructureDefinition) {
+
+                        unset($ancestorDefinitions[$key]);
+                        continue;
+                    }
+
                     $ancestorDefinitions[$key]->finalize();
 
                 } else {
@@ -197,6 +204,13 @@ class ClassDefinition implements StructureDefinition
                     if ($file !== false) {
 
                         $ancestorDefinitions[$key] = $parser->getDefinitionFromFile($file->getPath(), $ancestor);
+
+                        if (!$ancestorDefinitions[$key] instanceof StructureDefinition) {
+
+                            unset($ancestorDefinitions[$key]);
+                            continue;
+                        }
+
                         $ancestorDefinitions[$key]->finalize();
 
                     }

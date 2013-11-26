@@ -69,7 +69,8 @@ class InterfaceDefinition implements StructureDefinition
     {
         $this->docBlock = '';
         $this->name = '';
-        $this->extends = '';
+        $this->namespace = '';
+        $this->extends = array();
         $this->constants = array();
         $this->invariantConditions = new AssertionList();
         $this->ancestralInvariants = new TypedListList();
@@ -123,6 +124,12 @@ class InterfaceDefinition implements StructureDefinition
         if (empty($ancestors)) {
 
             return true;
+        }
+
+        // We need an array
+        if (!is_array($ancestors)) {
+
+            $ancestors = array($ancestors);
         }
 
         // Now finalize them recursively
