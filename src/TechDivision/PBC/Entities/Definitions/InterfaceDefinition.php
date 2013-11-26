@@ -32,6 +32,11 @@ class InterfaceDefinition implements StructureDefinition
     public $name;
 
     /**
+     * @var string
+     */
+    public $namespace;
+
+    /**
      * @var array
      */
     public $extends;
@@ -121,8 +126,9 @@ class InterfaceDefinition implements StructureDefinition
 
         // Now finalize them recursively
         $interfaceParser = new InterfaceParser();
-        $cache = Cache::getInstance();
-        $files = $cache->getFiles();
+        $config = Config::getInstance();
+        $cache = new StructureMap($config->getConfig('project-dirs'), $config);
+
         $ancestorDefinitions = array();
         foreach ($ancestors as $key => $ancestor) {
 
@@ -133,10 +139,22 @@ class InterfaceDefinition implements StructureDefinition
             }
 
             // Do we know this file?
-            if (isset($files[$ancestor])) {
+            $file = $cache->getEntry($ancestor);
+            if ($file !== false) {
 
-                $ancestorDefinitions[$key] = $interfaceParser->getDefinitionFromFile($files[$ancestor]['path'], $ancestor);
+                $ancestorDefinitions[$key] = $interfaceParser->getDefinitionFromFile($file->getPath(), $ancestor);
                 $ancestorDefinitions[$key]->finalize();
+
+            } else {
+                // Maybe the class is in the same namespace as we are?
+
+                $file = $cache->getEntry($this->namespace . '\\' . $ancestor);
+                if ($file !== false) {
+
+                    $ancestorDefinitions[$key] = $interfaceParser->getDefinitionFromFile($file->getPath(), $ancestor);
+                    $ancestorDefinitions[$key]->finalize();
+
+                }
             }
         }
 

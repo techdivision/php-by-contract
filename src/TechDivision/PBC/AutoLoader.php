@@ -51,7 +51,8 @@ class AutoLoader
     public function loadClass($className)
     {
         // Do we have the file in our cache dir? If we are in development mode we have to ignore this.
-        $cachePath = PBC_CACHE_DIR . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php';
+        $cacheConfig = $this->config->getConfig('cache');
+        $cachePath = $cacheConfig['dir'] . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php';
         if ($this->config->getConfig('environment') !== 'development' && is_readable($cachePath)) {
 
             require $cachePath;
@@ -99,7 +100,7 @@ class AutoLoader
 
             // We also require the classes of our maps as we do not have proper autoloading in place
             require_once __DIR__ . DIRECTORY_SEPARATOR . 'CacheMap.php';
-            $this->cache = new CacheMap(PBC_CACHE_DIR, $this->config);
+            $this->cache = new CacheMap($cacheConfig['dir'], $this->config);
         }
         $this->generator = new Generator($structureMap, $this->cache);
 

@@ -293,6 +293,30 @@ class StructureMap
     }
 
     /**
+     * Will break up any path into a canonical form like realpath(), but does not require the file to exist.
+     *
+     * @param $path
+     * @return mixed
+     */
+    private function normalizePath($path) {
+        return array_reduce(explode('/', $path), create_function('$a, $b', '
+            if($a === 0)
+                $a = "/";
+
+            if($b === "")
+                return $a;
+
+            if($b === ".")
+                return __DIR__;
+
+            if($b === "..")
+                return dirname($a);
+
+            return preg_replace("/\/+/", "/", "$a/$b");
+        '), 0);
+    }
+
+    /**
      * Will generate the structure map within the specified root path.
      *
      * @return  bool
@@ -303,7 +327,7 @@ class StructureMap
         $directoryIterators = array();
         foreach ($this->rootPathes as $rootPath) {
 
-            $directoryIterators[] = new \RecursiveDirectoryIterator($rootPath,
+            $directoryIterators[] = new \RecursiveDirectoryIterator($this->normalizePath($rootPath),
                 \RecursiveDirectoryIterator::KEY_AS_PATHNAME);
         }
 

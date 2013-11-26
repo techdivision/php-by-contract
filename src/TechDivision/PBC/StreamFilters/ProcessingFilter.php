@@ -77,7 +77,8 @@ class ProcessingFilter extends AbstractFilter
     public function filter($in, $out, &$consumed, $closing)
     {
         // Lets check if we got the config we wanted
-        $config = $this->params;
+        $config = $this->params->getConfig('enforcement');
+
         if (!is_array($config) || !isset($config['processing'])) {
 
             throw new GeneratorException();
@@ -90,11 +91,6 @@ class ProcessingFilter extends AbstractFilter
 
         // Get our buckets from the stream
         while ($bucket = stream_bucket_make_writeable($in)) {
-
-            // Get the code for the assertions
-            $preconditionCode = $this->generateCode($config, 'precondition');
-            $postconditionCode = $this->generateCode($config, 'postcondition');
-            $invariantCode = $this->generateCode($config, 'invariant');
 
             // Insert the code
             $bucket->data = str_replace(array(PBC_PROCESSING_PLACEHOLDER . 'precondition' .PBC_PLACEHOLDER_CLOSE,
