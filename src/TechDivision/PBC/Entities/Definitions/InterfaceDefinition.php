@@ -14,7 +14,8 @@ use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Interfaces\StructureDefinition;
 use TechDivision\PBC\Parser\InterfaceParser;
-use TechDivision\PBC\Proxies\Cache;
+use TechDivision\PBC\Config;
+use TechDivision\PBC\StructureMap;
 
 /**
  * Class InterfaceDefinition

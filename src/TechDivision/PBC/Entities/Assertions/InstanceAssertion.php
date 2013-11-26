@@ -41,7 +41,13 @@ class InstanceAssertion extends AbstractAssertion
      */
     public function getString()
     {
-        return (string) 'is_a(' . $this->operand . ', "' . $this->class . '")';
+        // We need to add an initial backslash if there is none
+        if (strpos($this->class, '\\') > 0) {
+
+            $this->class = '\\' . $this->class;
+        }
+
+        return (string) $this->operand . ' instanceof ' . $this->class;
     }
 
     /**

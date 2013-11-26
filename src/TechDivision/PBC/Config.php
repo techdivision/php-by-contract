@@ -28,6 +28,11 @@ class Config implements PBCConfig
     /**
      * @var array
      */
+    protected $context;
+
+    /**
+     * @var array
+     */
     protected $config = array();
 
     /**
@@ -56,6 +61,7 @@ class Config implements PBCConfig
             self::$instances[$context] = new self();
         }
 
+        self::$instances[$context]->context = $context;
         return self::$instances[$context];
     }
 
@@ -81,6 +87,8 @@ class Config implements PBCConfig
         }
 
         $this->config = array_replace_recursive($this->config, $configCandidate);
+        self::$instances[$this->context] = $this;
+        return self::$instances[$this->context];
     }
 
     /**
