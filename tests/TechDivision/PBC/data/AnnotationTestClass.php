@@ -28,4 +28,12 @@ class AnnotationTestClass
     {
 
     }
+
+    /**
+     * @param null|\Exception|string $value
+     */
+    public function orCombinator($value)
+    {
+
+    }
 } 

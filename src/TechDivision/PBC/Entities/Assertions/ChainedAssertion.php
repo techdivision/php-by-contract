@@ -39,8 +39,10 @@ class ChainedAssertion extends AbstractAssertion
     private $inversionMapping;
 
     /**
-     * @param $_assertionList
+     * @param AssertionList $_assertionList
      * @param $_combinators
+     *
+     * @throws  \InvalidArgumentException
      */
     public function __construct(AssertionList $_assertionList, $_combinators)
     {
@@ -57,7 +59,18 @@ class ChainedAssertion extends AbstractAssertion
 
         // There must be enough combinators to chain up the assertions.
         // If not, we do not stand a chance to make this work.
-        if ($_assertionList->count() !== (count($_combinators) + 1)) {
+        // If we got only one combinator as a string (not in an array) we will use it throughout
+        if (!is_array($_combinators)) {
+
+            $this->combinators = array();
+            for ($i = 1; $i < $_assertionList->count(); $i++) {
+
+                $this->combinators[] = $_combinators;
+            }
+        }
+
+        // No check if the counts are ok
+        if ($_assertionList->count() !== (count($this->combinators) + 1)) {
 
             throw new \InvalidArgumentException();
         }
@@ -98,7 +111,7 @@ class ChainedAssertion extends AbstractAssertion
 
             $this->inverted = false;
 
-        }  else {
+        } else {
 
             $this->inverted = true;
         }
@@ -115,7 +128,7 @@ class ChainedAssertion extends AbstractAssertion
         }
 
         // Now invert all combinators.
-        foreach($this->combinators as $key => $combinator) {
+        foreach ($this->combinators as $key => $combinator) {
 
             if (isset($this->inversionMapping[$combinator])) {
 

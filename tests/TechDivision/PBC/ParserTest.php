@@ -42,5 +42,28 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
+
+        $e = null;
+        try {
+
+            $annotationTestClass->orCombinator(new Exception());
+            $annotationTestClass->orCombinator(null);
+
+        } catch (Exception $e) {
+        }
+
+        // Did we get the right $e?
+        $this->assertNull($e);
+
+        $e = null;
+        try {
+
+            $annotationTestClass->orCombinator(array());
+
+        } catch (Exception $e) {
+        }
+
+        // Did we get the right $e?
+        $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
     }
 }

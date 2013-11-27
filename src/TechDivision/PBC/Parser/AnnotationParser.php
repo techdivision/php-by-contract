@@ -14,6 +14,7 @@ use TechDivision\PBC\Entities\Assertions\TypedCollectionAssertion;
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Assertions\ChainedAssertion;
 use TechDivision\PBC\Config;
+use TechDivision\PBC\Exceptions\ParserException;
 
 /**
  * Class AnnotationParser
@@ -153,6 +154,12 @@ class AnnotationParser extends AbstractParser
             }
         }
 
+        // Do we have an or combinator aka |?
+        if ($this->filterOrCombinator($docString)) {
+
+            return $this->parseChainedAssertion('|', $docString);
+        }
+
         // If we got invalid arguments then we will fail
         try {
 
@@ -257,6 +264,59 @@ class AnnotationParser extends AbstractParser
     }
 
     /**
+     * @param $combinator
+     * @param $docString
+     */
+    private function parseChainedAssertion($combinator, $docString)
+    {
+        // Get all the parts of the string
+        $assertionArray = explode(' ', $docString);
+
+        // Check all string parts for the | character
+        $combinedPart = '';
+        $combinedIndex = 0;
+        foreach ($assertionArray as $key => $assertionPart) {
+
+            // Check which part contains the | but does not only consist of it
+            if ($this->filterOrCombinator($assertionPart) && trim($assertionPart) !== '|') {
+
+                $combinedPart = trim($assertionPart);
+                $combinedIndex = $key;
+                break;
+            }
+        }
+
+        // Check if we got anything of value
+        if (empty($combinedPart)) {
+
+            throw new ParserException('Error parsing what seams to be a |-combined assertion ' . $docString);
+        }
+
+        // Now we have to create all the separate assertions for each part of the $combinedPart string
+        $assertionList = new AssertionList();
+        foreach (explode('|', $combinedPart) as $partString) {
+
+            // Rebuild the assertion string with one partial string of the combined part
+            $tmp = $assertionArray;
+            $tmp[$combinedIndex] = $partString;
+            $assertion = $this->parseAssertion(implode(' ', $tmp));
+
+            if (is_bool($assertion)) {
+
+                continue;
+
+            } else {
+
+                $assertionList->add($assertion);
+            }
+            $assertion = false;
+        }
+
+        // We got everything. Create a ChainedAssertion instance
+        return new ChainedAssertion($assertionList, '||');
+    }
+
+    /**
      * @param $docString
      *
      * @return bool
@@ -275,6 +335,22 @@ class AnnotationParser extends AbstractParser
 
                 return $stringPiece;
             }
+        }
+
+        // We found nothing; tell them.
+        return false;
+    }
+
+    /**
+     * @param $docString
+     *
+     * @return bool
+     */
+    private function filterOrCombinator($docString)
+    {
+        if (strpos($docString, '|')) {
+
+            return true;
         }
 
         // We found nothing; tell them.
