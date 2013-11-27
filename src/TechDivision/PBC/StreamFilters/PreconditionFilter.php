@@ -62,7 +62,7 @@ class PreconditionFilter extends AbstractFilter
      */
     public function dependenciesMet()
     {
-        var_dump($this);
+
     }
 
     /**

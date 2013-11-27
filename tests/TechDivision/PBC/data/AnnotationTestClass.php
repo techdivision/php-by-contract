@@ -32,7 +32,7 @@ class AnnotationTestClass
     /**
      * @return array<\Exception>
      */
-    public function typeCollectioonReturn($value)
+    public function typeCollectionReturn($value)
     {
         return $value;
     }

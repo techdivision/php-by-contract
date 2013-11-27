@@ -49,7 +49,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $e = null;
         try {
 
-            $annotationTestClass->typeCollectioonReturn(array(new Exception(), new Exception(), new Exception()));
+            $annotationTestClass->typeCollectionReturn(array(new Exception(), new Exception(), new Exception()));
 
         } catch (Exception $e) {
         }
@@ -60,7 +60,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $e = null;
         try {
 
-            $annotationTestClass->typeCollectioonReturn(array(new Exception(), 'failure', new Exception()));
+            $annotationTestClass->typeCollectionReturn(array(new Exception(), 'failure', new Exception()));
 
         } catch (Exception $e) {
         }

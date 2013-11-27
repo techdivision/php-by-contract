@@ -127,8 +127,8 @@ class SkeletonFilter extends AbstractFilter
                     } else {
 
                         // Change the function name to indicate this is the original function
-                        $bucket->data = str_replace($markerHook,
-                            $markerHook . PBC_ORIGINAL_FUNCTION_SUFFIX, $bucket->data);
+                        $bucket->data = preg_replace('/' . $markerHook . ' *\(/',
+                            $markerHook . PBC_ORIGINAL_FUNCTION_SUFFIX . '(', $bucket->data);
 
                         // Get the code for the assertions
                         $functionCode = $this->generateFunctionCode($functionDefinition);
