@@ -8,13 +8,14 @@
  */
 
 // I don't know how to handle that better, forgive me (or better: explain me how!) TODO
+$vendorDir = '';
 if (is_dir(__DIR__ . "/../../../vendor")) {
 
     $vendorDir = __DIR__ . "/../../../vendor/";
 
-} elseif (is_dir(__DIR__ . "/../../vendor")) {
+} elseif (is_dir(__DIR__ . "/../../../../../../vendor")) {
 
-    $vendorDir = __DIR__ . "/../../vendor/";
+    $vendorDir = __DIR__ . "/../../../../../../vendor/";
 }
 
 // Include the composer autoloader as a fallback

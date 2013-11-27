@@ -10,6 +10,7 @@
 namespace TechDivision\PBC\Parser;
 
 use TechDivision\PBC\Entities\Assertions\RawAssertion;
+use TechDivision\PBC\Entities\Assertions\TypedCollectionAssertion;
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Assertions\ChainedAssertion;
 use TechDivision\PBC\Config;
@@ -177,6 +178,14 @@ class AnnotationParser extends AbstractParser
 
                 } elseif ($class !== false) {
 
+                    // We might also have a typed collection
+                    $type = $this->filterTypedCollection($class);
+                    if ($type !== false && $variable !== false) {
+
+                        $assertion = new TypedCollectionAssertion($variable, $type);
+                        break;
+                    }
+
                     $type = $class;
                     $assertionType = 'TechDivision\PBC\Entities\Assertions\InstanceAssertion';
 
@@ -206,7 +215,42 @@ class AnnotationParser extends AbstractParser
             case PBC_KEYWORD_POST:
             case PBC_KEYWORD_INVARIANT:
 
+            // Now we have to check what we got
+            // First of all handle if we got a simple type
+            if ($type !== false) {
+
+                $assertionType = 'TechDivision\PBC\Entities\Assertions\TypeAssertion';
+
+            } elseif ($class !== false && !empty($class)) {
+
+                // We might also have a typed collection
+                $type = $this->filterTypedCollection($docString);
+                if ($type !== false && $variable !== false) {
+
+                    $assertion = new TypedCollectionAssertion($variable, $type);
+                    break;
+                }
+
+                $type = $class;
+                $assertionType = 'TechDivision\PBC\Entities\Assertions\InstanceAssertion';
+
+            } else {
+
                 $assertion = new RawAssertion(trim(str_replace($usedAnnotation, '', $docString)));
+                break;
+            }
+
+            // We handled what kind of assertion we need, now check what we will assert
+            if ($variable !== false && !empty($assertionType)) {
+
+                $assertion = new $assertionType($variable, $type);
+
+            } else {
+
+                $assertion = new RawAssertion(trim(str_replace($usedAnnotation, '', $docString)));
+            }
+
+            break;
         }
 
         return $assertion;
@@ -231,6 +275,24 @@ class AnnotationParser extends AbstractParser
 
                 return $stringPiece;
             }
+        }
+
+        // We found nothing; tell them.
+        return false;
+    }
+
+    /**
+     * @param $docString
+     *
+     * @return bool
+     */
+    private function filterTypedCollection($docString)
+    {
+        $tmp = strpos($docString, 'array<');
+        if ($tmp !== false && strpos($docString, '>') > $tmp) {
+
+            $stringPiece = explode('array<', $docString)[1];
+            return strstr($stringPiece, '>', true);
         }
 
         // We found nothing; tell them.

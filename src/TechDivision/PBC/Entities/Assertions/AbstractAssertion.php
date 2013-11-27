@@ -10,6 +10,7 @@
 namespace TechDivision\PBC\Entities\Assertions;
 
 
+use TechDivision\PBC\Exceptions\ParserException;
 use TechDivision\PBC\Interfaces\Assertion;
 
 /**
@@ -30,6 +31,11 @@ abstract class AbstractAssertion implements Assertion
     public function __construct()
     {
         $this->inverted = false;
+
+        if (!$this->isValid()) {
+
+            throw new ParserException('Could not parse assertion string ' . $this->getString());
+        }
     }
 
     /**
@@ -77,7 +83,7 @@ abstract class AbstractAssertion implements Assertion
         }
 
         // Assertion got parsed, check if it got parsed as the right thing
-        if ($stmts[0] instanceof PHPParser_Node_Stmt_If) {
+        if (is_a($stmts[0], 'PHPParser_Node_Stmt_If')) {
 
             return true;
 

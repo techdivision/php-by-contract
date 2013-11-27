@@ -41,6 +41,8 @@ class TypeAssertion extends AbstractAssertion
         $this->operand = $_operand;
         $this->validatesTo = true;
         $this->type = $_type;
+
+        parent::__construct();
     }
 
     /**

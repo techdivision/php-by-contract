@@ -19,19 +19,9 @@ class RawAssertion extends AbstractAssertion
      */
     public function __construct($_content)
     {
-        parent::__construct();
-
         $this->content = $_content;
 
-        try {
-
-            $this->isValid();
-
-        } catch (PHPParser_Error $e) {
-
-            throw new InvalidAssertionException($e->getMessage());
-
-        }
+        parent::__construct();
     }
 
     /**

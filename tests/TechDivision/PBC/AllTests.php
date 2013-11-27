@@ -16,6 +16,7 @@ require __DIR__ . '/StackTest.php';
 require __DIR__ . '/InterfaceTest.php';
 require __DIR__ . '/PropertyTest.php';
 require __DIR__ . '/TypeSafetyTest.php';
+require __DIR__ . '/ParserTest.php';
 
 class AllTests
 {
@@ -29,6 +30,7 @@ class AllTests
         $suite->addTestSuite('StackTest');
         $suite->addTestSuite('InterfaceTest');
         $suite->addTestSuite('PropertyTest');
+        $suite->addTestSuite('ParserTest');
 
         // Basic type safety test only makes sense if we enforce it
         $config = Config::getInstance();
