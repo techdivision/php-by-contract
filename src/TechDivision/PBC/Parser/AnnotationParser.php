@@ -157,7 +157,15 @@ class AnnotationParser extends AbstractParser
         // Do we have an or combinator aka |?
         if ($this->filterOrCombinator($docString)) {
 
-            return $this->parseChainedAssertion('|', $docString);
+            // If we got invalid arguments then we will fail
+            try {
+
+                return $this->parseChainedAssertion('|', $docString);
+
+            } catch (\InvalidArgumentException $e) {
+
+                return false;
+            }
         }
 
         // If we got invalid arguments then we will fail
@@ -176,6 +184,12 @@ class AnnotationParser extends AbstractParser
             // We got something which can only contain type information
             case '@param':
             case '@return':
+
+                if ($usedAnnotation === '@return') {
+
+                    $variable = PBC_KEYWORD_RESULT;
+
+                }
 
                 // Now we have to check what we got
                 // First of all handle if we got a simple type
@@ -222,42 +236,42 @@ class AnnotationParser extends AbstractParser
             case PBC_KEYWORD_POST:
             case PBC_KEYWORD_INVARIANT:
 
-            // Now we have to check what we got
-            // First of all handle if we got a simple type
-            if ($type !== false) {
+                // Now we have to check what we got
+                // First of all handle if we got a simple type
+                if ($type !== false) {
 
-                $assertionType = 'TechDivision\PBC\Entities\Assertions\TypeAssertion';
+                    $assertionType = 'TechDivision\PBC\Entities\Assertions\TypeAssertion';
 
-            } elseif ($class !== false && !empty($class)) {
+                } elseif ($class !== false && !empty($class)) {
 
-                // We might also have a typed collection
-                $type = $this->filterTypedCollection($docString);
-                if ($type !== false && $variable !== false) {
+                    // We might also have a typed collection
+                    $type = $this->filterTypedCollection($docString);
+                    if ($type !== false && $variable !== false) {
 
-                    $assertion = new TypedCollectionAssertion($variable, $type);
+                        $assertion = new TypedCollectionAssertion($variable, $type);
+                        break;
+                    }
+
+                    $type = $class;
+                    $assertionType = 'TechDivision\PBC\Entities\Assertions\InstanceAssertion';
+
+                } else {
+
+                    $assertion = new RawAssertion(trim(str_replace($usedAnnotation, '', $docString)));
                     break;
                 }
 
-                $type = $class;
-                $assertionType = 'TechDivision\PBC\Entities\Assertions\InstanceAssertion';
+                // We handled what kind of assertion we need, now check what we will assert
+                if ($variable !== false && !empty($assertionType)) {
 
-            } else {
+                    $assertion = new $assertionType($variable, $type);
 
-                $assertion = new RawAssertion(trim(str_replace($usedAnnotation, '', $docString)));
+                } else {
+
+                    $assertion = new RawAssertion(trim(str_replace($usedAnnotation, '', $docString)));
+                }
+
                 break;
-            }
-
-            // We handled what kind of assertion we need, now check what we will assert
-            if ($variable !== false && !empty($assertionType)) {
-
-                $assertion = new $assertionType($variable, $type);
-
-            } else {
-
-                $assertion = new RawAssertion(trim(str_replace($usedAnnotation, '', $docString)));
-            }
-
-            break;
         }
 
         return $assertion;
@@ -331,7 +345,11 @@ class AnnotationParser extends AbstractParser
 
             // Check if we got a variable
             $stringPiece = trim($stringPiece);
-            if (strpos($stringPiece, '$') === 0 || $stringPiece === PBC_KEYWORD_RESULT || $stringPiece === PBC_KEYWORD_OLD) {
+            if (strpos(
+                    $stringPiece,
+                    '$'
+                ) === 0 || $stringPiece === PBC_KEYWORD_RESULT || $stringPiece === PBC_KEYWORD_OLD
+            ) {
 
                 return $stringPiece;
             }

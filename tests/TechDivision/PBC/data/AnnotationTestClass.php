@@ -30,6 +30,14 @@ class AnnotationTestClass
     }
 
     /**
+     * @return array<\Exception>
+     */
+    public function typeCollectioonReturn($value)
+    {
+        return $value;
+    }
+
+    /**
      * @param null|\Exception|string $value
      */
     public function orCombinator($value)

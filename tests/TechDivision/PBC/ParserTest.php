@@ -43,6 +43,31 @@ class ParserTest extends PHPUnit_Framework_TestCase
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
 
+        // Get the object to test
+        $annotationTestClass = new \TechDivision\Tests\Parser\AnnotationTestClass();
+
+        $e = null;
+        try {
+
+            $annotationTestClass->typeCollectioonReturn(array(new Exception(), new Exception(), new Exception()));
+
+        } catch (Exception $e) {
+        }
+
+        // Did we get the right $e?
+        $this->assertNull($e);
+
+        $e = null;
+        try {
+
+            $annotationTestClass->typeCollectioonReturn(array(new Exception(), 'failure', new Exception()));
+
+        } catch (Exception $e) {
+        }
+
+        // Did we get the right $e?
+        $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPostconditionException", $e);
+
         $e = null;
         try {
 
