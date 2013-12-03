@@ -62,9 +62,20 @@ class SkeletonFilter extends AbstractFilter
      */
     public function filter($in, $out, &$consumed, $closing)
     {
+        $path = $this->params[1];
+        $functionDefinitions = $this->params[0];
         // Get our buckets from the stream
         $functionHook = '';
+        $firstIteration = true;
         while ($bucket = stream_bucket_make_writeable($in)) {
+
+            // Lets cave in the original filepath and the modification time
+            if ($firstIteration === true) {
+
+                $bucket->data = str_replace('<?php',
+                    '<?php /* ' . PBC_ORIGINAL_PATH_HINT . $path . '#' . filemtime($path) . PBC_ORIGINAL_PATH_HINT . ' */', $bucket->data);
+                $firstIteration = false;
+            }
 
             // Get the tokens
             $tokens = token_get_all($bucket->data);
@@ -119,7 +130,7 @@ class SkeletonFilter extends AbstractFilter
                     $markerHook = $tokens[$i][1] . $tokens[$i + 1][1] . $tokens[$i + 2][1];
 
                     // Check if we got the function in our list, if not continue
-                    $functionDefinition = $this->params->get($functionName);
+                    $functionDefinition = $functionDefinitions->get($functionName);
                     if (!$functionDefinition instanceof FunctionDefinition) {
 
                         continue;

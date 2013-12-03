@@ -44,20 +44,81 @@ class AutoLoader
     }
 
     /**
+     * Will break up any path into a canonical form like realpath(), but does not require the file to exist.
+     *
+     * @param $path
+     * @return mixed
+     */
+    private function normalizePath($path)
+    {
+        return array_reduce(
+            explode('/', $path),
+            create_function(
+                '$a, $b',
+                '
+                           if($a === 0)
+                               $a = "/";
+
+                           if($b === "")
+                               return $a;
+
+                           if($b === ".")
+                               return __DIR__;
+
+                           if($b === "..")
+                               return dirname($a);
+
+                           return preg_replace("/\/+/", "/", "$a/$b");
+                       '
+            ),
+            0
+        );
+    }
+
+    /**
      * @param $className
      *
      * @return bool
      */
     public function loadClass($className)
     {
+        $time[$className] = microtime(true);
         // Do we have the file in our cache dir? If we are in development mode we have to ignore this.
         $cacheConfig = $this->config->getConfig('cache');
-        $cachePath = $cacheConfig['dir'] . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php';
+        $cachePath = $this->normalizePath(
+            $cacheConfig['dir'] . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php'
+        );
+
         if ($this->config->getConfig('environment') !== 'development' && is_readable($cachePath)) {
 
-            require $cachePath;
-            return true;
+            $res = fopen($cachePath, 'r');
+            $str = fread($res, 384);
+
+            $succsss = preg_match(
+                '/' . PBC_ORIGINAL_PATH_HINT . '(.+)' .
+                PBC_ORIGINAL_PATH_HINT . '/',
+                $str,
+                $tmp
+            );
+
+            if ($succsss > 0) {
+
+                $tmp = explode('#', $tmp[1]);
+
+                $path = $tmp[0];
+                $mTime = $tmp[1];
+                $time[$className] = microtime(true) - $time[$className];
+
+                if (filemtime($path) == $mTime) {
+
+                    require $cachePath;
+
+
+                    return true;
+                }
+            }
         }
+
 
         // There was no file in our cache dir, so lets hope we know the original path of the file.
         $autoLoaderConfig = $this->config->getConfig('autoloader');
@@ -109,7 +170,6 @@ class AutoLoader
 
             // Require the new class, it should have been created now
             $file = $this->generator->getProxyFileName($className);
-
             if (is_readable($file) === true) {
 
                 require $file;
@@ -130,7 +190,8 @@ class AutoLoader
      */
     public function register($throws = true)
     {
-        // We want to let our autoloader be the first in line so we can react on loads and create/return our proxies.
+        // We want to let our autoloader be the first in line so we can react on loads
+        // and create/return our contracted definitions.
         // So lets use the prepend parameter here.
         spl_autoload_register(array($this, self::OUR_LOADER), $throws, true);
     }

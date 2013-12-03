@@ -385,7 +385,8 @@ class AnnotationParser extends AbstractParser
         $tmp = strpos($docString, 'array<');
         if ($tmp !== false && strpos($docString, '>') > $tmp) {
 
-            $stringPiece = explode('array<', $docString)[1];
+            $stringPiece = explode('array<', $docString);
+            $stringPiece = $stringPiece[1];
             return strstr($stringPiece, '>', true);
         }
 

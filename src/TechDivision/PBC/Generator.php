@@ -90,7 +90,7 @@ class Generator
 
 
             $structureDefinition = $classIterator->current();
-            $filePath = $this->createProxyFilePath($fileDefinition->namespace . '\\' . $structureDefinition->name);
+            $filePath = $this->createProxyFilePath($fileDefinition->namespace . '\\' . $structureDefinition->name, $mapEntry->getPath());
 
             $tmp = $this->createFileFromDefinitions($filePath, $fileDefinition, $structureDefinition);
 
@@ -191,7 +191,15 @@ class Generator
      */
     private function createFileFromInterfaceDefinitions($targetFileName, FileDefinition $fileDefinition, InterfaceDefinition $structureDefinition)
     {
-        return (boolean) file_put_contents($targetFileName, file_get_contents($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name));
+        // Get the content of the file
+        $content = file_get_contents($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name);
+
+        // Make the one change we need, the original file path and modification timestamp
+        $content = str_replace('<?php',
+        '<?php /* ' . PBC_ORIGINAL_PATH_HINT . $fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name . '#' .
+        filemtime($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name) . PBC_ORIGINAL_PATH_HINT . ' */', $content);
+
+        return (boolean) file_put_contents($targetFileName, $content);
     }
 
     /**
@@ -214,13 +222,14 @@ class Generator
 
         $res = fopen($this->createProxyFilePath($structureDefinition->namespace . '\\' . $structureDefinition->name), 'w+');
 
-        stream_filter_append($res, 'SkeletonFilter', STREAM_FILTER_WRITE, $structureDefinition->functionDefinitions);
+        stream_filter_append($res, 'SkeletonFilter', STREAM_FILTER_WRITE, array($structureDefinition->functionDefinitions,
+                $fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name));
         stream_filter_append($res, 'PreconditionFilter', STREAM_FILTER_WRITE, $structureDefinition->functionDefinitions);
         stream_filter_append($res, 'PostconditionFilter', STREAM_FILTER_WRITE, $structureDefinition->functionDefinitions);
         stream_filter_append($res, 'InvariantFilter', STREAM_FILTER_WRITE, $structureDefinition);
         stream_filter_append($res, 'ProcessingFilter', STREAM_FILTER_WRITE, $this->config);
 
-        $tmp = fwrite($res, file_get_contents($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name));
+        $tmp = fwrite($res, file_get_contents($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name, time()));
 
         // Did we write something?
         if ($tmp > 0) {

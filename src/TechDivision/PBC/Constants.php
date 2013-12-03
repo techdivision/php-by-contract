@@ -32,6 +32,7 @@ define('PBC_INVARIANT_PLACEHOLDER', '/* PBC_INVARIANT_PLACEHOLDER ');
 define('PBC_OLD_SETUP_PLACEHOLDER', '/* PBC_OLD_SETUP_PLACEHOLDER ');
 define('PBC_PLACEHOLDER_CLOSE', ' */');
 define('PBC_FAILURE_VARIABLE', '$pbcFailureMessage');
+define('PBC_ORIGINAL_PATH_HINT', 'PBC_ORIGINAL_PATH_HINT');
 
 // We might not have a PHP > 5.3 on our hands.
 // To avoid parser errors we will define used constants here
