@@ -12,22 +12,19 @@
             "TechDivision\\PBC",
             "PHPUnit",
             "PHPParser",
-            "Psr\\Log"
+            "Psr\\Log",
+            "PHP"
         ]
     },
 
     "enforcement": {
 
         "enforce-default-type-safety": true,
-        "processing": "exception"
+        "processing": "exception",
+        "level": 15
     },
 
     "project-dirs": [
-        {
-            "dir": "./../../../tests",
-            "enforce-default-type-safety": true,
-            "processing": "exception"
-        }
-
+        "./../../../tests"
     ]
 }
