@@ -1,7 +1,15 @@
 language: php
+
 php:
   - "5.5"
   - "5.4"
   - "5.3"
-before_script: composer install
-script: phpunit AllTests tests/TechDivision/PBC/AllTests.php
+
+before_script:
+  - composer install
+  - pear install PHP_CodeSniffer
+  - phpenv rehash
+
+script:
+  - phpunit AllTests tests/TechDivision/PBC/AllTests.php
+  - php scripts/phpcs CodeSniffer.php CodeSniffer --report=summary --ignore=*/tests/* -np
