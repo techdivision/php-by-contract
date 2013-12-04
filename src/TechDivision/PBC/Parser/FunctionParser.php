@@ -297,8 +297,11 @@ class FunctionParser extends AbstractParser
         for ($i = 0; $i < count($tokens); $i++) {
 
             // If we got a function keyword, we have to check how far the function extends,
-            // then copy the array within that bounds
-            if (is_array($tokens[$i]) && $tokens[$i][0] === T_FUNCTION) {
+            // then copy the array within that bounds, but first of all we have to check if we got
+            // a function name.
+            // Otherwise anonymous functions will make us go crazy.
+            if (is_array($tokens[$i]) && $tokens[$i][0] === T_FUNCTION &&
+                !empty($tokens[$i + 2]) && $tokens[$i + 2] !== '(') {
 
                 // The lower bound should be the last semicolon|closing curly bracket|PHP tag before the function
                 $lowerBound = 0;
