@@ -12,4 +12,3 @@ before_script:
 
 script:
   - phpunit AllTests tests/TechDivision/PBC/AllTests.php
-  - phpcs --report=summary --ignore=*/vendor/* -p .
