@@ -40,14 +40,7 @@ class Config implements PBCConfig
      */
     private function __construct()
     {
-        if ($this->validate(__DIR__ . DIRECTORY_SEPARATOR . self::DEFAULT_CONFIG)) {
-
-            $this->load(__DIR__ . DIRECTORY_SEPARATOR . self::DEFAULT_CONFIG);
-
-        } else {
-
-            throw new \Exception('Invalid default configuration.');
-        }
+        $this->load(__DIR__ . DIRECTORY_SEPARATOR . self::DEFAULT_CONFIG);
     }
 
     /**
@@ -91,26 +84,16 @@ class Config implements PBCConfig
         return self::$instances[$this->context];
     }
 
+    protected function checkRecency()
+    {
+
+    }
+
     /**
      *
      */
     public function validate($file)
-    { /*
-        // Check if we have to use a logger, and if so check if it complies with PSR-3.
-        if ($this->config['Enforcement']['processing'] === 'logging') {
-
-            // Instantiate our logger candidate
-            $loggerCandidate = $this->config['Enforcement']['logger'];
-            $loggerInterfaces = class_implements($loggerCandidate);
-
-            // Does it implement the PSR-3 interface?
-            if (!isset($loggerInterfaces['Psr\Log\LoggerInterface'])) {
-
-                // Logger does not satisfy PSR-3, lets set processing to exception
-                $this->config['Enforcement']['processing'] = 'exception';
-            }
-        }
-        */
+    {
         // There was no error till now, so return true.
         return true;
     }

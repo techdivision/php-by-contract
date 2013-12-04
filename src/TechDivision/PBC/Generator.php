@@ -9,6 +9,7 @@
 
 namespace TechDivision\PBC;
 
+use Hoa\Realdom\_Array;
 use TechDivision\PBC\CacheMap;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
@@ -239,40 +240,13 @@ class Generator
         // Before using the definition we have to finalize it
         $structureDefinition->finalize();
 
-        stream_filter_register('SkeletonFilter', 'TechDivision\PBC\StreamFilters\SkeletonFilter');
-        stream_filter_register('PreconditionFilter', 'TechDivision\PBC\StreamFilters\PreconditionFilter');
-        stream_filter_register('PostconditionFilter', 'TechDivision\PBC\StreamFilters\PostconditionFilter');
-        stream_filter_register('InvariantFilter', 'TechDivision\PBC\StreamFilters\InvariantFilter');
-        stream_filter_register('ProcessingFilter', 'TechDivision\PBC\StreamFilters\ProcessingFilter');
-
         $res = fopen(
             $this->createProxyFilePath($structureDefinition->namespace . '\\' . $structureDefinition->name),
             'w+'
         );
 
-        stream_filter_append(
-            $res,
-            'SkeletonFilter',
-            STREAM_FILTER_WRITE,
-            array(
-                $structureDefinition->functionDefinitions,
-                $fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name
-            )
-        );
-        stream_filter_append(
-            $res,
-            'PreconditionFilter',
-            STREAM_FILTER_WRITE,
-            $structureDefinition->functionDefinitions
-        );
-        stream_filter_append(
-            $res,
-            'PostconditionFilter',
-            STREAM_FILTER_WRITE,
-            $structureDefinition->functionDefinitions
-        );
-        stream_filter_append($res, 'InvariantFilter', STREAM_FILTER_WRITE, $structureDefinition);
-        stream_filter_append($res, 'ProcessingFilter', STREAM_FILTER_WRITE, $this->config);
+        // Append all configured filters
+        $this->appendFilter($res, $fileDefinition, $structureDefinition);
 
         $tmp = fwrite(
             $res,
@@ -296,6 +270,80 @@ class Generator
             );
             return false;
         }
+    }
+
+    /**
+     * Will append all needed filters based on the enforcement level stated in the configuration file.
+     *
+     * @param $res
+     * @param FileDefinition $fileDefinition
+     * @param ClassDefinition $structureDefinition
+     * @return bool
+     */
+    protected function appendFilter(
+        & $res,
+        FileDefinition $fileDefinition,
+        ClassDefinition $structureDefinition
+    )
+    {
+        // Lets get the enforcement level
+        $enforcementConfig = $this->config->getConfig('enforcement');
+        $levelArray = array();
+        if (isset($enforcementConfig['level'])) {
+
+            $levelArray = array_reverse(str_split(decbin($enforcementConfig['level'])));
+        }
+
+        // Whatever the enforcement level is, we will always need the skeleton filter.
+        stream_filter_register('SkeletonFilter', 'TechDivision\PBC\StreamFilters\SkeletonFilter');
+        stream_filter_append(
+            $res,
+            'SkeletonFilter',
+            STREAM_FILTER_WRITE,
+            array(
+                $structureDefinition->functionDefinitions,
+                $fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name
+            )
+        );
+
+        // Now lets register and append the filers if they are mapped to a 1
+        // Lets have a look at the precondition filter first
+        if (isset($levelArray[0]) && $levelArray[0] == 1) {
+
+            stream_filter_register('PreconditionFilter', 'TechDivision\PBC\StreamFilters\PreconditionFilter');
+            stream_filter_append(
+                $res,
+                'PreconditionFilter',
+                STREAM_FILTER_WRITE,
+                $structureDefinition->functionDefinitions
+            );
+        }
+
+        // What about the postcondition filter?
+        if (isset($levelArray[1]) && $levelArray[1] == 1) {
+
+            stream_filter_register('PostconditionFilter', 'TechDivision\PBC\StreamFilters\PostconditionFilter');
+            stream_filter_append(
+                $res,
+                'PostconditionFilter',
+                STREAM_FILTER_WRITE,
+                $structureDefinition->functionDefinitions
+            );
+        }
+
+        // What about the invariant filter?
+        if (isset($levelArray[2]) && $levelArray[2] == 1) {
+
+            stream_filter_register('InvariantFilter', 'TechDivision\PBC\StreamFilters\InvariantFilter');
+            stream_filter_append($res, 'InvariantFilter', STREAM_FILTER_WRITE, $structureDefinition);
+        }
+
+        // We ALWAYS need the processing filter. Everything else would not make any sense
+        stream_filter_register('ProcessingFilter', 'TechDivision\PBC\StreamFilters\ProcessingFilter');
+        stream_filter_append($res, 'ProcessingFilter', STREAM_FILTER_WRITE, $this->config);
+
+        // We arrived here without any thrown exceptions, return true
+        return true;
     }
 
     /**
