@@ -11,7 +11,8 @@ namespace TechDivision\PBC\Interfaces;
 
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 
-interface StructureParser extends Parser{
+interface StructureParser extends Parser
+{
 
     public function getDefinitionFromFile($file, $structureName = null);
 

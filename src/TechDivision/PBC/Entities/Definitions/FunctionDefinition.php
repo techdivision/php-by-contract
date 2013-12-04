@@ -131,8 +131,8 @@ class FunctionDefinition
      * Will return the header of this function either in calling or in defining manner.
      * String will stop after the closing ")" bracket, so the string can be used for interfaces as well.
      *
-     * @param   string  $type           Can be either "call" or "definition"
-     * @param   bool    $markAsOriginal
+     * @param   string $type Can be either "call" or "definition"
+     * @param   bool $markAsOriginal
      * @return  string
      */
     public function getHeader($type, $markAsOriginal = false)

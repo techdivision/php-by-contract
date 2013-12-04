@@ -21,6 +21,7 @@ use TechDivision\PBC\Interfaces\PBCException;
  *              Open Software License (OSL 3.0)
  * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-class GeneratorException extends \Exception implements PBCException {
+class GeneratorException extends \Exception implements PBCException
+{
 
 }

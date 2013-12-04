@@ -100,7 +100,7 @@ class InvariantFilter extends AbstractFilter
             if ($attribute->inInvariant && $attribute->visibility !== 'private') {
 
                 // Build up our regex expression to filter them out
-                $obsoleteProperties[] = '/' . $attribute->visibility .'.*?\\' . $attribute->name . '/';
+                $obsoleteProperties[] = '/' . $attribute->visibility . '.*?\\' . $attribute->name . '/';
                 $propertyReplacements[] = 'private ' . $attribute->name;
             }
 
@@ -168,13 +168,21 @@ class InvariantFilter extends AbstractFilter
                 $code = $this->generateFunctionCode($invariants);
 
                 // Insert the code
-                $bucket->data = str_replace(array($functionHook,
-                    $functionHook,
-                    $functionHook,
-                    $functionHook), array($functionHook . $attributeCode,
-                    $functionHook . $setCode,
-                    $functionHook . $getCode,
-                    $functionHook . $code), $bucket->data);
+                $bucket->data = str_replace(
+                    array(
+                        $functionHook,
+                        $functionHook,
+                        $functionHook,
+                        $functionHook
+                    ),
+                    array(
+                        $functionHook . $attributeCode,
+                        $functionHook . $setCode,
+                        $functionHook . $getCode,
+                        $functionHook . $code
+                    ),
+                    $bucket->data
+                );
             }
 
             // We need the code to call the invariant
@@ -182,9 +190,17 @@ class InvariantFilter extends AbstractFilter
             $callCodeExit = $this->generateInvariantCall('exit');
 
             // Insert the code
-            $bucket->data = str_replace(array(PBC_INVARIANT_PLACEHOLDER . 'entry' . PBC_PLACEHOLDER_CLOSE,
-                PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE), array($callCodeEntry,
-                $callCodeExit), $bucket->data);
+            $bucket->data = str_replace(
+                array(
+                    PBC_INVARIANT_PLACEHOLDER . 'entry' . PBC_PLACEHOLDER_CLOSE,
+                    PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE
+                ),
+                array(
+                    $callCodeEntry,
+                    $callCodeExit
+                ),
+                $bucket->data
+            );
 
             // Remove all the properties we will take care of with our magic setter and getter
             $bucket->data = preg_replace($obsoleteProperties, $propertyReplacements, $bucket->data, 1);
@@ -432,7 +448,11 @@ class InvariantFilter extends AbstractFilter
                     $assertionIterator->next();
                 }
                 $code .= 'if (!((' . implode(') && (', $codeFragment) . '))){' .
-                    PBC_FAILURE_VARIABLE . ' = \'(' . str_replace('\'', '"', implode(') && (', $codeFragment)) . ')\';' .
+                    PBC_FAILURE_VARIABLE . ' = \'(' . str_replace(
+                        '\'',
+                        '"',
+                        implode(') && (', $codeFragment)
+                    ) . ')\';' .
                     PBC_PROCESSING_PLACEHOLDER . 'invariant' . PBC_PLACEHOLDER_CLOSE . '}';
             }
             // increment the outer loop

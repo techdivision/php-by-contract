@@ -143,6 +143,6 @@ class Structure
      */
     public function hasContracts()
     {
-        return (bool) $this->hasContracts;
+        return (bool)$this->hasContracts;
     }
 }

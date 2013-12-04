@@ -28,7 +28,8 @@ class PropertyTest extends PHPUnit_Framework_TestCase
 
             $this->propertyTestClass->notExistingProperty = 'test';
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\MissingPropertyException", $e);
@@ -38,7 +39,8 @@ class PropertyTest extends PHPUnit_Framework_TestCase
 
             $test = $this->propertyTestClass->notExistingProperty;
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\MissingPropertyException", $e);
@@ -54,7 +56,8 @@ class PropertyTest extends PHPUnit_Framework_TestCase
 
             $this->propertyTestClass->privateNonCheckedProperty = 'test';
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("\\InvalidArgumentException", $e);
@@ -64,7 +67,8 @@ class PropertyTest extends PHPUnit_Framework_TestCase
 
             $test = $this->propertyTestClass->privateNonCheckedProperty;
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("\\InvalidArgumentException", $e);
@@ -74,7 +78,8 @@ class PropertyTest extends PHPUnit_Framework_TestCase
 
             $this->propertyTestClass->privateCheckedProperty = 'test';
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("\\InvalidArgumentException", $e);
@@ -84,7 +89,8 @@ class PropertyTest extends PHPUnit_Framework_TestCase
 
             $test = $this->propertyTestClass->privateCheckedProperty;
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("\\InvalidArgumentException", $e);
@@ -100,7 +106,8 @@ class PropertyTest extends PHPUnit_Framework_TestCase
 
             $this->propertyTestClass->publicNonCheckedProperty = 'test';
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertNull($e);
@@ -110,7 +117,8 @@ class PropertyTest extends PHPUnit_Framework_TestCase
 
             $test = $this->propertyTestClass->publicNonCheckedProperty;
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertNull($e);
@@ -120,7 +128,8 @@ class PropertyTest extends PHPUnit_Framework_TestCase
 
             $this->propertyTestClass->publicCheckedProperty = 27.42;
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertNull($e);
@@ -130,7 +139,8 @@ class PropertyTest extends PHPUnit_Framework_TestCase
 
             $test = $this->propertyTestClass->publicCheckedProperty;
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertNull($e);
@@ -141,7 +151,8 @@ class PropertyTest extends PHPUnit_Framework_TestCase
 
             $this->propertyTestClass->publicCheckedProperty = 27.423;
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenInvariantException", $e);

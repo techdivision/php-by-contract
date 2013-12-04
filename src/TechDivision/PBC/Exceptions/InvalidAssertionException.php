@@ -11,6 +11,7 @@ use TechDivision\PBC\Interfaces\PBCException;
  *
  * @package TechDivision\PBC\Exceptions
  */
-class InvalidAssertionException extends \Exception implements PBCException {
+class InvalidAssertionException extends \Exception implements PBCException
+{
 
 }

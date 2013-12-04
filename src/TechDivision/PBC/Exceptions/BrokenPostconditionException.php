@@ -18,6 +18,7 @@ use TechDivision\PBC\Interfaces\PBCException;
  *
  * @package TechDivision\PBC\Exceptions
  */
-class BrokenPostconditionException extends \Exception implements PBCException {
+class BrokenPostconditionException extends \Exception implements PBCException
+{
 
 }

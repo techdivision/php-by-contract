@@ -66,7 +66,7 @@ class BasicAssertion extends AbstractAssertion
      */
     public function getString()
     {
-        return (string) $this->firstOperand . ' ' . $this->operator . ' ' . $this->secondOperand;
+        return (string)$this->firstOperand . ' ' . $this->operator . ' ' . $this->secondOperand;
     }
 
     /**
@@ -76,7 +76,7 @@ class BasicAssertion extends AbstractAssertion
     {
         if (isset($this->inversionMapping[$this->operator])) {
 
-            return (string) $this->firstOperand . ' ' . $this->inversionMapping[$this->operator] . ' ' . $this->secondOperand;
+            return (string)$this->firstOperand . ' ' . $this->inversionMapping[$this->operator] . ' ' . $this->secondOperand;
         }
     }
 

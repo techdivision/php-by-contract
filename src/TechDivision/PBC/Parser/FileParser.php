@@ -106,7 +106,8 @@ class FileParser extends AbstractParser
      *
      * @return array
      */
-    public function getEntries() {
+    public function getEntries()
+    {
 
         $entries = array();
         foreach ($this->map as $entry) {
@@ -154,7 +155,6 @@ class FileParser extends AbstractParser
         // Return what we did or did not found
         return $namespaces;
     }
-
 
 
     /**

@@ -38,7 +38,7 @@ final class BasicTestClass
      */
     public function concatSomeStuff($param1, $param2, Exception $param3)
     {
-        return (string) $param1 . $param2 . $param3->getMessage();
+        return (string)$param1 . $param2 . $param3->getMessage();
     }
 
     /**

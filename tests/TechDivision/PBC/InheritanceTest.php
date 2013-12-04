@@ -11,7 +11,8 @@ require_once 'PHPUnit/Autoload.php';
 
 require_once __DIR__ . "/../../../src/TechDivision/PBC/Bootstrap.php";
 
-class InheritanceTest extends PHPUnit_Framework_TestCase {
+class InheritanceTest extends PHPUnit_Framework_TestCase
+{
 
     public function testInheritance()
     {
@@ -24,7 +25,8 @@ class InheritanceTest extends PHPUnit_Framework_TestCase {
 
             $testClass->pop();
 
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);

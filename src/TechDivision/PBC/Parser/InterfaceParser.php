@@ -190,7 +190,10 @@ class InterfaceParser extends AbstractParser implements StructureParser
 
         // So we got our docBlock, now we can parse the invariant annotations from it
         $annotationParser = new AnnotationParser();
-        $interfaceDefinition->invariantConditions = $annotationParser->getConditions($interfaceDefinition->docBlock, PBC_KEYWORD_INVARIANT);
+        $interfaceDefinition->invariantConditions = $annotationParser->getConditions(
+            $interfaceDefinition->docBlock,
+            PBC_KEYWORD_INVARIANT
+        );
 
         // Get the class identity
         $interfaceDefinition->name = $this->getName($tokens);

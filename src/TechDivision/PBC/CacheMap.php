@@ -15,10 +15,12 @@ class CacheMap extends StructureMap
     public function add(Structure $structure)
     {
         // The the entry
-        $this->map[$structure->getIdentifier()] = array('cTime' => $structure->getCTime(),
+        $this->map[$structure->getIdentifier()] = array(
+            'cTime' => $structure->getCTime(),
             'identifier' => $structure->getIdentifier(),
             'path' => $structure->getPath(),
-            'type' => $structure->getType());
+            'type' => $structure->getType()
+        );
 
         // Persist the map
         return $this->save();
@@ -210,10 +212,12 @@ class CacheMap extends StructureMap
 
             if ($identifier !== false) {
 
-                $this->map[$identifier[1]] = array('cTime' => filectime($file[0]),
+                $this->map[$identifier[1]] = array(
+                    'cTime' => filectime($file[0]),
                     'identifier' => $identifier[1],
                     'path' => $file[0],
-                    'type' => $identifier[0]);
+                    'type' => $identifier[0]
+                );
             }
         }
 

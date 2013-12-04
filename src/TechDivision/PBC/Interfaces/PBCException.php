@@ -10,4 +10,5 @@
 namespace TechDivision\PBC\Interfaces;
 
 interface PBCException
-{}
+{
+}

@@ -7,6 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 namespace TechDivision\PBC\Entities\Definitions;
+
 use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 
 /**

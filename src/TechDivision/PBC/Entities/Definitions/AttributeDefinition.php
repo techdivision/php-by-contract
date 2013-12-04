@@ -8,6 +8,7 @@
  */
 
 namespace TechDivision\PBC\Entities\Definitions;
+
 use TechDivision\PBC\Interfaces\Definition;
 
 /**

@@ -21,6 +21,7 @@ use TechDivision\PBC\Interfaces\PBCException;
  *              Open Software License (OSL 3.0)
  * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-class ParserException extends \Exception implements PBCException {
+class ParserException extends \Exception implements PBCException
+{
 
 }

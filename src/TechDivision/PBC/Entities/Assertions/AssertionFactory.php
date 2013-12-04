@@ -19,6 +19,7 @@ namespace TechDivision\PBC\Entities\Assertions;
  *              Open Software License (OSL 3.0)
  * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-class AssertionFactory {
+class AssertionFactory
+{
 
 } 

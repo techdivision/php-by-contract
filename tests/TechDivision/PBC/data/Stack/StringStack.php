@@ -24,7 +24,7 @@ class StringStack extends AbstractStack
     }
 
     /**
-     * @param   string  $obj
+     * @param   string $obj
      */
     public function push($obj)
     {

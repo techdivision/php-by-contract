@@ -126,7 +126,10 @@ class ClassParser extends AbstractParser implements StructureParser
 
         // So we got our docBlock, now we can parse the invariant annotations from it
         $annotationParser = new AnnotationParser();
-        $classDefinition->invariantConditions = $annotationParser->getConditions($classDefinition->docBlock, PBC_KEYWORD_INVARIANT);
+        $classDefinition->invariantConditions = $annotationParser->getConditions(
+            $classDefinition->docBlock,
+            PBC_KEYWORD_INVARIANT
+        );
 
         // Get the class identity
         $classDefinition->isFinal = $this->isFinalClass($tokens);
@@ -153,7 +156,7 @@ class ClassParser extends AbstractParser implements StructureParser
 
         } else {
 
-            foreach($fileDefinition->usedNamespaces as $alias) {
+            foreach ($fileDefinition->usedNamespaces as $alias) {
 
                 if (strpos($alias, $parentName) !== false) {
 
@@ -163,8 +166,13 @@ class ClassParser extends AbstractParser implements StructureParser
         }
 
         // Clean possible double-\
-        $classDefinition->extends = trim($this->resolveUsedNamespace($fileDefinition->usedNamespaces,
-            str_replace('\\\\', '\\', $classDefinition->extends)), '\\');
+        $classDefinition->extends = trim(
+            $this->resolveUsedNamespace(
+                $fileDefinition->usedNamespaces,
+                str_replace('\\\\', '\\', $classDefinition->extends)
+            ),
+            '\\'
+        );
 
         // Get all Interfaces and add their namespaces to them
         $interfaces = array();
@@ -427,8 +435,11 @@ class ClassParser extends AbstractParser implements StructureParser
                 $invariantIterator = $invariants->getIterator();
                 for ($j = 0; $j < $invariantCount; $j++) {
 
-                    if (strpos($invariantIterator->current()->getString(),
-                            '$this->' . ltrim($attributeIterator->current()->name, '$')) !== false) {
+                    if (strpos(
+                            $invariantIterator->current()->getString(),
+                            '$this->' . ltrim($attributeIterator->current()->name, '$')
+                        ) !== false
+                    ) {
 
                         // Tell them we were mentioned and persist it
                         $attributeIterator->current()->inInvariant = true;

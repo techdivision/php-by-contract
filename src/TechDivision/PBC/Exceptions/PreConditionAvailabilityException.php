@@ -18,6 +18,7 @@ use TechDivision\PBC\Interfaces\PBCException;
  *
  * @package TechDivision\PBC\Exceptions
  */
-class PreconditionAvailabilityException extends \Exception implements PBCException {
+class PreconditionAvailabilityException extends \Exception implements PBCException
+{
 
 }

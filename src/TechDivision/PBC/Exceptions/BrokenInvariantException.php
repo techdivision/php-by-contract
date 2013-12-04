@@ -18,6 +18,7 @@ use TechDivision\PBC\Interfaces\PBCException;
  *
  * @package TechDivision\PBC\Exceptions
  */
-class BrokenInvariantException extends \Exception implements PBCException {
+class BrokenInvariantException extends \Exception implements PBCException
+{
 
 }

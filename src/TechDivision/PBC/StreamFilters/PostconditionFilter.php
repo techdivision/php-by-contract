@@ -99,15 +99,23 @@ class PostconditionFilter extends AbstractFilter
                     } else {
 
                         // If we use the old notation we have to insert the statement to make a copy
-                        $bucket->data = str_replace(PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->name .
-                            PBC_PLACEHOLDER_CLOSE, $this->generateOldCode(), $bucket->data);
+                        $bucket->data = str_replace(
+                            PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->name .
+                            PBC_PLACEHOLDER_CLOSE,
+                            $this->generateOldCode(),
+                            $bucket->data
+                        );
 
                         // Get the code for the assertions
                         $code = $this->generateCode($functionDefinition->getPostconditions());
 
                         // Insert the code
-                        $bucket->data = str_replace(PBC_POSTCONDITION_PLACEHOLDER . $functionDefinition->name .
-                            PBC_PLACEHOLDER_CLOSE, $code, $bucket->data);
+                        $bucket->data = str_replace(
+                            PBC_POSTCONDITION_PLACEHOLDER . $functionDefinition->name .
+                            PBC_PLACEHOLDER_CLOSE,
+                            $code,
+                            $bucket->data
+                        );
 
                         // "Destroy" code and function definition
                         $code = null;
@@ -174,7 +182,11 @@ class PostconditionFilter extends AbstractFilter
             if (!empty($codeFragment)) {
 
                 $code .= 'if (!((' . implode(') && (', $codeFragment) . '))){' .
-                    PBC_FAILURE_VARIABLE . ' = \'(' . str_replace('\'', '"', implode(') && (', $codeFragment)) . ')\';' .
+                    PBC_FAILURE_VARIABLE . ' = \'(' . str_replace(
+                        '\'',
+                        '"',
+                        implode(') && (', $codeFragment)
+                    ) . ')\';' .
                     PBC_PROCESSING_PLACEHOLDER . 'postcondition' . PBC_PLACEHOLDER_CLOSE . '}';
             }
 

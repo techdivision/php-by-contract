@@ -75,7 +75,7 @@ class TypedCollectionAssertion extends AbstractAssertion
             $this->inverted = true;
             return true;
 
-        }  elseif ($this->inverted === true) {
+        } elseif ($this->inverted === true) {
 
             $this->comparator = '===';
             $this->inverted = false;

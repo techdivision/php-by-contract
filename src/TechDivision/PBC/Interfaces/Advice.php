@@ -9,6 +9,7 @@
 
 namespace TechDivision\PBC\Interfaces;
 
-interface Advice {
+interface Advice
+{
 
 }

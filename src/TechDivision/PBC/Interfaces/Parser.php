@@ -9,5 +9,6 @@
 
 namespace TechDivision\PBC\Interfaces;
 
-interface Parser {
+interface Parser
+{
 }

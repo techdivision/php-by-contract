@@ -298,22 +298,30 @@ class StructureMap
      * @param $path
      * @return mixed
      */
-    private function normalizePath($path) {
-        return array_reduce(explode('/', $path), create_function('$a, $b', '
-            if($a === 0)
-                $a = "/";
+    private function normalizePath($path)
+    {
+        return array_reduce(
+            explode('/', $path),
+            create_function(
+                '$a, $b',
+                '
+                           if($a === 0)
+                               $a = "/";
 
-            if($b === "")
-                return $a;
+                           if($b === "")
+                               return $a;
 
-            if($b === ".")
-                return __DIR__;
+                           if($b === ".")
+                               return __DIR__;
 
-            if($b === "..")
-                return dirname($a);
+                           if($b === "..")
+                               return dirname($a);
 
-            return preg_replace("/\/+/", "/", "$a/$b");
-        '), 0);
+                           return preg_replace("/\/+/", "/", "$a/$b");
+                       '
+            ),
+            0
+        );
     }
 
     /**

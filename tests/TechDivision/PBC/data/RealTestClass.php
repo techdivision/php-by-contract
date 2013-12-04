@@ -15,22 +15,25 @@ namespace TechDivision\Example\Servlets;
 use TechDivision\Example\Servlets\AbstractServlet;
 
 /**
- * @package     TechDivision\Example
- * @copyright  	Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license    	http://opensource.org/licenses/osl-3.0.php
+ * @package        TechDivision\Example
+ * @copyright      Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
+ * @license        http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
- * @author      Tim Wagner <tw@techdivision.com>
+ * @author         Tim Wagner <tw@techdivision.com>
  */
-class IndexServlet extends AbstractServlet {
+class IndexServlet extends AbstractServlet
+{
 
     /**
      * The relative path, up from the webapp path, to the template to use.
+     *
      * @var string
      */
     const INDEX_TEMPLATE = 17;
 
     /**
      * Class name of the persistence container proxy that handles the data.
+     *
      * @var string
      */
     const PROXY_CLASS = 'TechDivision\Example\Services\SampleProcessor';
@@ -41,11 +44,12 @@ class IndexServlet extends AbstractServlet {
      * Loads all sample data and attaches it to the servlet context ready to be rendered
      * by the template.
      *
-     * @param Request $req The request instance
+     * @param Request $req  The request instance
      * @param Response $res The response instance
      * @return void
      */
-    public function indexAction(Request $req, Response $res) {
+    public function indexAction(Request $req, Response $res)
+    {
         $overviewData = $this->getProxy(self::PROXY_CLASS)->findAll();
         $this->addAttribute(ContextKeys::OVERVIEW_DATA, $overviewData);
         $res->setContent($this->processTemplate(self::INDEX_TEMPLATE, $req, $res));
@@ -55,12 +59,13 @@ class IndexServlet extends AbstractServlet {
      * Loads the sample entity with the sample ID found in the request and attaches
      * it to the servlet context ready to be rendered by the template.
      *
-     * @param Request $req The request instance
+     * @param Request $req  The request instance
      * @param Response $res The response instance
      * @return void
      * @see IndexServlet::indexAction()
      */
-    public function loadAction(Request $req, Response $res) {
+    public function loadAction(Request $req, Response $res)
+    {
 
         // load the params with the entity data
         $parameterMap = $req->getParams();
@@ -84,12 +89,13 @@ class IndexServlet extends AbstractServlet {
      * Deletes the sample entity with the sample ID found in the request and
      * reloads all other entities from the database.
      *
-     * @param Request $req The request instance
+     * @param Request $req  The request instance
      * @param Response $res The response instance
      * @return void
      * @see IndexServlet::indexAction()
      */
-    public function deleteAction(Request $req, Response $res) {
+    public function deleteAction(Request $req, Response $res)
+    {
 
         // load the params with the entity data
         $parameterMap = $req->getParams();
@@ -113,19 +119,21 @@ class IndexServlet extends AbstractServlet {
      *
      * @param integer $syncedAt Holds the value for the class member syncedAt
      */
-    public function setSyncedAt($syncedAt = null) {
+    public function setSyncedAt($syncedAt = null)
+    {
         $this->syncedAt = $syncedAt;
     }
 
     /**
      * Persists the entity data found in the request.
      *
-     * @param Request $req The request instance
+     * @param Request $req  The request instance
      * @param Response $res The response instance
      * @return void
      * @see IndexServlet::indexAction()
      */
-    public function persistAction(Request $req, Response $res) {
+    public function persistAction(Request $req, Response $res)
+    {
 
         // load the params with the entity data
         $parameterMap = $req->getParams();
@@ -144,7 +152,7 @@ class IndexServlet extends AbstractServlet {
 
         // create a new entity and persist it
         $entity = new Sample();
-        $entity->setSampleId((integer) $sampleId);
+        $entity->setSampleId((integer)$sampleId);
         $entity->setName($name);
         $this->getProxy(self::PROXY_CLASS)->persist($entity);
 
@@ -158,7 +166,8 @@ class IndexServlet extends AbstractServlet {
      * @param \TechDivision\Example\Entities\Sample $entity The entity to create the edit link for
      * @return string The URL to open the edit dialog
      */
-    public function getEditLink($entity) {
+    public function getEditLink($entity)
+    {
         return '?action=load&sampleId=' . $entity->getSampleId();
     }
 
@@ -168,7 +177,8 @@ class IndexServlet extends AbstractServlet {
      * @param \TechDivision\Example\Entities\Sample $entity The entity to create the deletion link for
      * @return string The URL with the deletion link
      */
-    public function getDeleteLink($entity) {
+    public function getDeleteLink($entity)
+    {
         return '?action=delete&sampleId=' . $entity->getSampleId();
     }
 }

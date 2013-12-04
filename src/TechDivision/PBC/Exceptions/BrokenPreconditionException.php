@@ -13,6 +13,7 @@ use TechDivision\PBC\Interfaces\PBCException;
  *
  * @package TechDivision\PBC\Exceptions
  */
-class BrokenPreconditionException extends \Exception implements PBCException {
+class BrokenPreconditionException extends \Exception implements PBCException
+{
 
 }

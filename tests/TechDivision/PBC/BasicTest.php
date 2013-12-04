@@ -56,7 +56,8 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
             $test->stringToArray(13);
 
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
@@ -66,7 +67,8 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
             $test->concatSomeStuff("26", array(), new \Exception());
 
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
@@ -76,7 +78,8 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
             $test->stringToWelcome(34);
 
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);

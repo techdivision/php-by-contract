@@ -28,7 +28,8 @@ class TypeSafetyTest extends PHPUnit_Framework_TestCase
 
             $this->typeSafetyTestClass->iNeedStrings('stringer', 12);
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
@@ -38,7 +39,8 @@ class TypeSafetyTest extends PHPUnit_Framework_TestCase
 
             $this->typeSafetyTestClass->iNeedArrays('test', array());
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
@@ -48,7 +50,8 @@ class TypeSafetyTest extends PHPUnit_Framework_TestCase
 
             $this->typeSafetyTestClass->iNeedNumeric('four');
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
@@ -58,7 +61,8 @@ class TypeSafetyTest extends PHPUnit_Framework_TestCase
 
             $this->typeSafetyTestClass->iNeedStrings('stringer', 'testinger');
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertNull($e);
@@ -68,7 +72,8 @@ class TypeSafetyTest extends PHPUnit_Framework_TestCase
 
             $this->typeSafetyTestClass->iNeedArrays(array('test', 'test2'), array());
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertNull($e);
@@ -76,10 +81,11 @@ class TypeSafetyTest extends PHPUnit_Framework_TestCase
         $e = null;
         try {
 
-            $this->typeSafetyTestClass->iNeedNumeric(12,5);
+            $this->typeSafetyTestClass->iNeedNumeric(12, 5);
             $this->typeSafetyTestClass->iNeedNumeric(42);
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertNull($e);
@@ -95,7 +101,8 @@ class TypeSafetyTest extends PHPUnit_Framework_TestCase
 
             $this->typeSafetyTestClass->iReturnAString(12);
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPostconditionException", $e);
@@ -105,7 +112,8 @@ class TypeSafetyTest extends PHPUnit_Framework_TestCase
 
             $this->typeSafetyTestClass->iReturnAnArray('testinger');
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPostconditionException", $e);
@@ -115,7 +123,8 @@ class TypeSafetyTest extends PHPUnit_Framework_TestCase
 
             $this->typeSafetyTestClass->iReturnAnInt(array());
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPostconditionException", $e);
@@ -125,7 +134,8 @@ class TypeSafetyTest extends PHPUnit_Framework_TestCase
 
             $this->typeSafetyTestClass->iReturnAnArray();
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertNull($e);
@@ -135,7 +145,8 @@ class TypeSafetyTest extends PHPUnit_Framework_TestCase
 
             $this->typeSafetyTestClass->iReturnAnInt();
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertNull($e);
@@ -145,7 +156,8 @@ class TypeSafetyTest extends PHPUnit_Framework_TestCase
 
             $this->typeSafetyTestClass->iReturnAString();
 
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         // Did we get the right $e?
         $this->assertNull($e);

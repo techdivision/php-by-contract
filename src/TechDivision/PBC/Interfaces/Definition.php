@@ -9,7 +9,8 @@
 
 namespace TechDivision\PBC\Interfaces;
 
-interface Definition {
+interface Definition
+{
 
     public function getString();
 }

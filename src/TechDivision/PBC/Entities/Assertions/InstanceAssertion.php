@@ -47,7 +47,7 @@ class InstanceAssertion extends AbstractAssertion
             $this->class = '\\' . $this->class;
         }
 
-        return (string) $this->operand . ' instanceof ' . $this->class;
+        return (string)$this->operand . ' instanceof ' . $this->class;
     }
 
     /**
@@ -61,7 +61,7 @@ class InstanceAssertion extends AbstractAssertion
             $this->inverted = true;
             return true;
 
-        }  elseif ($this->inverted === true) {
+        } elseif ($this->inverted === true) {
 
             $this->operand = ltrim($this->operand, '!');
             $this->inverted = false;

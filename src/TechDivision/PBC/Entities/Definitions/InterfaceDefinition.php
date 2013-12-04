@@ -192,7 +192,7 @@ class InterfaceDefinition implements StructureDefinition
 
         } else {
 
-            foreach($ancestorDefinitions as $ancestorDefinition) {
+            foreach ($ancestorDefinitions as $ancestorDefinition) {
 
                 $functionIterator = $ancestorDefinition->functionDefinitions->getIterator();
                 for ($j = 0; $j < $functionIterator->count(); $j++) {

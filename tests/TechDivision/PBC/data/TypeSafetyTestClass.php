@@ -19,11 +19,12 @@ namespace TechDivision\Tests\TypeSafety;
  *              Open Software License (OSL 3.0)
  * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-class TypeSafetyTestClass {
+class TypeSafetyTestClass
+{
 
     /**
-     * @param   string  $string1
-     * @param   string  $string2
+     * @param   string $string1
+     * @param   string $string2
      */
     public function iNeedStrings($string1, $string2)
     {
@@ -31,8 +32,8 @@ class TypeSafetyTestClass {
     }
 
     /**
-     * @param   array   $array1
-     * @param   array   $array2
+     * @param   array $array1
+     * @param   array $array2
      */
     public function iNeedArrays($array1, $array2)
     {

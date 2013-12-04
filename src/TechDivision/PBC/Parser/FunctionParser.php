@@ -93,7 +93,10 @@ class FunctionParser extends AbstractParser
 
         // So we got our docBlock, now we can parse the precondition annotations from it
         $annotationParser = new AnnotationParser();
-        $functionDefinition->preconditions = $annotationParser->getConditions($functionDefinition->docBlock, PBC_KEYWORD_PRE);
+        $functionDefinition->preconditions = $annotationParser->getConditions(
+            $functionDefinition->docBlock,
+            PBC_KEYWORD_PRE
+        );
 
         // Does this method require the use of our "old" mechanism?
         $functionDefinition->usesOld = $this->usesKeyword($functionDefinition->docBlock, PBC_KEYWORD_OLD);
@@ -102,7 +105,10 @@ class FunctionParser extends AbstractParser
         $functionDefinition->body = $this->getFunctionBody($tokens);
 
         // So we got our docBlock, now we can parse the postcondition annotations from it
-        $functionDefinition->postconditions = $annotationParser->getConditions($functionDefinition->docBlock, PBC_KEYWORD_POST);
+        $functionDefinition->postconditions = $annotationParser->getConditions(
+            $functionDefinition->docBlock,
+            PBC_KEYWORD_POST
+        );
 
         return $functionDefinition;
     }
@@ -135,14 +141,14 @@ class FunctionParser extends AbstractParser
 
                         } else {
 
-                            $bracketPassed ++;
+                            $bracketPassed++;
                         }
                     }
 
                     // We got A closing bracket, decrease the counter
                     if ($tokens[$j] === ')') {
 
-                        $bracketPassed --;
+                        $bracketPassed--;
                     }
 
                     if ($bracketPassed >= 0 && $bracketPassed !== null) {
@@ -301,7 +307,8 @@ class FunctionParser extends AbstractParser
             // a function name.
             // Otherwise anonymous functions will make us go crazy.
             if (is_array($tokens[$i]) && $tokens[$i][0] === T_FUNCTION &&
-                !empty($tokens[$i + 2]) && $tokens[$i + 2] !== '(') {
+                !empty($tokens[$i + 2]) && $tokens[$i + 2] !== '('
+            ) {
 
                 // The lower bound should be the last semicolon|closing curly bracket|PHP tag before the function
                 $lowerBound = 0;

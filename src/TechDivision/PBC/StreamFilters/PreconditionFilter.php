@@ -27,8 +27,8 @@ class PreconditionFilter extends AbstractFilter
 {
 
     /**
- * @const   int
- */
+     * @const   int
+     */
     const FILTER_ORDER = 1;
 
     /**
@@ -103,8 +103,12 @@ class PreconditionFilter extends AbstractFilter
                         $code = $this->generateCode($functionDefinition->getPreconditions());
 
                         // Insert the code
-                        $bucket->data = str_replace(PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->name .
-                            PBC_PLACEHOLDER_CLOSE, $code, $bucket->data);
+                        $bucket->data = str_replace(
+                            PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->name .
+                            PBC_PLACEHOLDER_CLOSE,
+                            $code,
+                            $bucket->data
+                        );
 
                         // "Destroy" code and function definition
                         $code = null;
@@ -172,7 +176,7 @@ class PreconditionFilter extends AbstractFilter
 
         // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
         $code .= 'if ($passedOne === false){' .
-            PBC_FAILURE_VARIABLE . ' = implode(" and ", ' . PBC_FAILURE_VARIABLE .');' .
+            PBC_FAILURE_VARIABLE . ' = implode(" and ", ' . PBC_FAILURE_VARIABLE . ');' .
             PBC_PROCESSING_PLACEHOLDER . 'precondition' . PBC_PLACEHOLDER_CLOSE . '
             }';
 

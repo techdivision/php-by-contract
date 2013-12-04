@@ -54,11 +54,11 @@ class TypeAssertion extends AbstractAssertion
 
             if ($this->validatesTo === true) {
 
-                return (string) 'is_' . $this->type . '(' . $this->operand . ')';
+                return (string)'is_' . $this->type . '(' . $this->operand . ')';
 
             } else {
 
-                return (string) '!is_' . $this->type . '(' . $this->operand . ')';
+                return (string)'!is_' . $this->type . '(' . $this->operand . ')';
             }
 
         } else {
@@ -78,7 +78,7 @@ class TypeAssertion extends AbstractAssertion
             $this->inverted = true;
             return true;
 
-        }  elseif ($this->validatesTo === false) {
+        } elseif ($this->validatesTo === false) {
 
             $this->validatesTo = true;
             $this->inverted = false;

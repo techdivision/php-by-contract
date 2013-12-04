@@ -90,7 +90,10 @@ class Generator
 
 
             $structureDefinition = $classIterator->current();
-            $filePath = $this->createProxyFilePath($fileDefinition->namespace . '\\' . $structureDefinition->name, $mapEntry->getPath());
+            $filePath = $this->createProxyFilePath(
+                $fileDefinition->namespace . '\\' . $structureDefinition->name,
+                $mapEntry->getPath()
+            );
 
             $tmp = $this->createFileFromDefinitions($filePath, $fileDefinition, $structureDefinition);
 
@@ -138,22 +141,30 @@ class Generator
      * @param $path
      * @return mixed
      */
-    private function normalizePath($path) {
-        return array_reduce(explode('/', $path), create_function('$a, $b', '
-            if($a === 0)
-                $a = "/";
+    private function normalizePath($path)
+    {
+        return array_reduce(
+            explode('/', $path),
+            create_function(
+                '$a, $b',
+                '
+                           if($a === 0)
+                               $a = "/";
 
-            if($b === "")
-                return $a;
+                           if($b === "")
+                               return $a;
 
-            if($b === ".")
-                return __DIR__;
+                           if($b === ".")
+                               return __DIR__;
 
-            if($b === "..")
-                return dirname($a);
+                           if($b === "..")
+                               return dirname($a);
 
-            return preg_replace("/\/+/", "/", "$a/$b");
-        '), 0);
+                           return preg_replace("/\/+/", "/", "$a/$b");
+                       '
+            ),
+            0
+        );
     }
 
     /**
@@ -163,8 +174,11 @@ class Generator
      * @return mixed
      * @throws \InvalidArgumentException
      */
-    private function createFileFromDefinitions($targetFileName, FileDefinition $fileDefinition, StructureDefinition $structureDefinition)
-    {
+    private function createFileFromDefinitions(
+        $targetFileName,
+        FileDefinition $fileDefinition,
+        StructureDefinition $structureDefinition
+    ) {
         // We have to check which structure type we got
         $definitionType = get_class($structureDefinition);
 
@@ -189,17 +203,25 @@ class Generator
      * @param FileDefinition $fileDefinition
      * @param InterfaceDefinition $structureDefinition
      */
-    private function createFileFromInterfaceDefinitions($targetFileName, FileDefinition $fileDefinition, InterfaceDefinition $structureDefinition)
-    {
+    private function createFileFromInterfaceDefinitions(
+        $targetFileName,
+        FileDefinition $fileDefinition,
+        InterfaceDefinition $structureDefinition
+    ) {
         // Get the content of the file
         $content = file_get_contents($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name);
 
         // Make the one change we need, the original file path and modification timestamp
-        $content = str_replace('<?php',
-        '<?php /* ' . PBC_ORIGINAL_PATH_HINT . $fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name . '#' .
-        filemtime($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name) . PBC_ORIGINAL_PATH_HINT . ' */', $content);
+        $content = str_replace(
+            '<?php',
+            '<?php /* ' . PBC_ORIGINAL_PATH_HINT . $fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name . '#' .
+            filemtime(
+                $fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name
+            ) . PBC_ORIGINAL_PATH_HINT . ' */',
+            $content
+        );
 
-        return (boolean) file_put_contents($targetFileName, $content);
+        return (boolean)file_put_contents($targetFileName, $content);
     }
 
     /**
@@ -209,8 +231,11 @@ class Generator
      * @return bool
      * @throws \Exception|PHPParser_Error
      */
-    private function createFileFromClassDefinitions($targetFileName, FileDefinition $fileDefinition, ClassDefinition $structureDefinition)
-    {
+    private function createFileFromClassDefinitions(
+        $targetFileName,
+        FileDefinition $fileDefinition,
+        ClassDefinition $structureDefinition
+    ) {
         // Before using the definition we have to finalize it
         $structureDefinition->finalize();
 
@@ -220,16 +245,39 @@ class Generator
         stream_filter_register('InvariantFilter', 'TechDivision\PBC\StreamFilters\InvariantFilter');
         stream_filter_register('ProcessingFilter', 'TechDivision\PBC\StreamFilters\ProcessingFilter');
 
-        $res = fopen($this->createProxyFilePath($structureDefinition->namespace . '\\' . $structureDefinition->name), 'w+');
+        $res = fopen(
+            $this->createProxyFilePath($structureDefinition->namespace . '\\' . $structureDefinition->name),
+            'w+'
+        );
 
-        stream_filter_append($res, 'SkeletonFilter', STREAM_FILTER_WRITE, array($structureDefinition->functionDefinitions,
-                $fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name));
-        stream_filter_append($res, 'PreconditionFilter', STREAM_FILTER_WRITE, $structureDefinition->functionDefinitions);
-        stream_filter_append($res, 'PostconditionFilter', STREAM_FILTER_WRITE, $structureDefinition->functionDefinitions);
+        stream_filter_append(
+            $res,
+            'SkeletonFilter',
+            STREAM_FILTER_WRITE,
+            array(
+                $structureDefinition->functionDefinitions,
+                $fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name
+            )
+        );
+        stream_filter_append(
+            $res,
+            'PreconditionFilter',
+            STREAM_FILTER_WRITE,
+            $structureDefinition->functionDefinitions
+        );
+        stream_filter_append(
+            $res,
+            'PostconditionFilter',
+            STREAM_FILTER_WRITE,
+            $structureDefinition->functionDefinitions
+        );
         stream_filter_append($res, 'InvariantFilter', STREAM_FILTER_WRITE, $structureDefinition);
         stream_filter_append($res, 'ProcessingFilter', STREAM_FILTER_WRITE, $this->config);
 
-        $tmp = fwrite($res, file_get_contents($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name, time()));
+        $tmp = fwrite(
+            $res,
+            file_get_contents($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name, time())
+        );
 
         // Did we write something?
         if ($tmp > 0) {
@@ -239,8 +287,13 @@ class Generator
         } else {
 
             // Delete the empty file stub we made
-            unlink($this->createProxyFilePath($structureDefinition->namespace .
-                '\\' . $structureDefinition->name), $res);
+            unlink(
+                $this->createProxyFilePath(
+                    $structureDefinition->namespace .
+                    '\\' . $structureDefinition->name
+                ),
+                $res
+            );
             return false;
         }
     }
@@ -367,8 +420,11 @@ class Generator
 
                 $code .= 'if (!((';
                 $code .= implode(') && (', $codeFragment) . '))){';
-                $code .= $this->generateReactionCode($type, 'Assertion (' . str_replace('\'', '"', implode(') && (', $codeFragment)) .
-                    ') failed');
+                $code .= $this->generateReactionCode(
+                    $type,
+                    'Assertion (' . str_replace('\'', '"', implode(') && (', $codeFragment)) .
+                    ') failed'
+                );
                 $code .= '}';
             }
 
@@ -417,7 +473,11 @@ class Generator
                 }
                 $code .= 'if (!(';
                 $code .= implode(' && ', $codeFragment) . ')){';
-                $code .= 'throw new BrokenInvariantException(\'Assertion ' . str_replace('\'', '"', implode(' && ', $codeFragment)) .
+                $code .= 'throw new BrokenInvariantException(\'Assertion ' . str_replace(
+                        '\'',
+                        '"',
+                        implode(' && ', $codeFragment)
+                    ) .
                     ' failed in ' . PBC_CLASS_INVARIANT_NAME . '.\');';
                 $code .= '}';
             }
@@ -474,7 +534,11 @@ class Generator
         // The beginning is always the same
         $result .= 'if (' . $assertion->getInvertString();
         $result .= '){';
-        $result .= '    throw new ' . $exceptionType . '(\'Assertion ' . str_replace('\'', '"', $assertion->getString()) .
+        $result .= '    throw new ' . $exceptionType . '(\'Assertion ' . str_replace(
+                '\'',
+                '"',
+                $assertion->getString()
+            ) .
             ' failed in ' . $functionName . '.\');';
         $result .= '}';
 

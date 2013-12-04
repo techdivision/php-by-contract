@@ -29,7 +29,7 @@ class RawAssertion extends AbstractAssertion
      */
     public function getString()
     {
-        return (string) $this->content;
+        return (string)$this->content;
     }
 
     /**
@@ -43,7 +43,7 @@ class RawAssertion extends AbstractAssertion
             $this->inverted = true;
             return true;
 
-        }  elseif ($this->inverted === true) {
+        } elseif ($this->inverted === true) {
 
             // Just unset the parts of $this->content we do not need
             unset($this->content[0]);

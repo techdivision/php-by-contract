@@ -93,10 +93,15 @@ class ProcessingFilter extends AbstractFilter
         while ($bucket = stream_bucket_make_writeable($in)) {
 
             // Insert the code
-            $bucket->data = str_replace(array(PBC_PROCESSING_PLACEHOLDER . 'precondition' .PBC_PLACEHOLDER_CLOSE,
-                    PBC_PROCESSING_PLACEHOLDER . 'postcondition' .PBC_PLACEHOLDER_CLOSE,
-                    PBC_PROCESSING_PLACEHOLDER . 'invariant' .PBC_PLACEHOLDER_CLOSE),
-                array($preconditionCode, $postconditionCode, $invariantCode), $bucket->data);
+            $bucket->data = str_replace(
+                array(
+                    PBC_PROCESSING_PLACEHOLDER . 'precondition' . PBC_PLACEHOLDER_CLOSE,
+                    PBC_PROCESSING_PLACEHOLDER . 'postcondition' . PBC_PLACEHOLDER_CLOSE,
+                    PBC_PROCESSING_PLACEHOLDER . 'invariant' . PBC_PLACEHOLDER_CLOSE
+                ),
+                array($preconditionCode, $postconditionCode, $invariantCode),
+                $bucket->data
+            );
 
             // Tell them how much we already processed, and stuff it back into the output
             $consumed += $bucket->datalen;

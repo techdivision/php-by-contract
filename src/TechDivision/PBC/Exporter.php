@@ -13,6 +13,7 @@ require_once __DIR__ . '/Bootstrap.php';
 
 /**
  * Class Exporter
+ *
  * @package TechDivision\PBC
  */
 class Exporter
@@ -60,7 +61,7 @@ class Exporter
         $tmpFiles = $this->cache->getFiles();
         $fileList = array();
         $sourcePath = realpath($source);
-        foreach($tmpFiles as $class => $tmpFile) {
+        foreach ($tmpFiles as $class => $tmpFile) {
 
             if (isset($tmpFile['path']) && strpos($tmpFile['path'], $sourcePath) === 0) {
 
@@ -77,19 +78,19 @@ class Exporter
 
         // Return all the already found files from our $fileList and give it another try with parsing them anew.
         $tmpFileList = array_flip($fileList);
-        foreach($parsedFiles as $origPath => $parsedPath) {
+        foreach ($parsedFiles as $origPath => $parsedPath) {
 
-           if (isset($tmpFileList[$origPath])) {
+            if (isset($tmpFileList[$origPath])) {
 
-               unset($fileList[$tmpFileList[$origPath]]);
-           }
+                unset($fileList[$tmpFileList[$origPath]]);
+            }
         }
 
         // Next step!
         $parsedFiles = array_merge($parsedFiles, $this->getFreshlyParsedFiles($fileList));
 
         // Create all the files!!
-        foreach($parsedFiles as $origPath => $parsedPath) {
+        foreach ($parsedFiles as $origPath => $parsedPath) {
 
             // Have a look where to write the new file
             $targetPath = str_replace('\\\\', '\\', $target . DIRECTORY_SEPARATOR . $origPath);
@@ -122,7 +123,7 @@ class Exporter
 
         // Get all the parsed classes of our requested files
         $parsedFiles = array();
-        foreach($fileList as $class => $file) {
+        foreach ($fileList as $class => $file) {
 
             if (isset($classCache[$class])) {
 
@@ -142,7 +143,7 @@ class Exporter
         // Get a code generator and use it!
         $generator = new Generator($this->structureMap, $this->cache);
 
-        foreach($fileList as $class => $file) {
+        foreach ($fileList as $class => $file) {
 
             $generator->createProxy($class);
         }

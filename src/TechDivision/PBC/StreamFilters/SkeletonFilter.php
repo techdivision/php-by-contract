@@ -72,8 +72,13 @@ class SkeletonFilter extends AbstractFilter
             // Lets cave in the original filepath and the modification time
             if ($firstIteration === true) {
 
-                $bucket->data = str_replace('<?php',
-                    '<?php /* ' . PBC_ORIGINAL_PATH_HINT . $path . '#' . filemtime($path) . PBC_ORIGINAL_PATH_HINT . ' */', $bucket->data);
+                $bucket->data = str_replace(
+                    '<?php',
+                    '<?php /* ' . PBC_ORIGINAL_PATH_HINT . $path . '#' . filemtime(
+                        $path
+                    ) . PBC_ORIGINAL_PATH_HINT . ' */',
+                    $bucket->data
+                );
                 $firstIteration = false;
             }
 
@@ -138,8 +143,11 @@ class SkeletonFilter extends AbstractFilter
                     } else {
 
                         // Change the function name to indicate this is the original function
-                        $bucket->data = preg_replace('/' . $markerHook . ' *\(/',
-                            $markerHook . PBC_ORIGINAL_FUNCTION_SUFFIX . '(', $bucket->data);
+                        $bucket->data = preg_replace(
+                            '/' . $markerHook . ' *\(/',
+                            $markerHook . PBC_ORIGINAL_FUNCTION_SUFFIX . '(',
+                            $bucket->data
+                        );
 
                         // Get the code for the assertions
                         $functionCode = $this->generateFunctionCode($functionDefinition);
