@@ -1,11 +1,22 @@
 <?php
-
+/**
+ * TechDivision\PBC\Entities\Definitions\Structure
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ */
 namespace TechDivision\PBC\Entities\Definitions;
 
 /**
- * Class Structure
- *
- * @package TechDivision\PBC\Entities\Definitions
+ * @package     TechDivision\PBC
+ * @subpackage  Entities
+ * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
+ * @license     http://opensource.org/licenses/osl-3.0.php
+ *              Open Software License (OSL 3.0)
+ * @author      Bernhard Wick <b.wick@techdivision.com>
  */
 class Structure
 {
@@ -66,29 +77,12 @@ class Structure
         $this->type = $type;
     }
 
-
-    /**
-     * @param int $cTime
-     */
-    public function setCTime($cTime)
-    {
-        $this->cTime = $cTime;
-    }
-
     /**
      * @return int
      */
     public function getCTime()
     {
         return $this->cTime;
-    }
-
-    /**
-     * @param string $identifier
-     */
-    public function setIdentifier($identifier)
-    {
-        $this->identifier = $identifier;
     }
 
     /**
@@ -100,34 +94,11 @@ class Structure
     }
 
     /**
-     * @param string $path
-     */
-    public function setPath($path)
-    {
-        $this->path = $path;
-    }
-
-    /**
      * @return string
      */
     public function getPath()
     {
         return $this->path;
-    }
-
-    /**
-     * @param $type
-     * @throws \InvalidArgumentException
-     */
-    public function setType($type)
-    {
-        $allowedTypes = array_flip($this->allowedTypes);
-        if (!isset($allowedTypes[$type])) {
-
-            throw new \InvalidArgumentException();
-        }
-
-        $this->type = $type;
     }
 
     /**
