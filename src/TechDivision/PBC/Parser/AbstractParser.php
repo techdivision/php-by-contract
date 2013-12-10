@@ -9,9 +9,9 @@
 
 namespace TechDivision\PBC\Parser;
 
-use TechDivision\PBC\Interfaces\Parser;
+use TechDivision\PBC\Interfaces\ParserInterface;
 
-abstract class AbstractParser implements Parser
+abstract class AbstractParser implements ParserInterface
 {
 
     /**

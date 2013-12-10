@@ -15,12 +15,12 @@ use TechDivision\PBC\Entities\Definitions\AttributeDefinition;
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
-use TechDivision\PBC\Interfaces\StructureParser;
+use TechDivision\PBC\Interfaces\StructureParserInterface;
 
 /**
  * Class ClassParser
  */
-class ClassParser extends AbstractParser implements StructureParser
+class ClassParser extends AbstractParser implements StructureParserInterface
 {
     /**
      * @param $file

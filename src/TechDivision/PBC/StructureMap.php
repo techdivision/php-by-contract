@@ -4,6 +4,7 @@ namespace TechDivision\PBC;
 
 use TechDivision\PBC\Entities\Definitions\Structure;
 use TechDivision\PBC\Exceptions\CacheException;
+use TechDivision\PBC\Interfaces\MapInterface;
 
 // We might run into a situation where we do not have proper autoloading in place here. So require our DTO.
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'Entities' . DIRECTORY_SEPARATOR .
@@ -14,7 +15,7 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'Entities' . DIRECTORY_SEPARATOR .
  *
  * @package TechDivision\PBC
  */
-class StructureMap
+class StructureMap implements MapInterface
 {
     /**
      * @var array

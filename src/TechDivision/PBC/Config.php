@@ -9,10 +9,10 @@
 
 namespace TechDivision\PBC;
 
-use TechDivision\PBC\Interfaces\PBCConfig;
+use TechDivision\PBC\Interfaces\ConfigInterface;
 use Psr\Log\LoggerInterface;
 
-class Config implements PBCConfig
+class Config implements ConfigInterface
 {
 
     /**

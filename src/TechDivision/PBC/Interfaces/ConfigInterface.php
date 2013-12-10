@@ -2,7 +2,7 @@
 
 namespace TechDivision\PBC\Interfaces;
 
-interface PBCConfig
+interface ConfigInterface
 {
     public static function getInstance($context = '');
 

@@ -5,9 +5,9 @@ namespace TechDivision\PBC\Parser;
 use TechDivision\PBC\Entities\Definitions\InterfaceDefinition;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
-use TechDivision\PBC\Interfaces\StructureParser;
+use TechDivision\PBC\Interfaces\StructureParserInterface;
 
-class InterfaceParser extends AbstractParser implements StructureParser
+class InterfaceParser extends AbstractParser implements StructureParserInterface
 {
 
     /**

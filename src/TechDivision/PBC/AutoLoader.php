@@ -82,43 +82,44 @@ class AutoLoader
      */
     public function loadClass($className)
     {
-        $time[$className] = microtime(true);
+
         // Do we have the file in our cache dir? If we are in development mode we have to ignore this.
         $cacheConfig = $this->config->getConfig('cache');
-        $cachePath = $this->normalizePath(
-            $cacheConfig['dir'] . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php'
-        );
+        if ($this->config->getConfig('environment') !== 'development') {
 
-        if ($this->config->getConfig('environment') !== 'development' && is_readable($cachePath)) {
-
-            $res = fopen($cachePath, 'r');
-            $str = fread($res, 384);
-
-            $succsss = preg_match(
-                '/' . PBC_ORIGINAL_PATH_HINT . '(.+)' .
-                PBC_ORIGINAL_PATH_HINT . '/',
-                $str,
-                $tmp
+            $cachePath = $this->normalizePath(
+                $cacheConfig['dir'] . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php'
             );
 
-            if ($succsss > 0) {
+            if (is_readable($cachePath)) {
 
-                $tmp = explode('#', $tmp[1]);
+                $res = fopen($cachePath, 'r');
+                $str = fread($res, 384);
 
-                $path = $tmp[0];
-                $mTime = $tmp[1];
-                $time[$className] = microtime(true) - $time[$className];
+                $success = preg_match(
+                    '/' . PBC_ORIGINAL_PATH_HINT . '(.+)' .
+                    PBC_ORIGINAL_PATH_HINT . '/',
+                    $str,
+                    $tmp
+                );
 
-                if (filemtime($path) == $mTime) {
+                if ($success > 0) {
 
-                    require $cachePath;
+                    $tmp = explode('#', $tmp[1]);
+
+                    $path = $tmp[0];
+                    $mTime = $tmp[1];
+
+                    if (filemtime($path) == $mTime) {
+
+                        require $cachePath;
 
 
-                    return true;
+                        return true;
+                    }
                 }
             }
         }
-
 
         // There was no file in our cache dir, so lets hope we know the original path of the file.
         $autoLoaderConfig = $this->config->getConfig('autoloader');
