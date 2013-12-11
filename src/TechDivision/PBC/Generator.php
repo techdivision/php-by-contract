@@ -61,9 +61,9 @@ class Generator
      * @param $className
      * @return bool
      */
-    public function updateProxy($className)
+    public function update($className)
     {
-        return $this->createProxy($className, true);
+        return $this->create($className, true);
     }
 
     /**
@@ -71,7 +71,7 @@ class Generator
      * @param bool $update
      * @return bool
      */
-    public function createProxy($className, $update = false)
+    public function create($className, $update = false)
     {
         // If we do not know the file we can forget it
         $mapEntry = $this->structureMap->getEntry($className);
@@ -91,7 +91,7 @@ class Generator
 
 
             $structureDefinition = $classIterator->current();
-            $filePath = $this->createProxyFilePath(
+            $filePath = $this->createFilePath(
                 $fileDefinition->namespace . '\\' . $structureDefinition->name,
                 $mapEntry->getPath()
             );
@@ -109,7 +109,7 @@ class Generator
 
                     foreach ($dependants as $dependant) {
 
-                        $this->updateProxy($dependant, true);
+                        $this->update($dependant, true);
                     }
                 }
             }
@@ -126,7 +126,7 @@ class Generator
      * @param $className
      * @return string
      */
-    private function createProxyFilePath($className)
+    private function createFilePath($className)
     {
         // As a file can contain multiple classes we will substitute the filename with the class name
         $tmpFileName = ltrim(str_replace('\\', '_', $className), '_');
@@ -241,7 +241,7 @@ class Generator
         $structureDefinition->finalize();
 
         $res = fopen(
-            $this->createProxyFilePath($structureDefinition->namespace . '\\' . $structureDefinition->name),
+            $this->createFilePath($structureDefinition->namespace . '\\' . $structureDefinition->name),
             'w+'
         );
 
@@ -262,7 +262,7 @@ class Generator
 
             // Delete the empty file stub we made
             unlink(
-                $this->createProxyFilePath(
+                $this->createFilePath(
                     $structureDefinition->namespace .
                     '\\' . $structureDefinition->name
                 ),
@@ -598,7 +598,7 @@ class Generator
      *
      * @return mixed
      */
-    public function getProxyFileName($className)
+    public function getFileName($className)
     {
         $mapEntry = $this->cache->getEntry($className);
 

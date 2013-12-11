@@ -167,10 +167,10 @@ class AutoLoader
         $this->generator = new Generator($structureMap, $this->cache);
 
         // Create the new class definition
-        if ($this->generator->createProxy($className) === true) {
+        if ($this->generator->create($className) === true) {
 
             // Require the new class, it should have been created now
-            $file = $this->generator->getProxyFileName($className);
+            $file = $this->generator->getFileName($className);
             if (is_readable($file) === true) {
 
                 require $file;

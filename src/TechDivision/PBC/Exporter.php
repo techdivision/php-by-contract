@@ -145,7 +145,7 @@ class Exporter
 
         foreach ($fileList as $class => $file) {
 
-            $generator->createProxy($class);
+            $generator->create($class);
         }
 
         // Now everything should be cached ;)
