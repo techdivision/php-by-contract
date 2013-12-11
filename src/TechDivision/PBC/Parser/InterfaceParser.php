@@ -7,7 +7,7 @@ use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 use TechDivision\PBC\Interfaces\StructureParserInterface;
 
-class InterfaceParser extends AbstractParser implements StructureParserInterface
+class InterfaceParser extends AbstractStructureParser
 {
 
     /**

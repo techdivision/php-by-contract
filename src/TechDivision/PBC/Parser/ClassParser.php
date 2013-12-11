@@ -20,7 +20,7 @@ use TechDivision\PBC\Interfaces\StructureParserInterface;
 /**
  * Class ClassParser
  */
-class ClassParser extends AbstractParser implements StructureParserInterface
+class ClassParser extends AbstractStructureParser
 {
     /**
      * @param $file

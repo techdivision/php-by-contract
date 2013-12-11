@@ -102,27 +102,6 @@ class FileParser extends AbstractParser
     }
 
     /**
-     * Will return all entries as full DTOs
-     *
-     * @return array
-     */
-    public function getEntries()
-    {
-
-        $entries = array();
-        foreach ($this->map as $entry) {
-
-            $entries[] = new Structure($entry['cTime'],
-                $entry['identifier'],
-                $entry['path'],
-                $entry['type'],
-                $entry['hasContracts']);
-        }
-
-        return $entries;
-    }
-
-    /**
      * @param $tokens
      *
      * @return string
