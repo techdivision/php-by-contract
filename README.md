@@ -34,12 +34,11 @@ autoloaders your application might require.
 require_once "vendor/techdivision/php-by-contract/src/TechDivision/PBC/Bootstrap.php";
 ```
 
-You also have to specify your project's root path within the Config.php file:
+You also have to specify your project's root path(s) within the config.default.json (or add your own file with Config::load()) file:
 ```php
-$this->config['AutoLoader'] = array(
-    'omit' => array('TechDivision\PBC', 'PHPUnit', 'PHPParser', 'Symfony\Component', 'Psr\Log'),
-    'projectRoot' => PATH TO YOUR PROJECT
-);
+"project-dirs": [
+        "./../../../tests"
+    ]
 ```
 
 After that you can specify contracts, boundaries on which your code structures may rely, within your code's doc-comments.
