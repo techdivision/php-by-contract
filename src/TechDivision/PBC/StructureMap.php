@@ -65,13 +65,21 @@ class StructureMap implements MapInterface
         }
 
         // Save the config for later use.
-        $this->config = $config;
+        if ($config !== null) {
+
+            $this->config = $config;
+
+        } else {
+
+            $this->config = Config::getInstance();
+        }
 
         // Set the rootPath and calculate the path to the map file
         $this->rootPathes = $rootPathes;
 
         // Build up the path of the serialized map.
-        $this->mapPath = PBC_MAP_DIR . DIRECTORY_SEPARATOR . md5(implode('', $rootPathes));
+        $cacheConfig = $this->config->getConfig('cache');
+        $this->mapPath = $cacheConfig['dir'] . DIRECTORY_SEPARATOR . md5(implode('', $rootPathes));
 
         // Set the omitted pathes
         $this->omittedPathes = $omittedPathes;
@@ -290,39 +298,6 @@ class StructureMap implements MapInterface
 
             return false;
         }
-
-    }
-
-    /**
-     * Will break up any path into a canonical form like realpath(), but does not require the file to exist.
-     *
-     * @param $path
-     * @return mixed
-     */
-    private function normalizePath($path)
-    {
-        return array_reduce(
-            explode('/', $path),
-            create_function(
-                '$a, $b',
-                '
-                           if($a === 0)
-                               $a = "/";
-
-                           if($b === "")
-                               return $a;
-
-                           if($b === ".")
-                               return __DIR__;
-
-                           if($b === "..")
-                               return dirname($a);
-
-                           return preg_replace("/\/+/", "/", "$a/$b");
-                       '
-            ),
-            0
-        );
     }
 
     /**
@@ -336,7 +311,7 @@ class StructureMap implements MapInterface
         $directoryIterators = array();
         foreach ($this->rootPathes as $rootPath) {
 
-            $directoryIterators[] = new \RecursiveDirectoryIterator($this->normalizePath($rootPath),
+            $directoryIterators[] = new \RecursiveDirectoryIterator($rootPath,
                 \RecursiveDirectoryIterator::KEY_AS_PATHNAME);
         }
 

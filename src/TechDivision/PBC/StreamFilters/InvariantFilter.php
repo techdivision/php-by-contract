@@ -224,7 +224,7 @@ class InvariantFilter extends AbstractFilter
             '/**
             * @var array
             */
-            private $attributes = array(';
+            private $' . PBC_ATTRIBUTE_STORAGE . ' = array(';
 
         // After iterate over the attributes and build up our array
         $iterator = $attributeDefinitions->getIterator();
@@ -274,7 +274,7 @@ class InvariantFilter extends AbstractFilter
         public function __set($name, $value)
         {
             // Does this property even exist? If not, throw an exception
-            if (!isset($this->attributes[$name])) {';
+            if (!isset($this->' . PBC_ATTRIBUTE_STORAGE . '[$name])) {';
 
         if ($hasParents) {
 
@@ -298,7 +298,7 @@ class InvariantFilter extends AbstractFilter
             '$this->' . PBC_CONTRACT_DEPTH . '++;
 
             // Now check what kind of visibility we would have
-            $attribute = $this->attributes[$name];
+            $attribute = $this->' . PBC_ATTRIBUTE_STORAGE . '[$name];
             switch ($attribute["visibility"]) {
 
                 case "protected" :
@@ -345,7 +345,7 @@ class InvariantFilter extends AbstractFilter
         public function __get($name)
         {
             // Does this property even exist? If not, throw an exception
-            if (!isset($this->attributes[$name])) {';
+            if (!isset($this->' . PBC_ATTRIBUTE_STORAGE . '[$name])) {';
 
         if ($hasParents) {
 
@@ -366,7 +366,7 @@ class InvariantFilter extends AbstractFilter
         $code .= '}
 
         // Now check what kind of visibility we would have
-        $attribute = $this->attributes[$name];
+        $attribute = $this->' . PBC_ATTRIBUTE_STORAGE . '[$name];
         switch ($attribute["visibility"]) {
 
             case "protected" :

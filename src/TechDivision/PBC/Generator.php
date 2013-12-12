@@ -133,39 +133,7 @@ class Generator
         $this->config = Config::getInstance();
         $cacheConfig = $this->config->getConfig('cache');
 
-        return $this->normalizePath($cacheConfig['dir'] . DIRECTORY_SEPARATOR . $tmpFileName . '.php');
-    }
-
-    /**
-     * Will break up any path into a canonical form like realpath(), but does not require the file to exist.
-     *
-     * @param $path
-     * @return mixed
-     */
-    private function normalizePath($path)
-    {
-        return array_reduce(
-            explode('/', $path),
-            create_function(
-                '$a, $b',
-                '
-                           if($a === 0)
-                               $a = "/";
-
-                           if($b === "")
-                               return $a;
-
-                           if($b === ".")
-                               return __DIR__;
-
-                           if($b === "..")
-                               return dirname($a);
-
-                           return preg_replace("/\/+/", "/", "$a/$b");
-                       '
-            ),
-            0
-        );
+        return $cacheConfig['dir'] . DIRECTORY_SEPARATOR . $tmpFileName . '.php';
     }
 
     /**

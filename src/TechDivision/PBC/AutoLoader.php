@@ -44,38 +44,6 @@ class AutoLoader
     }
 
     /**
-     * Will break up any path into a canonical form like realpath(), but does not require the file to exist.
-     *
-     * @param $path
-     * @return mixed
-     */
-    private function normalizePath($path)
-    {
-        return array_reduce(
-            explode('/', $path),
-            create_function(
-                '$a, $b',
-                '
-                           if($a === 0)
-                               $a = "/";
-
-                           if($b === "")
-                               return $a;
-
-                           if($b === ".")
-                               return __DIR__;
-
-                           if($b === "..")
-                               return dirname($a);
-
-                           return preg_replace("/\/+/", "/", "$a/$b");
-                       '
-            ),
-            0
-        );
-    }
-
-    /**
      * @param $className
      *
      * @return bool
@@ -87,9 +55,7 @@ class AutoLoader
         $cacheConfig = $this->config->getConfig('cache');
         if ($this->config->getConfig('environment') !== 'development') {
 
-            $cachePath = $this->normalizePath(
-                $cacheConfig['dir'] . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php'
-            );
+            $cachePath = $cacheConfig['dir'] . DIRECTORY_SEPARATOR . str_replace('\\', '_', $className) . '.php';
 
             if (is_readable($cachePath)) {
 
