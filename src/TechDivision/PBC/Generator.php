@@ -21,23 +21,16 @@ use TechDivision\PBC\Entities\Definitions\Structure;
 use TechDivision\PBC\Parser\FileParser;
 use TechDivision\PBC\Config;
 use TechDivision\PBC\StreamFilters\SkeletonFilter;
-use TechDivision\PBC\StructureMap;
 
 /**
  * Class Generator
  */
 class Generator
 {
-
     /**
      * @var \TechDivision\PBC\CacheMap
      */
     private $cache;
-
-    /**
-     * @var \TechDivision\PBC\StructureMap
-     */
-    private $structureMap;
 
     /**
      * @var array
@@ -45,12 +38,10 @@ class Generator
     private $config;
 
     /**
-     * @param $structureMap
-     * @param $cache
+     * @param CacheMap $cache
      */
-    public function __construct(StructureMap $structureMap, CacheMap $cache)
+    public function __construct(CacheMap $cache)
     {
-        $this->structureMap = $structureMap;
         $this->cache = $cache;
 
         $config = Config::getInstance();
@@ -67,19 +58,12 @@ class Generator
     }
 
     /**
-     * @param $className
+     * @param Structure $mapEntry
      * @param bool $update
      * @return bool
      */
-    public function create($className, $update = false)
+    public function create(Structure $mapEntry, $update = false)
     {
-        // If we do not know the file we can forget it
-        $mapEntry = $this->structureMap->getEntry($className);
-        if (!$mapEntry instanceof Structure) {
-
-            return false;
-        }
-
         // We know the class and we know the file it is in, so get our FileParser and have a blast
         $fileParser = new FileParser();
         $fileDefinition = $fileParser->getDefinitionFromFile($mapEntry->getPath());
@@ -89,10 +73,12 @@ class Generator
         $classIterator = $fileDefinition->structureDefinitions->getIterator();
         for ($k = 0; $k < $classIterator->count(); $k++) {
 
-
             $structureDefinition = $classIterator->current();
+
+            $structureName = trim($fileDefinition->namespace . '\\' . $structureDefinition->name, '\\');
+
             $filePath = $this->createFilePath(
-                $fileDefinition->namespace . '\\' . $structureDefinition->name,
+                $structureName,
                 $mapEntry->getPath()
             );
 
@@ -101,17 +87,14 @@ class Generator
             if ($tmp === true) {
 
                 // Now get our new file into the cacheMap
-                $this->cache->add(new Structure(filectime($mapEntry->getPath()), $className, $filePath, 'class'));
-
-                if ($update === true) {
-                    // If this was an update we might have to update possible children as well, as contracts are inherited
-                    $dependants = $this->cache->getDependants($className);
-
-                    foreach ($dependants as $dependant) {
-
-                        $this->update($dependant, true);
-                    }
-                }
+                $this->cache->add(
+                    new Structure(
+                        filectime($mapEntry->getPath()),
+                        $structureName,
+                        $filePath,
+                        $structureDefinition->getType()
+                    )
+                );
             }
 
             // Next assertion please
@@ -252,8 +235,7 @@ class Generator
         & $res,
         FileDefinition $fileDefinition,
         ClassDefinition $structureDefinition
-    )
-    {
+    ) {
         // Lets get the enforcement level
         $enforcementConfig = $this->config->getConfig('enforcement');
         $levelArray = array();

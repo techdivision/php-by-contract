@@ -102,6 +102,10 @@ class Config implements ConfigInterface
         if (is_writable($tmp)) {
 
             $configCandidate['cache']['dir'] = $tmp;
+
+        } else {
+
+            return false;
         }
 
         // Same for project-dirs
@@ -112,6 +116,10 @@ class Config implements ConfigInterface
             if (is_readable($tmp)) {
 
                 $configCandidate['project-dirs'][$key] = $tmp;
+
+            } else {
+
+                return false;
             }
         }
 

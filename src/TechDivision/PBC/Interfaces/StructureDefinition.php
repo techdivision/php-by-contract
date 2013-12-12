@@ -5,6 +5,13 @@ namespace TechDivision\PBC\Interfaces;
 interface StructureDefinition
 {
     /**
+     * Will return the type of the definition.
+     *
+     * @return string
+     */
+    public function getType();
+
+    /**
      * Will return a list of all dependencies of a structure like parent class, implemented interfaces, etc.
      *
      * @return array

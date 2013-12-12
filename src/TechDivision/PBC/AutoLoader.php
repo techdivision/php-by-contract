@@ -130,10 +130,10 @@ class AutoLoader
             require_once __DIR__ . DIRECTORY_SEPARATOR . 'CacheMap.php';
             $this->cache = new CacheMap($cacheConfig['dir'], $this->config);
         }
-        $this->generator = new Generator($structureMap, $this->cache);
+        $this->generator = new Generator($this->cache);
 
         // Create the new class definition
-        if ($this->generator->create($className) === true) {
+        if ($this->generator->create($file) === true) {
 
             // Require the new class, it should have been created now
             $file = $this->generator->getFileName($className);

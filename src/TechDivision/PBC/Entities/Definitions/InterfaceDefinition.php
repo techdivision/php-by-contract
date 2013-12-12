@@ -63,6 +63,11 @@ class InterfaceDefinition implements StructureDefinition
     public $functionDefinitions;
 
     /**
+     * @const   string
+     */
+    const TYPE = 'interface';
+
+    /**
      * Default constructor
      */
     public function __construct()
@@ -75,6 +80,16 @@ class InterfaceDefinition implements StructureDefinition
         $this->invariantConditions = new AssertionList();
         $this->ancestralInvariants = new TypedListList();
         $this->functionDefinitions = new FunctionDefinitionList();
+    }
+
+    /**
+     * Will return the type of the definition.
+     *
+     * @return string
+     */
+    public function getType()
+    {
+        return self::TYPE;
     }
 
     /**
