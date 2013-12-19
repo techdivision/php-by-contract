@@ -121,7 +121,7 @@ class ProcessingFilter extends AbstractFilter
         $code = '';
 
         // Code defining the place the error happened
-        $place = '" . __CLASS__ . "::" . __METHOD__ . "';
+        $place = '" . __METHOD__ . "';
 
         // What kind of reaction should we create?
         switch ($config['processing']) {

@@ -430,7 +430,7 @@ class InvariantFilter extends AbstractFilter
      */
     private function generateFunctionCode(TypedListList $assertionLists)
     {
-        $code = 'private function ' . PBC_CLASS_INVARIANT_NAME . '() {';
+        $code = 'protected function ' . PBC_CLASS_INVARIANT_NAME . '() {';
 
         $invariantIterator = $assertionLists->getIterator();
         for ($i = 0; $i < $invariantIterator->count(); $i++) {

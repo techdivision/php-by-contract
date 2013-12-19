@@ -154,7 +154,7 @@ abstract class AbstractParser implements ParserInterface
      * Will check a token array for the occurrence of a certain on (class, interface or trait)
      *
      * @param $tokens
-     * @return bool
+     * @return bool|string
      */
     protected function getStructureToken($tokens)
     {
