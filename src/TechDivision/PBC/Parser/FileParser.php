@@ -104,7 +104,7 @@ class FileParser extends AbstractParser
     /**
      * @param $tokens
      *
-     * @return string
+     * @return array
      */
     private function getUsedNamespaces($tokens)
     {
