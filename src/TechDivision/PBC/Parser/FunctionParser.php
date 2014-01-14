@@ -380,8 +380,8 @@ class FunctionParser extends AbstractParser
     private function getFunctionVisibility(array $tokens)
     {
         // Check out all the tokens and look if we find the right thing. We can do that as these keywords are not valid
-        // within a function definition.
-        $visibility = '';
+        // within a function definition. Public is default.
+        $visibility = 'public';
         for ($i = 0; $i < count($tokens); $i++) {
 
             // Search for the visibility
@@ -396,13 +396,6 @@ class FunctionParser extends AbstractParser
 
                 break;
             }
-        }
-
-        // Last but not least we have to check if got the visibility, if not, set it public.
-        // This is necessary, as missing visibility in the definition will also default to public
-        if ($visibility === '') {
-
-            $visibility = 'public';
         }
 
         return $visibility;

@@ -9,7 +9,6 @@
 
 namespace TechDivision\PBC;
 
-use Hoa\Realdom\_Array;
 use TechDivision\PBC\CacheMap;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
@@ -20,7 +19,6 @@ use TechDivision\PBC\Interfaces\StructureDefinition;
 use TechDivision\PBC\Entities\Definitions\Structure;
 use TechDivision\PBC\Parser\FileParser;
 use TechDivision\PBC\Config;
-use TechDivision\PBC\StreamFilters\SkeletonFilter;
 
 /**
  * Class Generator
