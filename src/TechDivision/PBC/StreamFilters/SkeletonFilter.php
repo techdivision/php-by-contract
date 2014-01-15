@@ -144,6 +144,12 @@ class SkeletonFilter extends AbstractFilter
 
                     } else {
 
+                        // We do not have to create a proxy function for abstract functions
+                        if ($functionDefinition->isAbstract === true) {
+
+                            continue;
+                        }
+
                         // We have to set the visibility to private to avoid 
                         // issues with missing child implementations
                         $visibilityHook = '';
