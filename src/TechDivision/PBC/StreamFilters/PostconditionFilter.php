@@ -134,10 +134,11 @@ class PostconditionFilter extends AbstractFilter
      * @param $bucketData
      * @param $functionDefinition
      * @return boolean
+     *
+     * @throws \TechDivision\PBC\Exceptions\GeneratorException
      */
     private function injectOldCode(& $bucketData, FunctionDefinition & $functionDefinition)
     {
-
         // Do we even need to do anything?
         if ($functionDefinition->usesOld !== true) {
 
@@ -146,7 +147,7 @@ class PostconditionFilter extends AbstractFilter
         // If the function is static it should not use the pbcOld keyword as there is no state to the class!
         if ($functionDefinition->isStatic === true) {
 
-            throw new GeneratorException('Cannot clone class state in a static method.');
+            throw new GeneratorException('Cannot clone class state in static method ' . $functionDefinition->name);
         }
 
         // Still here? Then inject the clone statement to preserve an instance of the object prior to our call.

@@ -231,7 +231,7 @@ class SkeletonFilter extends AbstractFilter
         // Invariant is not needed in private functions
         if ($functionDefinition->visibility !== 'private && !' . $functionDefinition->isStatic) {
 
-            $code .= PBC_INVARIANT_PLACEHOLDER . 'entry' . PBC_PLACEHOLDER_CLOSE;
+            $code .= PBC_INVARIANT_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE;
         }
 
         $code .= PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
@@ -258,7 +258,7 @@ class SkeletonFilter extends AbstractFilter
         // Invariant is not needed in private functions
         if ($functionDefinition->visibility !== 'private && !' . $functionDefinition->isStatic) {
 
-            $code .= PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE;
+            $code .= PBC_INVARIANT_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE;
         }
 
         $code .= 'if (' . PBC_CONTRACT_CONTEXT . ') {\TechDivision\PBC\ContractContext::close();}

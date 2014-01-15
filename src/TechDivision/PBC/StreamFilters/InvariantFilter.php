@@ -179,24 +179,10 @@ class InvariantFilter extends AbstractFilter
                         $bucket->data
                     );
                 }
-
-                // We need the code to call the invariant
-                $callCodeEntry = $this->generateInvariantCall('entry');
-                $callCodeExit = $this->generateInvariantCall('exit');
             }
 
-            // Insert the code
-            $bucket->data = str_replace(
-                array(
-                    PBC_INVARIANT_PLACEHOLDER . 'entry' . PBC_PLACEHOLDER_CLOSE,
-                    PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE
-                ),
-                array(
-                    $callCodeEntry,
-                    $callCodeExit
-                ),
-                $bucket->data
-            );
+            // We need the code to call the invariant
+            $this->injectInvariantCall($bucket->data);
 
             // Remove all the properties we will take care of with our magic setter and getter
             $bucket->data = preg_replace($obsoleteProperties, $propertyReplacements, $bucket->data, 1);
@@ -297,7 +283,7 @@ class InvariantFilter extends AbstractFilter
 
         $code .= '}
         // Check if the invariant holds
-            ' . PBC_INVARIANT_PLACEHOLDER . 'entry' . PBC_PLACEHOLDER_CLOSE .
+            ' . PBC_INVARIANT_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE .
             '// Now check what kind of visibility we would have
             $attribute = $this->' . PBC_ATTRIBUTE_STORAGE . '[$name];
             switch ($attribute["visibility"]) {
@@ -328,7 +314,7 @@ class InvariantFilter extends AbstractFilter
             }
 
             // Check if the invariant holds
-            ' . PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE .
+            ' . PBC_INVARIANT_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE .
             '\TechDivision\PBC\ContractContext::close();';
 
         // We do not need the method encasing brackets if we inject
@@ -419,31 +405,23 @@ class InvariantFilter extends AbstractFilter
     }
 
     /**
-     * @param $position
-     * @return string
+     * @param $bucketData
+     * @return bool
      */
-    private function generateInvariantCall($position)
+    private function injectInvariantCall(& $bucketData)
     {
-        $allowed_positions = array_flip(array('entry', 'exit'));
-
-        if (!isset($allowed_positions[$position])) {
-
-            return '';
-        }
-
-        // Decide how our if statement should look depending on the position of the invariant
-        $code = '';
-        if ($position === 'entry') {
-
-            $code = 'if (' . PBC_CONTRACT_CONTEXT . ' === true) {
+        $code = 'if (' . PBC_CONTRACT_CONTEXT . ' === true) {
             $this->' . PBC_CLASS_INVARIANT_NAME . '();}';
-        } elseif ($position === 'exit') {
 
-            $code = 'if (' . PBC_CONTRACT_CONTEXT . ' === true) {
-            $this->' . PBC_CLASS_INVARIANT_NAME . '();}';
-        }
+        // Still here? Then inject the clone statement to preserve an instance of the object prior to our call.
+        $bucketData = str_replace(
+            PBC_INVARIANT_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE,
+            $code,
+            $bucketData
+        );
 
-        return $code;
+        // Still here? We encountered no error then.
+        return true;
     }
 
     /**
