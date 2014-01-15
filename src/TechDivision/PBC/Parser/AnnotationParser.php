@@ -194,11 +194,11 @@ class AnnotationParser extends AbstractParser
 
                 // Now we have to check what we got
                 // First of all handle if we got a simple type
-                if ($type !== false) {
+                if ($type !== false && !empty($type)) {
 
                     $assertionType = 'TechDivision\PBC\Entities\Assertions\TypeAssertion';
 
-                } elseif ($class !== false) {
+                } elseif ($class !== false && !empty($class)) {
 
                     // We might also have a typed collection
                     $type = $this->filterTypedCollection($class);

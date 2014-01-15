@@ -44,4 +44,13 @@ class AnnotationTestClass
     {
 
     }
+
+    /**
+     * @param
+     *          $param1
+     */
+    private function iHaveBadAnnotations($param1)
+    {
+
+    }
 } 
