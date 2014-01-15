@@ -14,6 +14,7 @@ namespace TechDivision\PBC\StreamFilters;
 use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
+use TechDivision\PBC\Exceptions\GeneratorException;
 
 /**
  * @package     TechDivision\PBC
@@ -99,12 +100,7 @@ class PostconditionFilter extends AbstractFilter
                     } else {
 
                         // If we use the old notation we have to insert the statement to make a copy
-                        $bucket->data = str_replace(
-                            PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->name .
-                            PBC_PLACEHOLDER_CLOSE,
-                            $this->generateOldCode(),
-                            $bucket->data
-                        );
+                        $this->injectOldCode($bucket->data, $functionDefinition);
 
                         // Get the code for the assertions
                         $code = $this->generateCode($functionDefinition->getPostconditions());
@@ -133,13 +129,36 @@ class PostconditionFilter extends AbstractFilter
     }
 
     /**
-     * Will return code to create an entry for the old object state.
+     * Will change code to create an entry for the old object state.
      *
-     * @return string
+     * @param $bucketData
+     * @param $functionDefinition
+     * @return boolean
      */
-    private function generateOldCode()
+    private function injectOldCode(& $bucketData, FunctionDefinition & $functionDefinition)
     {
-        return PBC_KEYWORD_OLD . ' = clone $this;';
+
+        // Do we even need to do anything?
+        if ($functionDefinition->usesOld !== true) {
+
+            return false;
+        }
+        // If the function is static it should not use the pbcOld keyword as there is no state to the class!
+        if ($functionDefinition->isStatic === true) {
+
+            throw new GeneratorException('Cannot clone class state in a static method.');
+        }
+
+        // Still here? Then inject the clone statement to preserve an instance of the object prior to our call.
+        $bucketData = str_replace(
+            PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->name .
+            PBC_PLACEHOLDER_CLOSE,
+            PBC_KEYWORD_OLD . ' = clone $this;',
+            $bucketData
+        );
+
+        // Still here? We encountered no error then.
+        return true;
     }
 
     /**

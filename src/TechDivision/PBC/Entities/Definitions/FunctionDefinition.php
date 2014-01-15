@@ -16,7 +16,8 @@ use TechDivision\PBC\Entities\Lists\TypedListList;
 /**
  * Class FunctionDefinition
  */
-class FunctionDefinition {
+class FunctionDefinition
+{
 
     /**
      * @var string
@@ -86,7 +87,8 @@ class FunctionDefinition {
     /**
      * Default constructor
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->docBlock = '';
         $this->isFinal = false;
         $this->visibility = '';
@@ -106,7 +108,8 @@ class FunctionDefinition {
      *
      * @return TypedListList
      */
-    public function getPreconditions() {
+    public function getPreconditions()
+    {
         $preconditions = $this->ancestralPreconditions;
         $preconditions->add($this->preconditions);
 
@@ -118,7 +121,8 @@ class FunctionDefinition {
      *
      * @return TypedListList
      */
-    public function getPostconditions() {
+    public function getPostconditions()
+    {
         $postconditions = $this->ancestralPostconditions;
         $postconditions->add($this->postconditions);
 
@@ -133,7 +137,8 @@ class FunctionDefinition {
      * @param   bool $markAsOriginal
      * @return  string
      */
-    public function getHeader($type, $markAsOriginal = false) {
+    public function getHeader($type, $markAsOriginal = false)
+    {
         $header = '';
 
         // We have to do some more work if we need the definition header
@@ -159,6 +164,18 @@ class FunctionDefinition {
 
             // Function keyword and name
             $header .= ' function ';
+        }
+
+        // If we have to generate code for a call we have to check for either static or normal access
+        if ($type === 'call') {
+            if ($this->isStatic === true) {
+
+                $header .= 'self::';
+
+            } else {
+
+                $header .= '$this->';
+            }
         }
 
         // Function name

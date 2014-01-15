@@ -244,7 +244,7 @@ class SkeletonFilter extends AbstractFilter
         }
 
         // Build up the call to the original function.
-        $code .= PBC_KEYWORD_RESULT . ' = $this->' . $functionDefinition->getHeader('call', true) . ';';
+        $code .= PBC_KEYWORD_RESULT . ' = ' . $functionDefinition->getHeader('call', true) . ';';
 
         // Finish the try ... catch and place the inject marker
         if ($injectNeeded === true) {
