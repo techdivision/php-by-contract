@@ -132,7 +132,7 @@ class ProcessingFilter extends AbstractFilter
                 $exception = $exceptionFactory->getClassName($for);
 
                 // Create the code
-                $code .= '$this->' . PBC_CONTRACT_DEPTH . '--;
+                $code .= '\TechDivision\PBC\ContractContext::close();
                 throw new \\' . $exception . '("Failed ' . PBC_FAILURE_VARIABLE . ' in ' . $place . '");';
 
                 break;

@@ -150,7 +150,7 @@ class PostconditionFilter extends AbstractFilter
     {
         // We only use contracting if we're not inside another contract already
         $code = '/* BEGIN OF POSTCONDITION ENFORCEMENT */
-        if ($this->' . PBC_CONTRACT_DEPTH . ' < 2) {';
+        if (' . PBC_CONTRACT_CONTEXT . ') {';
 
         // We need a counter to check how much conditions we got
         $conditionCounter = 0;

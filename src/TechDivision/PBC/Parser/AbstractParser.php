@@ -197,7 +197,7 @@ abstract class AbstractParser implements ParserInterface
      * @param $usedNamespaces
      * @param $structureName
      * @param bool $remove
-     * @return bool
+     * @return bool|string
      */
     protected function resolveUsedNamespace(& $usedNamespaces, $structureName, $remove = true)
     {

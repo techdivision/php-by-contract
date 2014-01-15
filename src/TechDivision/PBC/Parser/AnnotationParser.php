@@ -56,7 +56,8 @@ class AnnotationParser extends AbstractParser
      * @var array
      */
     private $simpleTypeMappings = array(
-        'boolean' => 'bool'
+        'boolean' => 'bool',
+        'void' => 'null'
     );
 
     public function __construct()

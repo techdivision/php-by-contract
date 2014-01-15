@@ -133,7 +133,7 @@ class PreconditionFilter extends AbstractFilter
     {
         // We only use contracting if we're not inside another contract already
         $code = '/* BEGIN OF PRECONDITION ENFORCEMENT */
-        if ($this->' . PBC_CONTRACT_DEPTH . ' < 2) {
+        if (' . PBC_CONTRACT_CONTEXT . ') {
             $passedOne = false;' .
             PBC_FAILURE_VARIABLE . ' = array();';
 

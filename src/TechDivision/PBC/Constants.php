@@ -15,7 +15,7 @@ define('PBC_KEYWORD_INVARIANT', '@invariant');
 // Some keywords we need for our constructed code
 define('PBC_KEYWORD_OLD', '$pbcOld');
 define('PBC_KEYWORD_RESULT', '$pbcResult');
-define('PBC_CONTRACT_DEPTH', 'pbcContractDepth');
+define('PBC_CONTRACT_CONTEXT', '$pbcOngoingContract');
 define('PBC_MARK_CONTRACT_ENTRY', '$pbcContractEntry');
 define('PBC_ATTRIBUTE_STORAGE', 'pbcAttributes');
 define('PBC_FAILURE_VARIABLE', '$pbcFailureMessage');

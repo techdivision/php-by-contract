@@ -86,6 +86,14 @@ class IndexServlet extends AbstractServlet
     }
 
     /**
+     * @param   array   $test
+     */
+    public static function iAmStatic($test)
+    {
+
+    }
+
+    /**
      * Deletes the sample entity with the sample ID found in the request and
      * reloads all other entities from the database.
      *

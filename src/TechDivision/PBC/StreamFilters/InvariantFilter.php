@@ -25,7 +25,8 @@ use TechDivision\PBC\Interfaces\StructureDefinition;
  *              Open Software License (OSL 3.0)
  * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-class InvariantFilter extends AbstractFilter {
+class InvariantFilter extends AbstractFilter
+{
 
     /**
      * @const   int
@@ -45,21 +46,24 @@ class InvariantFilter extends AbstractFilter {
     /**
      * @return array
      */
-    public function getDependencies() {
+    public function getDependencies()
+    {
         return $this->dependencies;
     }
 
     /**
      * @return int
      */
-    public function getFilterOrder() {
+    public function getFilterOrder()
+    {
         return self::FILTER_ORDER;
     }
 
     /**
      * @throws \Exception
      */
-    public function dependenciesMet() {
+    public function dependenciesMet()
+    {
         throw new \Exception();
     }
 
@@ -71,7 +75,8 @@ class InvariantFilter extends AbstractFilter {
      * @return int
      * @throws GeneratorException
      */
-    public function filter($in, $out, &$consumed, $closing) {
+    public function filter($in, $out, &$consumed, $closing)
+    {
         $structureDefinition = $this->params;
 
         // As we have to make severe changes to the system we might ensure we need to first.
@@ -122,59 +127,75 @@ class InvariantFilter extends AbstractFilter {
 
                 // Insert the code
                 $bucket->data = str_replace(
-                        array(
-                    $functionHook,
-                    $functionHook
-                        ), array(
-                    $functionHook . $attributeCode,
-                    $functionHook . $code
-                        ), $bucket->data
+                    array(
+                        $functionHook,
+                        $functionHook
+                    ),
+                    array(
+                        $functionHook . $attributeCode,
+                        $functionHook . $code
+                    ),
+                    $bucket->data
                 );
-                
+
                 // Determine if we need the __set method to be injected
                 if ($structureDefinition->functionDefinitions->entryExists('__set')) {
-                    
+
                     // Get the code for our __set() method
-                $setCode = $this->generateSetCode($structureDefinition->hasParents(), true);
-                $bucket->data = str_replace(PBC_METHOD_INJECT_PLACEHOLDER . '__set' .PBC_PLACEHOLDER_CLOSE,
-                        $setCode, $bucket->data);
- 
+                    $setCode = $this->generateSetCode($structureDefinition->hasParents(), true);
+                    $bucket->data = str_replace(
+                        PBC_METHOD_INJECT_PLACEHOLDER . '__set' . PBC_PLACEHOLDER_CLOSE,
+                        $setCode,
+                        $bucket->data
+                    );
+
                 } else {
-                    
+
                     $setCode = $this->generateSetCode($structureDefinition->hasParents());
-                $bucket->data = str_replace($functionHook,
-                        $functionHook . $setCode, $bucket->data);
+                    $bucket->data = str_replace(
+                        $functionHook,
+                        $functionHook . $setCode,
+                        $bucket->data
+                    );
                 }
-                
+
                 // Determine if we need the __get method to be injected
                 if ($structureDefinition->functionDefinitions->entryExists('__get')) {
-                    
+
                     // Get the code for our __set() method
-                $getCode = $this->generateGetCode($structureDefinition->hasParents(), true);
-                $bucket->data = str_replace(PBC_METHOD_INJECT_PLACEHOLDER . '__get' .PBC_PLACEHOLDER_CLOSE,
-                        $getCode, $bucket->data);
- 
+                    $getCode = $this->generateGetCode($structureDefinition->hasParents(), true);
+                    $bucket->data = str_replace(
+                        PBC_METHOD_INJECT_PLACEHOLDER . '__get' . PBC_PLACEHOLDER_CLOSE,
+                        $getCode,
+                        $bucket->data
+                    );
+
                 } else {
-                    
+
                     $getCode = $this->generateGetCode($structureDefinition->hasParents());
-                $bucket->data = str_replace($functionHook,
-                        $functionHook . $getCode, $bucket->data);
+                    $bucket->data = str_replace(
+                        $functionHook,
+                        $functionHook . $getCode,
+                        $bucket->data
+                    );
                 }
-                
+
                 // We need the code to call the invariant
-            $callCodeEntry = $this->generateInvariantCall('entry');
-            $callCodeExit = $this->generateInvariantCall('exit');
+                $callCodeEntry = $this->generateInvariantCall('entry');
+                $callCodeExit = $this->generateInvariantCall('exit');
             }
-            
+
             // Insert the code
             $bucket->data = str_replace(
-                    array(
-                PBC_INVARIANT_PLACEHOLDER . 'entry' . PBC_PLACEHOLDER_CLOSE,
-                PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE
-                    ), array(
-                $callCodeEntry,
-                $callCodeExit
-                    ), $bucket->data
+                array(
+                    PBC_INVARIANT_PLACEHOLDER . 'entry' . PBC_PLACEHOLDER_CLOSE,
+                    PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE
+                ),
+                array(
+                    $callCodeEntry,
+                    $callCodeExit
+                ),
+                $bucket->data
             );
 
             // Remove all the properties we will take care of with our magic setter and getter
@@ -192,7 +213,8 @@ class InvariantFilter extends AbstractFilter {
      * @param AttributeDefinitionList $attributeDefinitions
      * @return string
      */
-    private function generateAttributeCode(AttributeDefinitionList $attributeDefinitions) {
+    private function generateAttributeCode(AttributeDefinitionList $attributeDefinitions)
+    {
         // We should create attributes to store our attribute types
         $code = '/**
             * @var array
@@ -236,12 +258,13 @@ class InvariantFilter extends AbstractFilter {
      * @param $hasParents
      * @return string
      */
-    private function generateSetCode($hasParents, $injected = false) {
-        
+    private function generateSetCode($hasParents, $injected = false)
+    {
+
         // We only need the method header if we don't inject
         if ($injected === false) {
 
-             $code = '/**
+            $code = '/**
              * Magic function to forward writing property access calls if within visibility boundaries.
              *
              * @throws InvalidArgumentException
@@ -253,7 +276,8 @@ class InvariantFilter extends AbstractFilter {
             $code = '';
         }
 
-        $code .= '// Does this property even exist? If not, throw an exception
+        $code .= PBC_CONTRACT_CONTEXT . ' = \TechDivision\PBC\ContractContext::open();
+        // Does this property even exist? If not, throw an exception
             if (!isset($this->' . PBC_ATTRIBUTE_STORAGE . '[$name])) {';
 
         if ($hasParents) {
@@ -262,10 +286,10 @@ class InvariantFilter extends AbstractFilter {
         } else {
 
             $code .= 'if (property_exists($this, $name)) {
-
+\TechDivision\PBC\ContractContext::close();
                 throw new \InvalidArgumentException;
             } else {
-
+\TechDivision\PBC\ContractContext::close();
                 throw new \TechDivision\PBC\Exceptions\MissingPropertyException("Property $name does not exist in " .
                     __CLASS__);
             }';
@@ -274,9 +298,7 @@ class InvariantFilter extends AbstractFilter {
         $code .= '}
         // Check if the invariant holds
             ' . PBC_INVARIANT_PLACEHOLDER . 'entry' . PBC_PLACEHOLDER_CLOSE .
-                '$this->' . PBC_CONTRACT_DEPTH . '++;
-
-            // Now check what kind of visibility we would have
+            '// Now check what kind of visibility we would have
             $attribute = $this->' . PBC_ATTRIBUTE_STORAGE . '[$name];
             switch ($attribute["visibility"]) {
 
@@ -288,6 +310,7 @@ class InvariantFilter extends AbstractFilter {
 
                     } else {
 
+                        \TechDivision\PBC\ContractContext::close();
                         throw new \InvalidArgumentException;
                     }
                     break;
@@ -299,20 +322,21 @@ class InvariantFilter extends AbstractFilter {
 
                 default :
 
+                    \TechDivision\PBC\ContractContext::close();
                     throw new \InvalidArgumentException;
                     break;
             }
 
             // Check if the invariant holds
             ' . PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE .
-                '$this->' . PBC_CONTRACT_DEPTH . '--;';
+            '\TechDivision\PBC\ContractContext::close();';
 
         // We do not need the method encasing brackets if we inject
         if ($injected === false) {
 
-             $code .= '}';
+            $code .= '}';
         }
-        
+
         return $code;
     }
 
@@ -320,12 +344,13 @@ class InvariantFilter extends AbstractFilter {
      * @param $hasParents
      * @return string
      */
-    private function generateGetCode($hasParents, $injected = false) {
-        
+    private function generateGetCode($hasParents, $injected = false)
+    {
+
         // We only need the method header if we don't inject
         if ($injected === false) {
 
-             $code = '/**
+            $code = '/**
          * Magic function to forward reading property access calls if within visibility boundaries.
          *
          * @throws InvalidArgumentException
@@ -336,7 +361,7 @@ class InvariantFilter extends AbstractFilter {
 
             $code = '';
         }
-        $code .= 
+        $code .=
             '// Does this property even exist? If not, throw an exception
             if (!isset($this->' . PBC_ATTRIBUTE_STORAGE . '[$name])) {';
 
@@ -387,9 +412,9 @@ class InvariantFilter extends AbstractFilter {
         // We do not need the method encasing brackets if we inject
         if ($injected === false) {
 
-             $code .= '}';
+            $code .= '}';
         }
-        
+
         return $code;
     }
 
@@ -397,7 +422,8 @@ class InvariantFilter extends AbstractFilter {
      * @param $position
      * @return string
      */
-    private function generateInvariantCall($position) {
+    private function generateInvariantCall($position)
+    {
         $allowed_positions = array_flip(array('entry', 'exit'));
 
         if (!isset($allowed_positions[$position])) {
@@ -409,11 +435,11 @@ class InvariantFilter extends AbstractFilter {
         $code = '';
         if ($position === 'entry') {
 
-            $code = 'if ($this->' . PBC_CONTRACT_DEPTH . ' === 0) {
+            $code = 'if (' . PBC_CONTRACT_CONTEXT . ' === true) {
             $this->' . PBC_CLASS_INVARIANT_NAME . '();}';
         } elseif ($position === 'exit') {
 
-            $code = 'if ($this->' . PBC_CONTRACT_DEPTH . ' === 1) {
+            $code = 'if (' . PBC_CONTRACT_CONTEXT . ' === true) {
             $this->' . PBC_CLASS_INVARIANT_NAME . '();}';
         }
 
@@ -424,7 +450,8 @@ class InvariantFilter extends AbstractFilter {
      * @param TypedListList $assertionLists
      * @return string
      */
-    private function generateFunctionCode(TypedListList $assertionLists) {
+    private function generateFunctionCode(TypedListList $assertionLists)
+    {
         $code = 'protected function ' . PBC_CLASS_INVARIANT_NAME . '() {';
 
         $invariantIterator = $assertionLists->getIterator();
@@ -443,10 +470,12 @@ class InvariantFilter extends AbstractFilter {
                     $assertionIterator->next();
                 }
                 $code .= 'if (!((' . implode(') && (', $codeFragment) . '))){' .
-                        PBC_FAILURE_VARIABLE . ' = \'(' . str_replace(
-                                '\'', '"', implode(') && (', $codeFragment)
-                        ) . ')\';' .
-                        PBC_PROCESSING_PLACEHOLDER . 'invariant' . PBC_PLACEHOLDER_CLOSE . '}';
+                    PBC_FAILURE_VARIABLE . ' = \'(' . str_replace(
+                        '\'',
+                        '"',
+                        implode(') && (', $codeFragment)
+                    ) . ')\';' .
+                    PBC_PROCESSING_PLACEHOLDER . 'invariant' . PBC_PLACEHOLDER_CLOSE . '}';
             }
             // increment the outer loop
             $invariantIterator->next();

@@ -23,7 +23,8 @@ use TechDivision\PBC\Exceptions\GeneratorException;
  *              Open Software License (OSL 3.0)
  * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-class SkeletonFilter extends AbstractFilter {
+class SkeletonFilter extends AbstractFilter
+{
 
     /**
      * @const   int
@@ -38,7 +39,8 @@ class SkeletonFilter extends AbstractFilter {
     /**
      * @return int
      */
-    public function getFilterOrder() {
+    public function getFilterOrder()
+    {
         return self::FILTER_ORDER;
     }
 
@@ -47,7 +49,8 @@ class SkeletonFilter extends AbstractFilter {
      *
      * @return bool
      */
-    public function dependenciesMet() {
+    public function dependenciesMet()
+    {
         return true;
     }
 
@@ -59,7 +62,8 @@ class SkeletonFilter extends AbstractFilter {
      * @return int|void
      * @throws \TechDivision\PBC\Exceptions\GeneratorException
      */
-    public function filter($in, $out, &$consumed, $closing) {
+    public function filter($in, $out, &$consumed, $closing)
+    {
         $path = $this->params[1];
         $functionDefinitions = $this->params[0];
         // Get our buckets from the stream
@@ -71,9 +75,11 @@ class SkeletonFilter extends AbstractFilter {
             if ($firstIteration === true) {
 
                 $bucket->data = str_replace(
-                        '<?php', '<?php /* ' . PBC_ORIGINAL_PATH_HINT . $path . '#' . filemtime(
-                                $path
-                        ) . PBC_ORIGINAL_PATH_HINT . ' */', $bucket->data
+                    '<?php',
+                    '<?php /* ' . PBC_ORIGINAL_PATH_HINT . $path . '#' . filemtime(
+                        $path
+                    ) . PBC_ORIGINAL_PATH_HINT . ' */',
+                    $bucket->data
                 );
                 $firstIteration = false;
             }
@@ -116,16 +122,12 @@ class SkeletonFilter extends AbstractFilter {
 
                         // Insert the placeholder for our function hook.
                         // All following injects into the structure body will rely on it
-                        $bucket->data = str_replace($functionHook, $functionHook . PBC_FUNCTION_HOOK_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE, $bucket->data);
+                        $bucket->data = str_replace(
+                            $functionHook,
+                            $functionHook . PBC_FUNCTION_HOOK_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE,
+                            $bucket->data
+                        );
                         $functionHook = PBC_FUNCTION_HOOK_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE;
-
-                        // Get the code for our contract depth attribute
-                        // We do this here, as this point is only passed once!
-                        $depthCode = $this->generateDepthCode();
-
-                        // Insert the code
-                        // We also have to insert our contract depth attribute
-                        $bucket->data = str_replace($functionHook, $functionHook . $depthCode, $bucket->data);
                     }
                 }
                 // Did we find a function? If so check if we know that thing and insert the code of its preconditions.
@@ -133,49 +135,57 @@ class SkeletonFilter extends AbstractFilter {
 
                     // Get the name of the function
                     $functionName = $tokens[$i + 2][1];
-                
+
                     // Check if we got the function in our list, if not continue
                     $functionDefinition = $functionDefinitions->get($functionName);
                     if (!$functionDefinition instanceof FunctionDefinition) {
 
                         continue;
-                        
+
                     } else {
-                        
-                        // Get the hook for the "original marker"
-                    $markerHook = $tokens[$i][1] . $tokens[$i + 1][1] . $tokens[$i + 2][1];
 
                         // We have to set the visibility to private to avoid 
                         // issues with missing child implementations
                         $visibilityHook = '';
                         $visibility = '';
-                        for ($j = $i + 2; $j > $i - 8; $j --) {
-                            
-                            if (@$tokens[$j][0] === T_PUBLIC || 
-                                    @$tokens[$j][0] === T_PROTECTED || 
-                                    @$tokens[$j][0] === T_PRIVATE) {
-                                
+                        for ($j = $i + 2; $j > $i - 8; $j--) {
+
+                            // If we found the visibility
+                            if (@$tokens[$j][0] === T_PUBLIC ||
+                                @$tokens[$j][0] === T_PROTECTED ||
+                                    @$tokens[$j][0] === T_PRIVATE
+                            ) {
+
                                 $visibility = $tokens[$j][1];
                                 break;
                             }
-                            
+
+                            // If we found something else which means there is no visibility
+                            if (@$tokens[$j] === ';' ||
+                                @$tokens[$j][0] === T_DOC_COMMENT ||
+                                    @$tokens[$j] === '}'
+                            ) {
+
+                                break;
+                            }
+
+                            // Build up the hook for replacement
                             if (is_array($tokens[$j])) {
-                                
+
                                 $visibilityHook = $tokens[$j][1] . $visibilityHook;
-                                
+
                             } else {
-                                
+
                                 $visibilityHook = $tokens[$j] . $visibilityHook;
                             }
                         }
-                        
-                        // change the visibility
-                        $bucket->data = str_replace($visibility . $visibilityHook, 
-                                'private' . $visibilityHook , $bucket->data);
-                        
-                        // Change the function name to indicate this is the original function
+
+                        // Change the function name to indicate this is the original function.
+                        // Also change the visibility to private
                         $bucket->data = preg_replace(
-                                '/' . $markerHook . ' *\(/', $markerHook . PBC_ORIGINAL_FUNCTION_SUFFIX . '(', $bucket->data
+                            '/' . $visibility . $visibilityHook . ' *\(/',
+                            'private' . $visibilityHook . PBC_ORIGINAL_FUNCTION_SUFFIX . '(',
+                            $bucket->data
                         );
 
                         // Get the code for the assertions
@@ -199,73 +209,60 @@ class SkeletonFilter extends AbstractFilter {
     }
 
     /**
-     * @return string
-     */
-    private function generateDepthCode() {
-        $code = '
-        /**
-         *  @var int
-         */
-         private $' . PBC_CONTRACT_DEPTH . ' = 0;';
-
-        return $code;
-    }
-
-    /**
      * @param   FunctionDefinition $functionDefinition
      * @return  string
      */
-    private function generateFunctionCode(FunctionDefinition $functionDefinition) {
-        
+    private function generateFunctionCode(FunctionDefinition $functionDefinition)
+    {
+
         // __get and __set need some special steps so we can inject our own logic into them
-                    $injectNeeded = false;
-    if ($functionDefinition->name === '__get' || $functionDefinition->name === '__set') {
-            
+        $injectNeeded = false;
+        if ($functionDefinition->name === '__get' || $functionDefinition->name === '__set') {
+
             $injectNeeded = true;
         }
-        
+
         // Build up the header
         $code = $functionDefinition->getHeader('definition');
 
         // Now just place all the placeholder for other filters to come
-        $code .= '{';
+        $code .= '{' . PBC_CONTRACT_CONTEXT . ' = \TechDivision\PBC\ContractContext::open();';
 
         // Invariant is not needed in private functions
-        if ($functionDefinition->visibility !== 'private') {
+        if ($functionDefinition->visibility !== 'private && !' . $functionDefinition->isStatic) {
 
-            $code .= PBC_INVARIANT_PLACEHOLDER . 'entry' . PBC_PLACEHOLDER_CLOSE .
-                    '$this->' . PBC_CONTRACT_DEPTH . '++;';
+            $code .= PBC_INVARIANT_PLACEHOLDER . 'entry' . PBC_PLACEHOLDER_CLOSE;
         }
 
         $code .= PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
-                PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
+            PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
 
         // If we inject something we need a try ... catch around the original call.
         if ($injectNeeded === true) {
-            
+
             $code .= 'try {';
         }
-        
+
         // Build up the call to the original function.
         $code .= PBC_KEYWORD_RESULT . ' = $this->' . $functionDefinition->getHeader('call', true) . ';';
 
         // Finish the try ... catch and place the inject marker
         if ($injectNeeded === true) {
-            
+
             $code .= '} catch (\Exception $e) {}' . PBC_METHOD_INJECT_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
         }
-        
+
         // No just place all the other placeholder for other filters to come
         $code .= PBC_POSTCONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
 
         // Invariant is not needed in private functions
-        if ($functionDefinition->visibility !== 'private') {
+        if ($functionDefinition->visibility !== 'private && !' . $functionDefinition->isStatic) {
 
-            $code .= PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE .
-                    '$this->' . PBC_CONTRACT_DEPTH . '--;';
+            $code .= PBC_INVARIANT_PLACEHOLDER . 'exit' . PBC_PLACEHOLDER_CLOSE;
         }
 
-        $code .= 'return ' . PBC_KEYWORD_RESULT . ';}';
+        $code .= 'if (' . PBC_CONTRACT_CONTEXT . ') {\TechDivision\PBC\ContractContext::close();}
+            return ' . PBC_KEYWORD_RESULT . ';}';
 
         return $code;
     }
