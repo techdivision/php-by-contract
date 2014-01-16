@@ -84,6 +84,7 @@ class FunctionParser extends AbstractParser
 
         // Get the function signature
         $functionDefinition->isFinal = $this->hasSignatureToken($tokens, T_FINAL, T_FUNCTION);
+        $functionDefinition->isAbstract = $this->hasSignatureToken($tokens, T_ABSTRACT, T_FUNCTION);
         $functionDefinition->visibility = $this->getFunctionVisibility($tokens);
         $functionDefinition->isStatic = $this->hasSignatureToken($tokens, T_STATIC, T_FUNCTION);
         $functionDefinition->name = $this->getFunctionName($tokens);

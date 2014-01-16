@@ -91,6 +91,7 @@ class FunctionDefinition
     {
         $this->docBlock = '';
         $this->isFinal = false;
+        $this->isAbstract = false;
         $this->visibility = '';
         $this->isStatic = false;
         $this->name = '';

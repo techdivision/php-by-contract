@@ -9,7 +9,6 @@
 
 namespace TechDivision\PBC\Entities\Assertions;
 
-
 use TechDivision\PBC\Exceptions\ParserException;
 use TechDivision\PBC\Interfaces\Assertion;
 
@@ -62,6 +61,7 @@ abstract class AbstractAssertion implements Assertion
 
     /**
      * @return bool
+     * @throws \TechDivision\PBC\Exceptions\ParserException
      */
     public function isValid()
     {
@@ -76,10 +76,10 @@ abstract class AbstractAssertion implements Assertion
             // Parse it
             $stmts = $parser->parse($code);
 
-        } catch (PHPParser_Error $e) {
+        } catch (\PHPParser_Error $e) {
 
             // If we got a parsing error we can assume the assertion as being invalid
-            return false;
+            throw new ParserException('The assertion ' . $this->getString() . ' could not be integrated correctly.');
         }
 
         // Assertion got parsed, check if it got parsed as the right thing
