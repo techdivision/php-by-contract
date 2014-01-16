@@ -16,8 +16,7 @@ use TechDivision\PBC\Entities\Lists\TypedListList;
 /**
  * Class FunctionDefinition
  */
-class FunctionDefinition
-{
+class FunctionDefinition {
 
     /**
      * @var string
@@ -87,8 +86,7 @@ class FunctionDefinition
     /**
      * Default constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->docBlock = '';
         $this->isFinal = false;
         $this->isAbstract = false;
@@ -109,8 +107,7 @@ class FunctionDefinition
      *
      * @return TypedListList
      */
-    public function getPreconditions()
-    {
+    public function getPreconditions() {
         $preconditions = $this->ancestralPreconditions;
         $preconditions->add($this->preconditions);
 
@@ -122,8 +119,7 @@ class FunctionDefinition
      *
      * @return TypedListList
      */
-    public function getPostconditions()
-    {
+    public function getPostconditions() {
         $postconditions = $this->ancestralPostconditions;
         $postconditions->add($this->postconditions);
 
@@ -138,7 +134,7 @@ class FunctionDefinition
      * @param   bool $markAsOriginal
      * @return  string
      */
-    public function getHeader($type, $markAsOriginal = false)
+    public function getHeader($type, $markAsOriginal = false) 
     {
         $header = '';
 
@@ -172,22 +168,27 @@ class FunctionDefinition
             if ($this->isStatic === true) {
 
                 $header .= 'self::';
-
             } else {
 
                 $header .= '$this->';
             }
         }
 
-        // Function name
-        $header .= $this->name;
+        if ($type === 'closure') {
 
-        // Do we need to append the keyword which marks the function as original implementation
-        if ($markAsOriginal === true) {
+            $header .= 'function()';
+            
+        } else {
 
-            $header .= PBC_ORIGINAL_FUNCTION_SUFFIX;
+            // Function name
+            $header .= $this->name;
+
+            // Do we need to append the keyword which marks the function as original implementation
+            if ($markAsOriginal === true) {
+
+                $header .= PBC_ORIGINAL_FUNCTION_SUFFIX;
+            }
         }
-
         // Iterate over all parameters and create the parameter string.
         // We will create the string we need, either for calling the function or for defining it.
         $parameterString = array();
@@ -204,12 +205,21 @@ class FunctionDefinition
             $parameterIterator->next();
         }
 
-        // Explode to insert commas
-        $parameterString = implode(', ', $parameterString);
+        if ($type === 'closure' && !empty($parameterString)) {
+            
+            $header .= ' use ';
+            
+        }
+        
+        // Check if we even got something. If not a closure header would be malformed.
+        if ($type !== 'closure' || !empty($parameterString)) {
+            // Explode to insert commas
+            $parameterString = implode(', ', $parameterString);
 
-        // Append the parameters to the header
-        $header .= '(' . $parameterString . ')';
-
+            // Append the parameters to the header
+            $header .= '(' . $parameterString . ')';
+        }
+        
         return $header;
     }
 

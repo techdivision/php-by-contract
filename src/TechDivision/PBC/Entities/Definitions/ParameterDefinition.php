@@ -47,7 +47,12 @@ class ParameterDefinition
         // Prepare the parts
         $stringParts = array();
 
-        if ($mode === 'call') {
+        if ($mode === 'closure') {
+
+            // Get the name
+            $stringParts[] = '& ' . $this->name;
+
+        } elseif ($mode === 'call') {
 
             // Get the name
             $stringParts[] = $this->name;

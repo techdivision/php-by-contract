@@ -243,14 +243,18 @@ class SkeletonFilter extends AbstractFilter
         $code .= PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
             PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
 
-        // If we inject something we need a try ... catch around the original call.
+        // If we inject something we might need a try ... catch around the original call.
         if ($injectNeeded === true) {
 
             $code .= 'try {';
         }
 
+        // Build up the original function as a closure
+        $code .= PBC_CLOSURE_VARIABLE . ' = ' . $functionDefinition->getHeader('closure') . '{'
+                . $functionDefinition->body . '};';
+        
         // Build up the call to the original function.
-        $code .= PBC_KEYWORD_RESULT . ' = ' . $functionDefinition->getHeader('call', true) . ';';
+        $code .= PBC_KEYWORD_RESULT . ' = ' . PBC_CLOSURE_VARIABLE . '();';
 
         // Finish the try ... catch and place the inject marker
         if ($injectNeeded === true) {

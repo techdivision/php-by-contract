@@ -21,7 +21,7 @@
 
         "enforce-default-type-safety": true,
         "processing": "exception",
-        "level": 15
+        "level": 7
     },
 
     "project-dirs": [

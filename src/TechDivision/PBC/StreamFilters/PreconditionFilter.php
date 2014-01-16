@@ -85,7 +85,7 @@ class PreconditionFilter extends AbstractFilter
             for ($i = 0; $i < $tokensCount; $i++) {
 
                 // Did we find a function? If so check if we know that thing and insert the code of its preconditions.
-                if (is_array($tokens[$i]) && $tokens[$i][0] === T_FUNCTION) {
+                if (is_array($tokens[$i]) && $tokens[$i][0] === T_FUNCTION && is_array($tokens[$i + 2])) {
 
                     // Get the name of the function
                     $functionName = $tokens[$i + 2][1];

@@ -19,6 +19,7 @@ define('PBC_CONTRACT_CONTEXT', '$pbcOngoingContract');
 define('PBC_MARK_CONTRACT_ENTRY', '$pbcContractEntry');
 define('PBC_ATTRIBUTE_STORAGE', 'pbcAttributes');
 define('PBC_FAILURE_VARIABLE', '$pbcFailureMessage');
+define('PBC_CLOSURE_VARIABLE', '$pbcFunctionClosure');
 
 define('PBC_CLASS_INVARIANT_NAME', 'pbcClassInvariant');
 define('PBC_ORIGINAL_FUNCTION_SUFFIX', 'PBCOriginal');
