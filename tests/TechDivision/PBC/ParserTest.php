@@ -91,4 +91,21 @@ class ParserTest extends PHPUnit_Framework_TestCase
         // Did we get the right $e?
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
     }
+
+    /**
+     *
+     */
+    public function testMethodParsing()
+    {
+       $e = null;
+        try {
+
+            $methodTestClass = new \TechDivision\Tests\Parser\MethodTestClass();
+
+        } catch (Exception $e) {
+        }
+
+        // Did we get the right $e?
+        $this->assertNull($e);
+    }
 }
