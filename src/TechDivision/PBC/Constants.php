@@ -20,6 +20,8 @@ define('PBC_MARK_CONTRACT_ENTRY', '$pbcContractEntry');
 define('PBC_ATTRIBUTE_STORAGE', 'pbcAttributes');
 define('PBC_FAILURE_VARIABLE', '$pbcFailureMessage');
 define('PBC_CLOSURE_VARIABLE', '$pbcFunctionClosure');
+define('PBC_DIR_SUBSTITUTE', 'PBC_DIR_SUBSTITUTE');
+define('PBC_FILE_SUBSTITUTE', 'PBC_FILE_SUBSTITUTE');
 
 define('PBC_CLASS_INVARIANT_NAME', 'pbcClassInvariant');
 define('PBC_ORIGINAL_FUNCTION_SUFFIX', 'PBCOriginal');

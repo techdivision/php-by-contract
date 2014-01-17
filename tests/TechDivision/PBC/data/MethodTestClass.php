@@ -35,4 +35,22 @@ class MethodTestClass
 
         $this->service->create($application);
     }
+
+    /**
+     * @ensures $pbcResult === '/Users/wickb/Workspace/src/TechDivision_DesignByContract/tests/TechDivision/PBC/data'
+     * @return string
+     */
+    public function returnDir()
+    {
+        return __DIR__;
+    }
+
+    /**
+     * @ensures $pbcResult === '/Users/wickb/Workspace/src/TechDivision_DesignByContract/tests/TechDivision/PBC/data/MethodTestClass.php'
+     * @return string
+     */
+    public function returnFile()
+    {
+        return __FILE__;
+    }
 } 

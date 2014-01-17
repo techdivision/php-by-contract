@@ -18,4 +18,34 @@ class MethodTest extends PHPUnit_Framework_TestCase
         $this->magicMethodTestClass = 
             new \TechDivision\Tests\Method\MagicMethodTestClass();
     }
+
+    /**
+     *
+     */
+    public function testMagicConstantSubstitution()
+    {
+        $methodTestClass = new \TechDivision\Tests\Parser\MethodTestClass();
+
+        $e = null;
+        try {
+
+            $methodTestClass->returnDir();
+
+        } catch (Exception $e) {
+        }
+
+        // Did we get the right $e?
+        $this->assertNull($e);
+
+        $e = null;
+        try {
+
+            $methodTestClass->returnFile();
+
+        } catch (Exception $e) {
+        }
+
+        // Did we get the right $e?
+        $this->assertNull($e);
+    }
 }

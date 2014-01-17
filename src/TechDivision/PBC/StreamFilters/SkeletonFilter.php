@@ -129,6 +129,11 @@ class SkeletonFilter extends AbstractFilter
                         );
                         $functionHook = PBC_FUNCTION_HOOK_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE;
                     }
+
+                    // We have to create the local constants which will substitute __DIR__ and __FILE__
+                    // within the cache folder.
+                    $this->injectMagicConstants($bucket->data, $path);
+
                 }
                 // Did we find a function? If so check if we know that thing and insert the code of its preconditions.
                 if (is_array($tokens[$i]) && $tokens[$i][0] === T_FUNCTION) {
@@ -206,12 +211,67 @@ class SkeletonFilter extends AbstractFilter
                 }
             }
 
+            // We have to substitute magic __DIR__ and __FILE__ constants
+            $this->substituteMagicConstants($bucket->data);
+
             // Tell them how much we already processed, and stuff it back into the output
             $consumed += $bucket->datalen;
             stream_bucket_append($out, $bucket);
         }
 
         return PSFS_PASS_ON;
+    }
+
+    /**
+     * Will substitute all magic __DIR__ and __FILE__ constants with our prepared substitutes to
+     * emulate original original filesystem context when in cache folder.
+     *
+     * @param $bucketData
+     * @return bool
+     */
+    private function substituteMagicConstants(& $bucketData)
+    {
+        // Inject the code
+        $bucketData = str_replace(
+            array('__DIR__', '__FILE__'),
+            array('self::' . PBC_DIR_SUBSTITUTE, 'self::' . PBC_FILE_SUBSTITUTE),
+            $bucketData
+        );
+
+        // Still here? Success then.
+        return true;
+    }
+
+    /**
+     * Will inject the code to declare our local constants PBC_FILE_SUBSTITUTE and PBC_DIR_SUBSTITUTE
+     * which are used for substitution of __FILE__ and __DIR__.
+     *
+     * @param $bucketData
+     * @param string $file
+     * @return bool
+     */
+    private function injectMagicConstants(& $bucketData, $file)
+    {
+        $dir = dirname($file);
+        $functionHook = PBC_FUNCTION_HOOK_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE;
+
+        // Build up the needed code for __DIR__ substitution
+        $code = '/**
+     * @const   string
+     */
+    const ' . PBC_DIR_SUBSTITUTE . ' = "' . $dir . '";';
+
+        // Build up the needed code for __FILE__ substitution
+        $code .= '/**
+     * @const   string
+     */
+    const ' . PBC_FILE_SUBSTITUTE . ' = "' . $file . '";';
+
+        // Inject the code
+        $bucketData = str_replace($functionHook, $functionHook . $code, $bucketData);
+
+        // Still here? Success then.
+        return true;
     }
 
     /**
@@ -251,8 +311,8 @@ class SkeletonFilter extends AbstractFilter
 
         // Build up the original function as a closure
         $code .= PBC_CLOSURE_VARIABLE . ' = ' . $functionDefinition->getHeader('closure') . '{'
-                . $functionDefinition->body . '};';
-        
+            . $functionDefinition->body . '};';
+
         // Build up the call to the original function.
         $code .= PBC_KEYWORD_RESULT . ' = ' . PBC_CLOSURE_VARIABLE . '();';
 
