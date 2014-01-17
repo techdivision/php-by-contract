@@ -320,7 +320,7 @@ abstract class AbstractParser implements ParserInterface
                 $bracketCounter = null;
                 for ($j = $i + 1; $j < count($tokens); $j++) {
 
-                    if ($tokens[$j] === '{') {
+                    if ($tokens[$j] === '{' || $tokens[$j][0] === T_CURLY_OPEN) {
 
                         // If we still got null set to 0
                         if ($bracketCounter === null) {

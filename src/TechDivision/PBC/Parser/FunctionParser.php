@@ -260,7 +260,7 @@ class FunctionParser extends AbstractParser
                 for ($j = $i + 1; $j < count($tokens); $j++) {
 
                     // We have to count brackets. When they are even again we will break.
-                    if ($tokens[$j] === '{') {
+                    if ($tokens[$j] === '{' || $tokens[$j][0] === T_CURLY_OPEN) {
 
                         $bracketCounter++;
 
@@ -316,7 +316,8 @@ class FunctionParser extends AbstractParser
                 for ($j = $i - 1; $j >= 0; $j--) {
 
                     if ($tokens[$j] === ';' || $tokens[$j] === '{' ||
-                        (is_array($tokens[$j]) && $tokens[$j][0] === T_OPEN_TAG)
+                        (is_array($tokens[$j]) && $tokens[$j][0] === T_OPEN_TAG) ||
+                        $tokens[$j][0] === T_CURLY_OPEN
                     ) {
 
                         $lowerBound = $j + 1;
@@ -331,7 +332,7 @@ class FunctionParser extends AbstractParser
                 $bracketCounter = null;
                 for ($j = $i + 1; $j < count($tokens); $j++) {
 
-                    if ($tokens[$j] === '{') {
+                    if ($tokens[$j] === '{' || $tokens[$j][0] === T_CURLY_OPEN) {
 
                         // If we still got null set to 0
                         if ($bracketCounter === null) {

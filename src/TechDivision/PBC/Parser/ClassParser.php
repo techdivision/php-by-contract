@@ -208,7 +208,7 @@ class ClassParser extends AbstractStructureParser
 
                 for ($j = $i + 1; $j < count($tokens); $j++) {
 
-                    if ($tokens[$j] === '{') {
+                    if ($tokens[$j] === '{' || $tokens[$j][0] === T_CURLY_OPEN) {
 
                         $className = $tokens[$i + 2][1];
                     }
@@ -235,7 +235,7 @@ class ClassParser extends AbstractStructureParser
 
                 for ($j = $i + 1; $j < count($tokens); $j++) {
 
-                    if ($tokens[$j] === '{' || $tokens[$j][0] === T_IMPLEMENTS) {
+                    if ($tokens[$j] === '{' || $tokens[$j][0] === T_CURLY_OPEN || $tokens[$j][0] === T_IMPLEMENTS) {
 
                         return $className;
 
@@ -266,7 +266,7 @@ class ClassParser extends AbstractStructureParser
 
                 for ($j = $i + 1; $j < count($tokens); $j++) {
 
-                    if ($tokens[$j] === '{' || $tokens[$j][0] === T_EXTENDS) {
+                    if ($tokens[$j] === '{' || $tokens[$j][0] === T_CURLY_OPEN || $tokens[$j][0] === T_EXTENDS) {
 
                         return $interfaces;
 
@@ -392,7 +392,7 @@ class ClassParser extends AbstractStructureParser
                         // We got something, lets count the brackets between it and our variable's position
                         for ($k = $j + 1; $k < $i; $k++) {
 
-                            if ($tokens[$k] === '{') {
+                            if ($tokens[$k] === '{' || $tokens[$k][0] === T_CURLY_OPEN) {
 
                                 $usedCounter = true;
                                 $bracketCounter++;

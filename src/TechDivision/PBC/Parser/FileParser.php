@@ -89,7 +89,7 @@ class FileParser extends AbstractParser
 
                         $namespace .= '\\' . $tokens[$j][1];
 
-                    } elseif ($tokens[$j] === '{' || $tokens[$j] === ';') {
+                    } elseif ($tokens[$j] === '{' || $tokens[$j] === ';' || $tokens[$j][0] === T_CURLY_OPEN) {
 
                         break;
                     }
@@ -122,7 +122,7 @@ class FileParser extends AbstractParser
 
                         $namespace .= '\\' . $tokens[$j][1];
 
-                    } elseif ($tokens[$j] === '{' || $tokens[$j] === ';') {
+                    } elseif ($tokens[$j] === '{' || $tokens[$j] === ';' || $tokens[$j][0] === T_CURLY_OPEN) {
 
                         $namespaces[] = $namespace;
                         break;
@@ -165,7 +165,7 @@ class FileParser extends AbstractParser
                 // We got something, lets count the brackets between it and our variable's position
                 for ($j = $i + 1; $j < count($tokens); $j++) {
 
-                    if ($tokens[$j] === '{') {
+                    if ($tokens[$j] === '{' || $tokens[$j][0] === T_CURLY_OPEN) {
 
                         $bracketCounter++;
 
