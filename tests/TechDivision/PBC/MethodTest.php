@@ -29,23 +29,25 @@ class MethodTest extends PHPUnit_Framework_TestCase
         $e = null;
         try {
 
-            $methodTestClass->returnDir();
+            $dir = $methodTestClass->returnDir();
 
         } catch (Exception $e) {
         }
 
-        // Did we get the right $e?
+        // Did we get the right $e and right dir?
         $this->assertNull($e);
+        $this->assertEquals($dir, __DIR__ . DIRECTORY_SEPARATOR . 'data');
 
         $e = null;
         try {
 
-            $methodTestClass->returnFile();
+            $file = $methodTestClass->returnFile();
 
         } catch (Exception $e) {
         }
 
-        // Did we get the right $e?
+        // Did we get the right $e and right file?
         $this->assertNull($e);
+        $this->assertEquals($file, __DIR__ . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'MethodTestClass.php');
     }
 }

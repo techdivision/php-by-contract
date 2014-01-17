@@ -37,7 +37,6 @@ class MethodTestClass
     }
 
     /**
-     * @ensures $pbcResult === '/Users/wickb/Workspace/src/TechDivision_DesignByContract/tests/TechDivision/PBC/data'
      * @return string
      */
     public function returnDir()
@@ -46,7 +45,6 @@ class MethodTestClass
     }
 
     /**
-     * @ensures $pbcResult === '/Users/wickb/Workspace/src/TechDivision_DesignByContract/tests/TechDivision/PBC/data/MethodTestClass.php'
      * @return string
      */
     public function returnFile()
