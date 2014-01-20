@@ -194,7 +194,7 @@ class SkeletonFilter extends AbstractFilter
                         // Change the function name to indicate this is the original function.
                         // Also change the visibility to private
                         $bucket->data = preg_replace(
-                            '/' . $visibility . $visibilityHook . ' *\(/',
+                            '%' . $visibility . $visibilityHook . ' *\(%',
                             'private' . $visibilityHook . PBC_ORIGINAL_FUNCTION_SUFFIX . '(',
                             $bucket->data
                         );

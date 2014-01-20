@@ -226,13 +226,13 @@ class Generator
      *
      * @param $res
      * @param FileDefinition $fileDefinition
-     * @param ClassDefinition $structureDefinition
+     * @param StructureDefinition $structureDefinition
      * @return bool
      */
     protected function appendFilter(
         & $res,
         FileDefinition $fileDefinition,
-        ClassDefinition $structureDefinition
+        StructureDefinition $structureDefinition
     ) {
         // Lets get the enforcement level
         $enforcementConfig = $this->config->getConfig('enforcement');
@@ -258,32 +258,66 @@ class Generator
         // Lets have a look at the precondition filter first
         if (isset($levelArray[0]) && $levelArray[0] == 1) {
 
-            stream_filter_register('PreconditionFilter', 'TechDivision\PBC\StreamFilters\PreconditionFilter');
-            stream_filter_append(
-                $res,
-                'PreconditionFilter',
-                STREAM_FILTER_WRITE,
-                $structureDefinition->functionDefinitions
-            );
+            // Do we even got any preconditions?
+            $filterNeeded = false;
+            $iterator = $structureDefinition->functionDefinitions->getIterator();
+            foreach($iterator as $functionDefinition) {
+
+                if ($functionDefinition->getPreconditions()->count() !== 0) {
+
+                    $filterNeeded = true;
+                    break;
+                }
+            }
+
+            if ($filterNeeded) {
+
+                stream_filter_register('PreconditionFilter', 'TechDivision\PBC\StreamFilters\PreconditionFilter');
+                stream_filter_append(
+                    $res,
+                    'PreconditionFilter',
+                    STREAM_FILTER_WRITE,
+                    $structureDefinition->functionDefinitions
+                );
+            }
         }
 
         // What about the postcondition filter?
         if (isset($levelArray[1]) && $levelArray[1] == 1) {
 
-            stream_filter_register('PostconditionFilter', 'TechDivision\PBC\StreamFilters\PostconditionFilter');
-            stream_filter_append(
-                $res,
-                'PostconditionFilter',
-                STREAM_FILTER_WRITE,
-                $structureDefinition->functionDefinitions
-            );
+            // Do we even got any postconditions?
+            $filterNeeded = false;
+            $iterator = $structureDefinition->functionDefinitions->getIterator();
+            foreach($iterator as $functionDefinition) {
+
+                if ($functionDefinition->getPostconditions()->count() !== 0) {
+
+                    $filterNeeded = true;
+                    break;
+                }
+            }
+
+            if ($filterNeeded) {
+
+                stream_filter_register('PostconditionFilter', 'TechDivision\PBC\StreamFilters\PostconditionFilter');
+                stream_filter_append(
+                    $res,
+                    'PostconditionFilter',
+                    STREAM_FILTER_WRITE,
+                    $structureDefinition->functionDefinitions
+                );
+            }
         }
 
         // What about the invariant filter?
         if (isset($levelArray[2]) && $levelArray[2] == 1) {
 
-            stream_filter_register('InvariantFilter', 'TechDivision\PBC\StreamFilters\InvariantFilter');
-            stream_filter_append($res, 'InvariantFilter', STREAM_FILTER_WRITE, $structureDefinition);
+            // Do we even got any invariants?
+            if ($structureDefinition->getInvariants()->count(true) !== 0) {
+
+                stream_filter_register('InvariantFilter', 'TechDivision\PBC\StreamFilters\InvariantFilter');
+                stream_filter_append($res, 'InvariantFilter', STREAM_FILTER_WRITE, $structureDefinition);
+            }
         }
 
         // We ALWAYS need the processing filter. Everything else would not make any sense

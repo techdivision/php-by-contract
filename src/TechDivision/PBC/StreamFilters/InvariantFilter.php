@@ -79,15 +79,6 @@ class InvariantFilter extends AbstractFilter
     {
         $structureDefinition = $this->params;
 
-        // As we have to make severe changes to the system we might ensure we need to first.
-        // If there is no invariant for this or any ancestral structures we might skip this step entirely.
-        $invariants = $structureDefinition->getInvariants();
-        if ($invariants->count() === 0) {
-
-            // Nothing to do here
-            return PSFS_PASS_ON;
-        }
-
         // After iterate over the attributes and build up our array of attributes we have to include in our
         // checking mechanism.
         $obsoleteProperties = array();
@@ -123,7 +114,7 @@ class InvariantFilter extends AbstractFilter
                 $attributeCode = $this->generateAttributeCode($structureDefinition->attributeDefinitions);
 
                 // Get the code for the assertions
-                $code = $this->generateFunctionCode($invariants);
+                $code = $this->generateFunctionCode($structureDefinition->getInvariants());
 
                 // Insert the code
                 $bucket->data = str_replace(

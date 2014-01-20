@@ -26,4 +26,28 @@ class TypedListList extends AbstractTypedList
     {
         $this->itemType = 'TechDivision\PBC\Interfaces\TypedList';
     }
+
+    /**
+     * Overwritten implementation of count() which is able to determine the count of contained lists
+     * as a whole.
+     *
+     * @param bool $countChildren
+     * @return int|void
+     */
+    public function count($countChildren = false)
+    {
+        // If we do not want the children to be counted we can use the parent's count() method
+        if ($countChildren !== true) {
+
+            return parent::count();
+        }
+
+        $counter = 0;
+        foreach ($this->container as $item) {
+
+            $counter += $item->count();
+        }
+
+        return $counter;
+    }
 }

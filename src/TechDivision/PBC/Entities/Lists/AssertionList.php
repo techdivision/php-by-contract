@@ -26,4 +26,5 @@ class AssertionList extends AbstractTypedList
     {
         $this->itemType = 'TechDivision\PBC\Interfaces\Assertion';
     }
+
 }
