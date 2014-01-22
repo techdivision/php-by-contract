@@ -15,6 +15,7 @@ use TechDivision\PBC\Entities\Definitions\AttributeDefinition;
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
+use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Interfaces\StructureParserInterface;
 
 /**
@@ -25,9 +26,10 @@ class ClassParser extends AbstractStructureParser
     /**
      * @param $file
      * @param FileDefinition $fileDefinition
+     * @param bool $getRecursive
      * @return bool|StructureDefinitionList
      */
-    public function getDefinitionListFromFile($file, FileDefinition $fileDefinition)
+    public function getDefinitionListFromFile($file, FileDefinition $fileDefinition, $getRecursive = true)
     {
         // Get all the token arrays for the different classes
         $tokens = $this->getStructureTokens($file, T_CLASS);
@@ -43,7 +45,7 @@ class ClassParser extends AbstractStructureParser
 
             try {
 
-                $structureDefinitionList->add($this->getDefinitionFromTokens($token, $fileDefinition));
+                $structureDefinitionList->add($this->getDefinitionFromTokens($token, $fileDefinition, $getRecursive));
 
             } catch (\UnexpectedValueException $e) {
                 // Just try the next one
@@ -58,12 +60,13 @@ class ClassParser extends AbstractStructureParser
     /**
      * @param $file
      * @param null $className
-     * @return bool|void
+     * @param bool $getRecursive
+     * @return bool|StructureDefinition
      */
-    public function getDefinitionFromFile($file, $className = null)
+    public function getDefinitionFromFile($file, $className = null, $getRecursive = true)
     {
         $fileParser = new FileParser();
-        $fileDefinition = $fileParser->getDefinitionFromFile($file);
+        $fileDefinition = $fileParser->getDefinitionFromFile($file, $getRecursive);
 
         // First of all we need to get the class tokens
         $tokens = $this->getStructureTokens($file, T_CLASS);
@@ -80,7 +83,7 @@ class ClassParser extends AbstractStructureParser
         } elseif (count($tokens) === 1) {
             // We got what we came for
 
-            return $this->getDefinitionFromTokens($tokens[0], $fileDefinition);
+            return $this->getDefinitionFromTokens($tokens[0], $fileDefinition, $getRecursive);
 
         } elseif (is_string($className) && count($tokens) > 1) {
             // We are still here, but got a class name to look for
@@ -92,7 +95,7 @@ class ClassParser extends AbstractStructureParser
 
                     if (is_array($token[$i]) && $token[$i] === T_CLASS && $token[$i + 2] === $className) {
 
-                        return $this->getDefinitionFromTokens($tokens[$key], $fileDefinition);
+                        return $this->getDefinitionFromTokens($tokens[$key], $fileDefinition, $getRecursive);
                     }
                 }
             }
@@ -111,15 +114,24 @@ class ClassParser extends AbstractStructureParser
      * @access private
      * @param $tokens
      * @param FileDefinition $fileDefinition
+     * @param bool $getRecursive
      * @return StructureDefinition
      */
-    private function getDefinitionFromTokens($tokens, FileDefinition $fileDefinition)
+    private function getDefinitionFromTokens($tokens, FileDefinition $fileDefinition, $getRecursive = true)
     {
         // First of all we need a new ClassDefinition to fill
         $classDefinition = new ClassDefinition();
 
         // File based namespaces do not make much sense, so hand it over here.
         $classDefinition->namespace = $fileDefinition->namespace;
+        $classDefinition->name = $this->getName($tokens);
+
+
+        // Maybe we already got this structure?
+        if ($this->structureDefinitionHierarchy->entryExists($classDefinition->getQualifiedName())) {
+
+            return $this->structureDefinitionHierarchy->getEntry($classDefinition->getQualifiedName());
+        }
 
         // For our next step we would like to get the doc comment (if any)
         $classDefinition->docBlock = $this->getDocBlock($tokens, T_CLASS);
@@ -134,10 +146,8 @@ class ClassParser extends AbstractStructureParser
         // Get the class identity
         $classDefinition->isFinal = $this->isFinalClass($tokens);
         $classDefinition->isAbstract = $this->isAbstractClass($tokens);
-        $classDefinition->name = $this->getClassName($tokens);
 
         // Lets check if there is any inheritance, or if we implement any interfaces
-
         $parentName = $this->getParent($tokens);
         if ($parentName === '') {
 
@@ -169,6 +179,7 @@ class ClassParser extends AbstractStructureParser
         $classDefinition->extends = trim(
             $this->resolveUsedNamespace(
                 $fileDefinition->usedNamespaces,
+                $classDefinition->namespace,
                 str_replace('\\\\', '\\', $classDefinition->extends)
             ),
             '\\'
@@ -178,7 +189,7 @@ class ClassParser extends AbstractStructureParser
         $interfaces = array();
         foreach ($this->getInterfaces($tokens) as $interface) {
 
-            $classDefinition->implements[] = $this->resolveUsedNamespace($fileDefinition->usedNamespaces, $interface);
+            $classDefinition->implements[] = $this->resolveUsedNamespace($fileDefinition->usedNamespaces, $classDefinition->namespace, $interface);
         }
 
         $classDefinition->constants = $this->getConstants($tokens);
@@ -187,9 +198,40 @@ class ClassParser extends AbstractStructureParser
         $classDefinition->attributeDefinitions = $this->getAttributes($tokens, $classDefinition->invariantConditions);
 
         // Only thing still missing are the methods, so ramp up our FunctionParser
-        $functionParser = new FunctionParser();
-        $classDefinition->functionDefinitions = $functionParser->getDefinitionListFromTokens($tokens);
+        $functionParser = new FunctionParser($this->structureMap, $this->structureDefinitionHierarchy);
+        $classDefinition->functionDefinitions = $functionParser->getDefinitionListFromTokens($tokens, $getRecursive);
 
+        // If we have to parse the definition in a recursive manner, we have to get the parent invariants
+        if ($getRecursive === true) {
+
+            $ancestralInvariants = new TypedListList();
+
+            $dependencies = $classDefinition->getDependencies();
+            foreach ($dependencies as $dependency) {
+
+                // Maybe we already got this structure?
+                if ($this->structureDefinitionHierarchy->entryExists($classDefinition->getQualifiedName())) {
+
+                    $dependencyDefinition = $this->structureDefinitionHierarchy->getEntry(
+                        $classDefinition->getQualifiedName()
+                    );
+
+                } else {
+var_dump($dependency);
+                    $fileEntry = $this->structureMap->getEntry($dependency);
+                    $dependencyDefinition = $this->getDefinitionFromFile(
+                        $fileEntry->getPath(),
+                        $dependency,
+                        $getRecursive
+                    );
+                }
+
+                $classDefinition->ancestralInvariants = $dependencyDefinition->getInvariants();
+            }
+        }
+
+        // Before exiting we will add the entry to the current structure definition hierarchy
+        $this->structureDefinitionHierarchy->insert($classDefinition);
         return $classDefinition;
     }
 
@@ -197,7 +239,7 @@ class ClassParser extends AbstractStructureParser
      * @param $tokens
      * @return string
      */
-    private function getClassName($tokens)
+    private function getName($tokens)
     {
         // Check the tokens
         $className = '';
