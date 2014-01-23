@@ -304,7 +304,7 @@ class AnnotationParser extends AbstractParser
         // Check if we got anything of value
         if (empty($combinedPart)) {
 
-            throw new ParserException('Error parsing what seams to be a |-combined assertion ' . $docString);
+            throw new ParserException('Error parsing what seems to be a |-combined assertion ' . $docString);
         }
 
         // Now we have to create all the separate assertions for each part of the $combinedPart string

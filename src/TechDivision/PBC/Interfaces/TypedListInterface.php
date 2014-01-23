@@ -9,7 +9,7 @@
 
 namespace TechDivision\PBC\Interfaces;
 
-interface TypedList
+interface TypedListInterface
 {
     /**
      * @param $value

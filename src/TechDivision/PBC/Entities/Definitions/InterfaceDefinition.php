@@ -12,7 +12,7 @@ use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
-use TechDivision\PBC\Interfaces\StructureDefinition;
+use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
 use TechDivision\PBC\Parser\InterfaceParser;
 use TechDivision\PBC\Config;
 use TechDivision\PBC\StructureMap;
@@ -20,8 +20,23 @@ use TechDivision\PBC\StructureMap;
 /**
  * Class InterfaceDefinition
  */
-class InterfaceDefinition implements StructureDefinition
+class InterfaceDefinition implements StructureDefinitionInterface
 {
+    /**
+     * @var string
+     */
+    public $path;
+
+    /**
+     * @var string
+     */
+    public $namespace;
+
+    /**
+     * @var array
+     */
+    public $usedNamespaces;
+
     /**
      * @var string
      */
@@ -31,11 +46,6 @@ class InterfaceDefinition implements StructureDefinition
      * @var string
      */
     public $name;
-
-    /**
-     * @var string
-     */
-    public $namespace;
 
     /**
      * @var array
@@ -83,6 +93,23 @@ class InterfaceDefinition implements StructureDefinition
     }
 
     /**
+     * Will return the qualified name of a structure
+     *
+     * @return string
+     */
+    public function getQualifiedName()
+    {
+        if (empty($this->namespace)) {
+
+            return $this->name;
+
+        } else {
+
+            return $this->namespace . '\\' . $this->name;
+        }
+    }
+
+    /**
      * Will return the type of the definition.
      *
      * @return string
@@ -119,72 +146,6 @@ class InterfaceDefinition implements StructureDefinition
     public function getDependencies()
     {
         return $this->extends;
-    }
-
-    /**
-     * Finalize this class definition
-     *
-     * Will make the final steps to complete the class definition.
-     * Mostly this consists of getting the ancestral invariants and
-     * method pre- and postconditions.
-     *
-     * @return  boolean
-     */
-    public function finalize()
-    {
-        // We have to get all ancestral interfaces
-        $ancestors = $this->extends;
-
-        // Do we even have something like that?
-        if (empty($ancestors)) {
-
-            return true;
-        }
-
-        // We need an array
-        if (!is_array($ancestors)) {
-
-            $ancestors = array($ancestors);
-        }
-
-        // Now finalize them recursively
-        $interfaceParser = new InterfaceParser();
-        $config = Config::getInstance();
-        $cache = new StructureMap($config->getConfig('project-dirs'), $config);
-
-        $ancestorDefinitions = array();
-        foreach ($ancestors as $key => $ancestor) {
-
-            // Do we have this pestering leading \?
-            if (strpos($ancestor, '\\') === 0) {
-
-                $ancestor = ltrim($ancestor, '\\');
-            }
-
-            // Do we know this file?
-            $file = $cache->getEntry($ancestor);
-            if ($file !== false) {
-
-                $ancestorDefinitions[$key] = $interfaceParser->getDefinitionFromFile($file->getPath(), $ancestor);
-                $ancestorDefinitions[$key]->finalize();
-
-            } else {
-                // Maybe the class is in the same namespace as we are?
-
-                $file = $cache->getEntry($this->namespace . '\\' . $ancestor);
-                if ($file !== false) {
-
-                    $ancestorDefinitions[$key] = $interfaceParser->getDefinitionFromFile($file->getPath(), $ancestor);
-                    $ancestorDefinitions[$key]->finalize();
-
-                }
-            }
-        }
-
-        // Get all the ancestral method pre- and postconditions
-        $this->getAncestralConditions($ancestorDefinitions);
-
-        return true;
     }
 
     /**

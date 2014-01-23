@@ -12,16 +12,14 @@ class InterfaceParser extends AbstractStructureParser
 
     /**
      * @param $file
-     * @param null $className
-     * @return bool|void
+     * @param null $interfaceName
+     * @param bool $getRecursive
+     * @return bool|FileDefinition
      */
-    public function getDefinitionFromFile($file, $interfaceName = null)
+    public function getDefinition($interfaceName = null, $getRecursive = false)
     {
-        $fileParser = new FileParser();
-        $fileDefinition = $fileParser->getDefinitionFromFile($file);
-
         // First of all we need to get the interface tokens
-        $tokens = $this->getStructureTokens($file, T_INTERFACE);
+        $tokens = $this->getStructureTokens(T_INTERFACE);
 
         // Did we get something valuable?
         if ($tokens === false) {
@@ -35,7 +33,7 @@ class InterfaceParser extends AbstractStructureParser
         } elseif (count($tokens) === 1) {
             // We got what we came for
 
-            return $this->getDefinitionFromTokens($tokens[0], $fileDefinition);
+            return $this->getDefinitionFromTokens($tokens[0]);
 
         } elseif (is_string($interfaceName) && count($tokens) > 1) {
             // We are still here, but got an interface name to look for
@@ -47,7 +45,7 @@ class InterfaceParser extends AbstractStructureParser
 
                     if (is_array($token[$i]) && $token[$i] === T_INTERFACE && $token[$i + 2] === $interfaceName) {
 
-                        return $this->getDefinitionFromTokens($tokens[$key], $fileDefinition);
+                        return $this->getDefinitionFromTokens($tokens[$key]);
                     }
                 }
             }
@@ -60,9 +58,10 @@ class InterfaceParser extends AbstractStructureParser
     /**
      * @param $file
      * @param FileDefinition $fileDefinition
+     * @param bool $getRecursive
      * @return bool|StructureDefinitionList
      */
-    public function getDefinitionListFromFile($file, FileDefinition $fileDefinition)
+    public function getDefinitionListFromFile($file, FileDefinition $fileDefinition, $getRecursive = false)
     {
         // Get all the token arrays for the different classes
         $tokens = $this->getStructureTokens($file, T_INTERFACE);
@@ -180,13 +179,23 @@ class InterfaceParser extends AbstractStructureParser
      * @param $tokens
      * @return FileDefinition
      */
-    private function getDefinitionFromTokens($tokens, FileDefinition $fileDefinition)
+    private function getDefinitionFromTokens($tokens, $getRecursive = true)
     {
         // First of all we need a new ClassDefinition to fill
         $interfaceDefinition = new InterfaceDefinition();
 
+        // Save the path of the original definition for later use
+        $interfaceDefinition->path = $this->file;
+
+        // Get the interfaces own namespace and the namespace which are included via use
+        $interfaceDefinition->namespace = $this->getNamespace();
+        $interfaceDefinition->usedNamespaces = $this->getUsedNamespaces();
+
         // For our next step we would like to get the doc comment (if any)
         $interfaceDefinition->docBlock = $this->getDocBlock($tokens, T_INTERFACE);
+
+        // Get the interface identity
+        $interfaceDefinition->name = $this->getName($tokens);
 
         // So we got our docBlock, now we can parse the invariant annotations from it
         $annotationParser = new AnnotationParser();
@@ -195,13 +204,9 @@ class InterfaceParser extends AbstractStructureParser
             PBC_KEYWORD_INVARIANT
         );
 
-        // Get the class identity
-        $interfaceDefinition->name = $this->getName($tokens);
-
         // Lets check if there is any inheritance, or if we implement any interfaces
-
         $parentNames = $this->getParents($tokens);
-        if (count($fileDefinition->usedNamespaces) === 0) {
+        if (count($interfaceDefinition->usedNamespaces) === 0) {
 
             foreach ($parentNames as $parentName) {
 
@@ -211,13 +216,13 @@ class InterfaceParser extends AbstractStructureParser
 
                 } else {
 
-                    $interfaceDefinition->extends[] = '\\' . $fileDefinition->namespace . '\\' . $parentName;
+                    $interfaceDefinition->extends[] = '\\' . $interfaceDefinition->namespace . '\\' . $parentName;
                 }
             }
 
         } else {
 
-            foreach ($fileDefinition->usedNamespaces as $alias) {
+            foreach ($interfaceDefinition->usedNamespaces as $alias) {
 
                 foreach ($parentNames as $parentName) {
 

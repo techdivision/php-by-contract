@@ -23,7 +23,7 @@ class FunctionParser extends AbstractParser
      * @param $tokens
      * @return bool|FunctionDefinitionList
      */
-    public function getDefinitionListFromTokens(array $tokens)
+    public function getDefinitionListFromTokens(array $tokens, $getRecursive = true)
     {
         // First of all we need to get the function tokens
         $tokens = $this->getFunctionTokens($tokens);

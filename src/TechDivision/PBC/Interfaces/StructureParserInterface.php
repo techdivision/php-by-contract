@@ -13,8 +13,18 @@ use TechDivision\PBC\Entities\Definitions\FileDefinition;
 
 interface StructureParserInterface extends ParserInterface
 {
+    /**
+     * @param null $structureName
+     * @param bool $getRecursive
+     * @return mixed
+     */
+    public function getDefinition($structureName = null, $getRecursive = true);
 
-    public function getDefinitionFromFile($file, $structureName = null);
-
-    public function getDefinitionListFromFile($file, FileDefinition $fileDefinition);
+    /**
+     * @param $file
+     * @param FileDefinition $fileDefinition
+     * @param bool $getRecursive
+     * @return mixed
+     */
+    public function getDefinitionListFromFile($file, FileDefinition $fileDefinition, $getRecursive = true);
 }

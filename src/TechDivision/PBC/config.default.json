@@ -1,5 +1,5 @@
 {
-    "environment": "production",
+    "environment": "development",
 
     "cache": {
 
@@ -9,9 +9,7 @@
     "autoloader": {
 
         "omit": [
-            "TechDivision\\PBC",
             "PHPUnit",
-            "PHPParser",
             "Psr\\Log",
             "PHP"
         ]

@@ -11,7 +11,7 @@
 
 namespace TechDivision\PBC\Entities\Lists;
 
-use TechDivision\PBC\Interfaces\TypedList;
+use TechDivision\PBC\Interfaces\TypedListInterface;
 
 /**
  * @package     TechDivision\PBC
@@ -21,7 +21,7 @@ use TechDivision\PBC\Interfaces\TypedList;
  *              Open Software License (OSL 3.0)
  * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-abstract class AbstractTypedList implements TypedList
+abstract class AbstractTypedList implements TypedListInterface
 {
     /**
      * @var string

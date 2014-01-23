@@ -10,14 +10,16 @@
 namespace TechDivision\PBC;
 
 use TechDivision\PBC\CacheMap;
+use TechDivision\PBC\StructureMap;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Entities\Definitions\InterfaceDefinition;
+use TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Interfaces\Assertion;
-use TechDivision\PBC\Interfaces\StructureDefinition;
+use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
 use TechDivision\PBC\Entities\Definitions\Structure;
-use TechDivision\PBC\Parser\FileParser;
+use TechDivision\PBC\Parser\StructureParserFactory;
 use TechDivision\PBC\Config;
 
 /**
@@ -28,22 +30,37 @@ class Generator
     /**
      * @var \TechDivision\PBC\CacheMap
      */
-    private $cache;
+    protected $cacheMap;
+
+    /**
+     * @var \TechDivision\PBC\StructureMap
+     */
+    protected $structureMap;
 
     /**
      * @var array
      */
-    private $config;
+    protected $config;
 
     /**
+     * @var StructureDefinitionHierarchy
+     */
+    protected $structureDefinitionHierarchy;
+
+    /**
+     * @param StructureMap $structureMap
      * @param CacheMap $cache
      */
-    public function __construct(CacheMap $cache)
+    public function __construct(StructureMap $structureMap, CacheMap $cache)
     {
         $this->cache = $cache;
 
+        $this->structureMap = $structureMap;
+
         $config = Config::getInstance();
         $this->config = $config->getConfig('enforcement');
+
+        $this->structureDefinitionHierarchy = new StructureDefinitionHierarchy();
     }
 
     /**
@@ -59,45 +76,48 @@ class Generator
      * @param Structure $mapEntry
      * @param bool $update
      * @return bool
+     * @throws GeneratorException
      */
     public function create(Structure $mapEntry, $update = false)
     {
-        // We know the class and we know the file it is in, so get our FileParser and have a blast
-        $fileParser = new FileParser();
-        $fileDefinition = $fileParser->getDefinitionFromFile($mapEntry->getPath());
+        // We know what we are searching for and we got a fine factory so lets get us a parser
+        $structureParserFactory = new StructureParserFactory();
+        $parser = $structureParserFactory->getInstance(
+            $mapEntry->getType(),
+            $mapEntry->getPath(),
+            $this->structureMap,
+            $this->structureDefinitionHierarchy
+        );
 
-        // So we got our FileDefinition, now lets check if there are multiple classes in there.
-        // Iterate over all classes within the FileDefinition and create a file for each of them
-        $classIterator = $fileDefinition->structureDefinitions->getIterator();
-        for ($k = 0; $k < $classIterator->count(); $k++) {
+        // Lets get the definition we are looking for
+        $structureDefinition = $parser->getDefinition($mapEntry->getIdentifier(), true);
 
-            $structureDefinition = $classIterator->current();
+        if (!$structureDefinition instanceof StructureDefinitionInterface) {
 
-            $structureName = trim($fileDefinition->namespace . '\\' . $structureDefinition->name, '\\');
-
-            $filePath = $this->createFilePath(
-                $structureName,
-                $mapEntry->getPath()
-            );
-
-            $tmp = $this->createFileFromDefinitions($filePath, $fileDefinition, $structureDefinition);
-
-            if ($tmp === true) {
-
-                // Now get our new file into the cacheMap
-                $this->cache->add(
-                    new Structure(
-                        filectime($mapEntry->getPath()),
-                        $structureName,
-                        $filePath,
-                        $structureDefinition->getType()
-                    )
-                );
-            }
-
-            // Next assertion please
-            $classIterator->next();
+            return false;
         }
+
+        $qualifiedName = $structureDefinition->getQualifiedName();
+        $filePath = $this->createFilePath(
+            $qualifiedName,
+            $mapEntry->getPath()
+        );
+
+        $tmp = $this->createFileFromDefinition($filePath, $structureDefinition);
+
+        if ($tmp === false) {
+
+            throw new GeneratorException('Could not create contracted definition for ' . $qualifiedName);
+        }
+        // Now get our new file into the cacheMap
+        $this->cache->add(
+            new Structure(
+                filectime($mapEntry->getPath()),
+                $qualifiedName,
+                $filePath,
+                $structureDefinition->getType()
+            )
+        );
 
         // Still here? Than everything worked out great.
         return true;
@@ -119,22 +139,20 @@ class Generator
 
     /**
      * @param $targetFileName
-     * @param FileDefinition $fileDefinition
-     * @param StructureDefinition $structureDefinition
+     * @param StructureDefinitionInterface $structureDefinition
      * @return mixed
      * @throws \InvalidArgumentException
      */
-    private function createFileFromDefinitions(
+    private function createFileFromDefinition(
         $targetFileName,
-        FileDefinition $fileDefinition,
-        StructureDefinition $structureDefinition
+        StructureDefinitionInterface $structureDefinition
     ) {
         // We have to check which structure type we got
         $definitionType = get_class($structureDefinition);
 
         // Call the method accordingly
         $tmp = explode('\\', $definitionType);
-        $creationMethod = 'createFileFrom' . array_pop($tmp) . 's';
+        $creationMethod = 'createFileFrom' . array_pop($tmp);
 
         // Check if we got something
         if (!method_exists($this, $creationMethod)) {
@@ -142,7 +160,7 @@ class Generator
             throw new \InvalidArgumentException();
         }
 
-        return $this->$creationMethod($targetFileName, $fileDefinition, $structureDefinition);
+        return $this->$creationMethod($targetFileName, $structureDefinition);
     }
 
     /**
@@ -153,20 +171,19 @@ class Generator
      * @param FileDefinition $fileDefinition
      * @param InterfaceDefinition $structureDefinition
      */
-    private function createFileFromInterfaceDefinitions(
+    private function createFileFromInterfaceDefinition(
         $targetFileName,
-        FileDefinition $fileDefinition,
         InterfaceDefinition $structureDefinition
     ) {
         // Get the content of the file
-        $content = file_get_contents($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name);
+        $content = file_get_contents($structureDefinition->path);
 
         // Make the one change we need, the original file path and modification timestamp
         $content = str_replace(
             '<?php',
-            '<?php /* ' . PBC_ORIGINAL_PATH_HINT . $fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name . '#' .
+            '<?php /* ' . PBC_ORIGINAL_PATH_HINT . $structureDefinition->path . '#' .
             filemtime(
-                $fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name
+                $structureDefinition->path
             ) . PBC_ORIGINAL_PATH_HINT . ' */',
             $content
         );
@@ -176,35 +193,33 @@ class Generator
 
     /**
      * @param $targetFileName
-     * @param FileDefinition $fileDefinition
      * @param ClassDefinition $structureDefinition
      * @return bool
-     * @throws \Exception|PHPParser_Error
      */
-    private function createFileFromClassDefinitions(
+    private function createFileFromClassDefinition(
         $targetFileName,
-        FileDefinition $fileDefinition,
         ClassDefinition $structureDefinition
     ) {
         // Before using the definition we have to finalize it
-        $structureDefinition->finalize();
+        // $structureDefinition->finalize();
 
         $res = fopen(
-            $this->createFilePath($structureDefinition->namespace . '\\' . $structureDefinition->name),
+            $this->createFilePath($structureDefinition->getQualifiedName()),
             'w+'
         );
 
         // Append all configured filters
-        $this->appendFilter($res, $fileDefinition, $structureDefinition);
+        $this->appendFilter($res, $structureDefinition);
 
         $tmp = fwrite(
             $res,
-            file_get_contents($fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name, time())
+            file_get_contents($structureDefinition->path, time())
         );
 
         // Did we write something?
         if ($tmp > 0) {
 
+            fclose($res);
             return true;
 
         } else {
@@ -212,11 +227,12 @@ class Generator
             // Delete the empty file stub we made
             unlink(
                 $this->createFilePath(
-                    $structureDefinition->namespace .
-                    '\\' . $structureDefinition->name
+                    $structureDefinition->getQualifiedName()
                 ),
                 $res
             );
+
+            fclose($res);
             return false;
         }
     }
@@ -225,14 +241,12 @@ class Generator
      * Will append all needed filters based on the enforcement level stated in the configuration file.
      *
      * @param $res
-     * @param FileDefinition $fileDefinition
-     * @param StructureDefinition $structureDefinition
+     * @param StructureDefinitionInterface $structureDefinition
      * @return bool
      */
     protected function appendFilter(
         & $res,
-        FileDefinition $fileDefinition,
-        StructureDefinition $structureDefinition
+        StructureDefinitionInterface $structureDefinition
     ) {
         // Lets get the enforcement level
         $enforcementConfig = $this->config->getConfig('enforcement');
@@ -248,10 +262,7 @@ class Generator
             $res,
             'SkeletonFilter',
             STREAM_FILTER_WRITE,
-            array(
-                $structureDefinition->functionDefinitions,
-                $fileDefinition->path . DIRECTORY_SEPARATOR . $fileDefinition->name
-            )
+            $structureDefinition
         );
 
         // Now lets register and append the filers if they are mapped to a 1
@@ -261,7 +272,7 @@ class Generator
             // Do we even got any preconditions?
             $filterNeeded = false;
             $iterator = $structureDefinition->functionDefinitions->getIterator();
-            foreach($iterator as $functionDefinition) {
+            foreach ($iterator as $functionDefinition) {
 
                 if ($functionDefinition->getPreconditions()->count() !== 0) {
 
@@ -288,7 +299,7 @@ class Generator
             // Do we even got any postconditions?
             $filterNeeded = false;
             $iterator = $structureDefinition->functionDefinitions->getIterator();
-            foreach($iterator as $functionDefinition) {
+            foreach ($iterator as $functionDefinition) {
 
                 if ($functionDefinition->getPostconditions()->count() !== 0) {
 

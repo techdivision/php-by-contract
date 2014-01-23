@@ -2,8 +2,15 @@
 
 namespace TechDivision\PBC\Interfaces;
 
-interface StructureDefinition
+interface StructureDefinitionInterface
 {
+    /**
+     * Will return the qualified name of a structure
+     *
+     * @return string
+     */
+    public function getQualifiedName();
+
     /**
      * Will return the type of the definition.
      *
@@ -17,13 +24,6 @@ interface StructureDefinition
      * @return array
      */
     public function getDependencies();
-
-    /**
-     * Will finalize a definition by resolving dependencies and inherited/implemented contracts.
-     *
-     * @return bool
-     */
-    public function finalize();
 
     /**
      * Will return true if the structure has (a) parent structure(s).

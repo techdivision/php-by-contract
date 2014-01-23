@@ -182,46 +182,4 @@ class CacheMap extends StructureMap
         }
 
     }
-
-    /**
-     * Will generate the structure map within the specified root path.
-     *
-     * @return  bool
-     */
-    private function generate()
-    {
-        // Get an iterator over all files in the root path
-        $directory = new \RecursiveDirectoryIterator($this->rootPath);
-        $iterator = new \RecursiveIteratorIterator($directory);
-
-        // Lets prepare the patter based on the existance of omitted pathes.
-        if (!empty($this->omittedPathes)) {
-
-            $pattern = '/[^' . str_replace('/', '\/', implode($this->omittedPathes, '|')) . ']\.php$/i';
-
-        } else {
-
-            $pattern = '/^.+\.php$/i';
-        }
-
-        $regex = new \RegexIterator($iterator, $pattern, \RecursiveRegexIterator::GET_MATCH);
-
-        foreach ($regex as $file) {
-
-            $identifier = $this->findIdentifier($file[0]);
-
-            if ($identifier !== false) {
-
-                $this->map[$identifier[1]] = array(
-                    'cTime' => filectime($file[0]),
-                    'identifier' => $identifier[1],
-                    'path' => $file[0],
-                    'type' => $identifier[0]
-                );
-            }
-        }
-
-        // Save for later reuse.
-        $this->save();
-    }
 }

@@ -24,7 +24,7 @@ class StructureDefinitionList extends AbstractTypedList
 
     public function __construct()
     {
-        $this->itemType = 'TechDivision\PBC\Interfaces\StructureDefinition';
+        $this->itemType = 'TechDivision\PBC\Interfaces\StructureDefinitionInterface';
         $this->defaultOffset = 'name';
     }
 }

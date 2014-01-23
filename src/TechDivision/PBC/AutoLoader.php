@@ -90,8 +90,13 @@ class AutoLoader
         // There was no file in our cache dir, so lets hope we know the original path of the file.
         $autoLoaderConfig = $this->config->getConfig('autoloader');
 
+        // If we are loading something of our own library we can skip to composer
+        if (strpos($className, 'TechDivision\PBC') === 0 || strpos($className, 'PHP') === 0 ) {
+
+            return false;
+        }
+
         // We also require the classes of our maps as we do not have proper autoloading in place
-        require_once __DIR__ . DIRECTORY_SEPARATOR . 'StructureMap.php';
         $structureMap = new StructureMap($this->config->getConfig('project-dirs'), $this->config);
         $file = $structureMap->getEntry($className);
 
@@ -126,18 +131,17 @@ class AutoLoader
         // Get a current cache instance if we do not have one already.
         if ($this->cache === null) {
 
-            // We also require the classes of our maps as we do not have proper autoloading in place
-            require_once __DIR__ . DIRECTORY_SEPARATOR . 'CacheMap.php';
-            $this->cache = new CacheMap($cacheConfig['dir'], $this->config);
-        }
-        $this->generator = new Generator($this->cache);
+                // We also require the classes of our maps as we do not have proper autoloading in place
+                $this->cache = new CacheMap($cacheConfig['dir'], $this->config);
+            }
+            $this->generator = new Generator($structureMap, $this->cache);
 
-        // Create the new class definition
-        if ($this->generator->create($file) === true) {
+            // Create the new class definition
+            if ($this->generator->create($file) === true) {
 
-            // Require the new class, it should have been created now
-            $file = $this->generator->getFileName($className);
-            if (is_readable($file) === true) {
+                // Require the new class, it should have been created now
+                $file = $this->generator->getFileName($className);
+                if (is_readable($file) === true) {
 
                 require $file;
                 return true;

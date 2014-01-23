@@ -11,6 +11,8 @@
 
 namespace TechDivision\PBC\Entities\Lists;
 
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'AbstractTypedList.php';
+
 /**
  * @package     TechDivision\PBC
  * @subpackage  Entities
@@ -24,7 +26,7 @@ class TypedListList extends AbstractTypedList
 
     public function __construct()
     {
-        $this->itemType = 'TechDivision\PBC\Interfaces\TypedList';
+        $this->itemType = 'TechDivision\PBC\Interfaces\TypedListInterface';
     }
 
     /**

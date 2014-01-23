@@ -9,12 +9,12 @@
 
 namespace TechDivision\PBC\Entities\Definitions;
 
-use TechDivision\PBC\Interfaces\Definition;
+use TechDivision\PBC\Interfaces\DefinitionInterface;
 
 /**
  * Class AttributeDefinition
  */
-class AttributeDefinition implements Definition
+class AttributeDefinition implements DefinitionInterface
 {
     /**
      * @var string

@@ -19,9 +19,10 @@ class FileParser extends AbstractParser
 {
     /**
      * @param $file
+     * @param bool $getRecursive
      * @return bool|FileDefinition
      */
-    public function getDefinitionFromFile($file)
+    public function getDefinitionFromFile($file, $getRecursive = null)
     {
         // We need and instance first of all
         $fileDefinition = new FileDefinition();
@@ -56,9 +57,9 @@ class FileParser extends AbstractParser
         }
 
         // Still here? Create an instance of this parser.
-        $parser = new $parserName();
+        $parser = new $parserName($this->structureMap, $this->structureDefinitionHierarchy);
 
-        $structureDefinitions = $parser->getDefinitionListFromFile($file, $fileDefinition);
+        $structureDefinitions = $parser->getDefinitionListFromFile($file, $fileDefinition, $getRecursive);
 
         // Did we get the right thing?
         if ($structureDefinitions instanceof StructureDefinitionList) {

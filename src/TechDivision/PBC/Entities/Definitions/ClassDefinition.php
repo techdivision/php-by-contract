@@ -17,17 +17,27 @@ use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Parser\ClassParser;
 use TechDivision\PBC\Parser\InterfaceParser;
 use TechDivision\PBC\Proxies\Cache;
-use TechDivision\PBC\Interfaces\StructureDefinition;
+use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
 
 /**
  * Class ClassDefinition
  */
-class ClassDefinition implements StructureDefinition
+class ClassDefinition implements StructureDefinitionInterface
 {
     /**
      * @var string
      */
+    public $path;
+
+    /**
+     * @var string
+     */
     public $namespace;
+
+    /**
+     * @var array
+     */
+    public $usedNamespaces;
 
     /**
      * @var string
@@ -92,19 +102,51 @@ class ClassDefinition implements StructureDefinition
     /**
      * Default constructor
      */
-    public function __construct()
+    public function __construct(
+        $docBlock = '',
+        $isFinal = false,
+        $isAbstract = false,
+        $name = '',
+        $extends = '',
+        $implements = array(),
+        $constants = array(),
+        $attributeDefinitions = null,
+        $invariantConditions = null,
+        $ancestralInvariants = null,
+        $functionDefinitions = null
+    ) {
+        $this->docBlock = $docBlock;
+        $this->isFinal = $isFinal;
+        $this->isAbstract = $isAbstract;
+        $this->name = $name;
+        $this->extends = $extends;
+        $this->implements = $implements;
+        $this->constants = $constants;
+        $this->attributeDefinitions = is_null(
+            $attributeDefinitions
+        ) ? new AttributeDefinitionList() : $attributeDefinitions;
+        $this->invariantConditions = is_null($invariantConditions) ? new AssertionList() : $invariantConditions;
+        $this->ancestralInvariants = is_null($ancestralInvariants) ? new TypedListList() : $ancestralInvariants;
+        $this->functionDefinitions = is_null(
+            $functionDefinitions
+        ) ? new FunctionDefinitionList() : $functionDefinitions;
+    }
+
+    /**
+     * Will return the qualified name of a structure
+     *
+     * @return string
+     */
+    public function getQualifiedName()
     {
-        $this->docBlock = '';
-        $this->isFinal = false;
-        $this->isAbstract = false;
-        $this->name = '';
-        $this->extends = '';
-        $this->implements = array();
-        $this->constants = array();
-        $this->attributeDefinitions = new AttributeDefinitionList();
-        $this->invariantConditions = new AssertionList();
-        $this->ancestralInvariants = new TypedListList();
-        $this->functionDefinitions = new FunctionDefinitionList();
+        if (empty($this->namespace)) {
+
+            return $this->name;
+
+        } else {
+
+            return $this->namespace . '\\' . $this->name;
+        }
     }
 
     /**
@@ -144,99 +186,13 @@ class ClassDefinition implements StructureDefinition
     public function getDependencies()
     {
         $result = $this->implements;
-        $result[] = $this->extends;
+
+        if ($this->extends !== '') {
+
+            $result[] = $this->extends;
+        }
 
         return $result;
-    }
-
-    /**
-     * Finalize this class definition
-     *
-     * Will make the final steps to complete the class definition.
-     * Mostly this consists of getting the ancestral invariants and
-     * method pre- and postconditions.
-     *
-     * @param   boolean
-     * @return  boolean
-     */
-    public function finalize()
-    {
-        // We have to get all ancestral classes and interfaces
-        $ancestors = array();
-        if (!empty($this->implements)) {
-
-            $ancestors['interface'] = $this->implements;
-        }
-        if (!empty($this->extends)) {
-
-            $ancestors['class'][] = $this->extends;
-        }
-
-        // Is there anything left
-        if (empty($ancestors)) {
-
-            return true;
-        }
-
-        // Now finalize them recursively using the needed parsers
-        $parsers = array('interface' => new InterfaceParser(), 'class' => new ClassParser());
-        $config = Config::getInstance();
-        $cache = new StructureMap($config->getConfig('project-dirs'), $config);
-
-        $ancestorDefinitions = array();
-        foreach ($ancestors as $key => $ancestorList) {
-
-            // If we don't have a parser for this data we can skip that turn
-            if (!isset($parsers[$key])) {
-
-                continue;
-
-            } else {
-
-                $parser = $parsers[$key];
-            }
-
-            foreach ($ancestorList as $ancestor) {
-
-                // Do we know this file?
-                $file = $cache->getEntry($ancestor);
-                if ($file !== false) {
-
-                    $ancestorDefinitions[$key] = $parser->getDefinitionFromFile($file->getPath(), $ancestor);
-
-                    if (!$ancestorDefinitions[$key] instanceof StructureDefinition) {
-
-                        unset($ancestorDefinitions[$key]);
-                        continue;
-                    }
-
-                    $ancestorDefinitions[$key]->finalize();
-
-                } else {
-                    // Maybe the class is in the same namespace as we are?
-
-                    $file = $cache->getEntry($this->namespace . '\\' . $ancestor);
-                    if ($file !== false) {
-
-                        $ancestorDefinitions[$key] = $parser->getDefinitionFromFile($file->getPath(), $ancestor);
-
-                        if (!$ancestorDefinitions[$key] instanceof StructureDefinition) {
-
-                            unset($ancestorDefinitions[$key]);
-                            continue;
-                        }
-
-                        $ancestorDefinitions[$key]->finalize();
-
-                    }
-                }
-            }
-        }
-
-        // Get all the ancestral method pre- and postconditions
-        $this->getAncestralConditions($ancestorDefinitions);
-
-        return true;
     }
 
     /**
@@ -313,7 +269,7 @@ class ClassDefinition implements StructureDefinition
 
             if (isset($files[$this->extends])) {
 
-                $parent = $classParser->getDefinitionFromFile($files[$this->extends]['path'], $this->extends);
+                $parent = $classParser->getDefinition($files[$this->extends]['path'], $this->extends);
 
                 // Make the parent get their parent's invariant contracts
                 $isChild = $parent->getAncestralInvariant($ancestorDefinitions);

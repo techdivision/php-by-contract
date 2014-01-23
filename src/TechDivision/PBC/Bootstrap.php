@@ -26,4 +26,3 @@ use TechDivision\PBC\AutoLoader;
 // We have to register our autoLoader to put our proxies in place
 $autoLoader = new AutoLoader();
 $autoLoader->register();
-

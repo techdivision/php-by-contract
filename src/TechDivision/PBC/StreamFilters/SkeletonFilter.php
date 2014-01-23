@@ -37,6 +37,11 @@ class SkeletonFilter extends AbstractFilter
     public $params;
 
     /**
+     * @var array
+     */
+    private $neededActions = array('injectMagicConstants' => 1);
+
+    /**
      * @return int
      */
     public function getFilterOrder()
@@ -64,8 +69,8 @@ class SkeletonFilter extends AbstractFilter
      */
     public function filter($in, $out, &$consumed, $closing)
     {
-        $path = $this->params[1];
-        $functionDefinitions = $this->params[0];
+        $path = $this->params->path;
+        $functionDefinitions = $this->params->functionDefinitions;
         // Get our buckets from the stream
         $functionHook = '';
         $firstIteration = true;
@@ -108,7 +113,7 @@ class SkeletonFilter extends AbstractFilter
                             }
 
                             // If we got the opening bracket we can break
-                            if ($tokens[$j] === '{') {
+                            if ($tokens[$j] === '{' || $tokens[$j][0] === T_CURLY_OPEN) {
 
                                 break;
                             }
@@ -154,6 +159,9 @@ class SkeletonFilter extends AbstractFilter
 
                             continue;
                         }
+
+
+                        //  $this->injectFunctionCode($bucket->data, $functionDefinition);
 
                         // We have to set the visibility to private to avoid 
                         // issues with missing child implementations
@@ -255,22 +263,28 @@ class SkeletonFilter extends AbstractFilter
         $dir = dirname($file);
         $functionHook = PBC_FUNCTION_HOOK_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE;
 
+        if ($this->neededActions[__FUNCTION__] <= 0 || strpos($bucketData, $functionHook) === false) {
+
+            return false;
+        }
+
         // Build up the needed code for __DIR__ substitution
         $code = '/**
-     * @const   string
-     */
-    const ' . PBC_DIR_SUBSTITUTE . ' = "' . $dir . '";';
+             * @const   string
+             */
+            const ' . PBC_DIR_SUBSTITUTE . ' = "' . $dir . '";';
 
         // Build up the needed code for __FILE__ substitution
         $code .= '/**
-     * @const   string
-     */
-    const ' . PBC_FILE_SUBSTITUTE . ' = "' . $file . '";';
+             * @const   string
+             */
+            const ' . PBC_FILE_SUBSTITUTE . ' = "' . $file . '";';
 
         // Inject the code
         $bucketData = str_replace($functionHook, $functionHook . $code, $bucketData);
 
         // Still here? Success then.
+        $this->neededActions[__FUNCTION__] --;
         return true;
     }
 
@@ -289,7 +303,8 @@ class SkeletonFilter extends AbstractFilter
         }
 
         // Build up the header
-        $code = $functionDefinition->getHeader('definition');
+        $code = $functionDefinition->docBlock;
+        $code .= $functionDefinition->getHeader('definition');
 
         // Now just place all the placeholder for other filters to come
         $code .= '{' . PBC_CONTRACT_CONTEXT . ' = \TechDivision\PBC\ContractContext::open();';
