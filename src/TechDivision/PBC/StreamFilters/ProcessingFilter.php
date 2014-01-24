@@ -123,6 +123,12 @@ class ProcessingFilter extends AbstractFilter
         // Code defining the place the error happened
         $place = '" . __METHOD__ . "';
 
+        // If we are in an invariant we should tell them about the method we got called from
+        if ($for === 'invariant') {
+
+            $place = '$callingMethod';
+        }
+
         // What kind of reaction should we create?
         switch ($config['processing']) {
 

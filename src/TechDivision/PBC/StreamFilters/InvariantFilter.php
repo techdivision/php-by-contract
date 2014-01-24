@@ -402,7 +402,7 @@ class InvariantFilter extends AbstractFilter
     private function injectInvariantCall(& $bucketData)
     {
         $code = 'if (' . PBC_CONTRACT_CONTEXT . ' === true) {
-            $this->' . PBC_CLASS_INVARIANT_NAME . '();}';
+            $this->' . PBC_CLASS_INVARIANT_NAME . '(__METHOD__);}';
 
         // Still here? Then inject the clone statement to preserve an instance of the object prior to our call.
         $bucketData = str_replace(
@@ -421,7 +421,7 @@ class InvariantFilter extends AbstractFilter
      */
     private function generateFunctionCode(TypedListList $assertionLists)
     {
-        $code = 'protected function ' . PBC_CLASS_INVARIANT_NAME . '() {';
+        $code = 'protected function ' . PBC_CLASS_INVARIANT_NAME . '($callingMethod) {';
 
         $invariantIterator = $assertionLists->getIterator();
         for ($i = 0; $i < $invariantIterator->count(); $i++) {
