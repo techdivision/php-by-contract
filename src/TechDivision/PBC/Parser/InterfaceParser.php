@@ -5,16 +5,14 @@ namespace TechDivision\PBC\Parser;
 use TechDivision\PBC\Entities\Definitions\InterfaceDefinition;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
-use TechDivision\PBC\Interfaces\StructureParserInterface;
 
 class InterfaceParser extends AbstractStructureParser
 {
 
     /**
-     * @param $file
      * @param null $interfaceName
      * @param bool $getRecursive
-     * @return bool|FileDefinition
+     * @return bool|mixed|FileDefinition
      */
     public function getDefinition($interfaceName = null, $getRecursive = false)
     {

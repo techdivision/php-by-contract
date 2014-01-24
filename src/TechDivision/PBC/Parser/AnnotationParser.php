@@ -189,7 +189,6 @@ class AnnotationParser extends AbstractParser
                 if ($usedAnnotation === '@return') {
 
                     $variable = PBC_KEYWORD_RESULT;
-
                 }
 
                 // Now we have to check what we got
@@ -409,7 +408,13 @@ class AnnotationParser extends AbstractParser
         $validTypes = array_flip($this->validSimpleTypes);
         foreach ($explodedString as $stringPiece) {
 
-            // Check if we got a variable
+            // If we got a variable before any type we do not have proper doc syntax
+            if (strpos($stringPiece, '$') !== false) {
+
+                return false;
+            }
+
+            // Check if we got a type we recognize
             $stringPiece = strtolower(trim($stringPiece));
             if (isset($validTypes[$stringPiece])) {
 

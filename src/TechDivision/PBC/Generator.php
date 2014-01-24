@@ -11,6 +11,7 @@ namespace TechDivision\PBC;
 
 use TechDivision\PBC\CacheMap;
 use TechDivision\PBC\StructureMap;
+use TechDivision\PBC\Exceptions\GeneratorException;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Entities\Definitions\InterfaceDefinition;

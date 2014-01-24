@@ -185,8 +185,16 @@ class ClassDefinition implements StructureDefinitionInterface
      */
     public function getDependencies()
     {
+        // Get our interfaces
         $result = $this->implements;
 
+        // We got an error that this is nor array, weird but build up a final frontier here
+        if (!is_array($result)) {
+
+            $result = array($result);
+        }
+
+        // Add our parent class (if any)
         if ($this->extends !== '') {
 
             $result[] = $this->extends;

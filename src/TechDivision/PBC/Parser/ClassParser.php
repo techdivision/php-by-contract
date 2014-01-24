@@ -19,6 +19,7 @@ use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Interfaces\StructureParserInterface;
+use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
 use TechDivision\PBC\Exceptions\ParserException;
 
 /**
@@ -63,10 +64,16 @@ class ClassParser extends AbstractStructureParser
     /**
      * @param null $className
      * @param bool $getRecursive
-     * @return bool|StructureDefinition
+     * @return bool|StructureDefinitionInterface
      */
     public function getDefinition($className = null, $getRecursive = true)
     {
+        // Maybe we already got this structure?
+        if ($this->structureDefinitionHierarchy->entryExists($className)) {
+
+            return $this->structureDefinitionHierarchy->getEntry($className);
+        }
+
         // First of all we need to get the class tokens
         $tokens = $this->getStructureTokens(T_CLASS);
 
@@ -80,8 +87,8 @@ class ClassParser extends AbstractStructureParser
             return false;
 
         } elseif (count($tokens) === 1) {
-            // We got what we came for
 
+            // We got what we came for
             return $this->getDefinitionFromTokens($tokens[0], $getRecursive);
 
         } elseif (is_string($className) && count($tokens) > 1) {
@@ -113,7 +120,7 @@ class ClassParser extends AbstractStructureParser
      * @access private
      * @param $tokens
      * @param bool $getRecursive
-     * @return StructureDefinition
+     * @return StructureDefinitionInterface
      */
     private function getDefinitionFromTokens($tokens, $getRecursive = true)
     {
@@ -127,12 +134,6 @@ class ClassParser extends AbstractStructureParser
         $classDefinition->namespace = $this->getNamespace();
         $classDefinition->name = $this->getName($tokens);
         $classDefinition->usedNamespaces = $this->getUsedNamespaces();
-
-        // Maybe we already got this structure?
-        if ($this->structureDefinitionHierarchy->entryExists($classDefinition->getQualifiedName())) {
-
-            return $this->structureDefinitionHierarchy->getEntry($classDefinition->getQualifiedName());
-        }
 
         // For our next step we would like to get the doc comment (if any)
         $classDefinition->docBlock = $this->getDocBlock($tokens, T_CLASS);
@@ -204,50 +205,30 @@ class ClassParser extends AbstractStructureParser
             $dependencies = $classDefinition->getDependencies();
             foreach ($dependencies as $dependency) {
 
-                // frechly set the depency definition to avoid side effects
+                // freshly set the dependency definition to avoid side effects
                 $dependencyDefinition = null;
 
-                // Maybe we already got this structure?
-                if ($this->structureDefinitionHierarchy->entryExists($classDefinition->getQualifiedName())) {
+                $fileEntry = $this->structureMap->getEntry($dependency);
+                if (!$fileEntry instanceof Structure) {
 
-                    $dependencyDefinition = $this->structureDefinitionHierarchy->getEntry(
-                        $classDefinition->getQualifiedName()
-                    );
-
-                } else {
-
-                    $fileEntry = $this->structureMap->getEntry($dependency);
-                    if (!$fileEntry instanceof Structure) {
-
-                        // Continue, don't fail as we might have dependencies which are not under PBC surveilance
-                        continue;
-                    }
-
-                    // If we do not have a class we need a different parser for this dependency
-                    if ($fileEntry->getType() !== 'class') {
-
-                        // Get the needed parser
-                        $structureParserFactory = new StructureParserFactory();
-                        $parser = $structureParserFactory->getInstance(
-                            $fileEntry->getType(),
-                            $fileEntry->getPath(),
-                            $this->structureMap,
-                            $this->structureDefinitionHierarchy
-                        );
-
-                    } else {
-
-                        // If we have a class we can use this parser
-                        $parser = $this;
-                    }
-
-                    // Get the definition
-                    $dependencyDefinition = $parser->getDefinition(
-                        $fileEntry->getPath(),
-                        $dependency,
-                        $getRecursive
-                    );
+                    // Continue, don't fail as we might have dependencies which are not under PBC surveillance
+                    continue;
                 }
+
+                // Get the needed parser
+                $structureParserFactory = new StructureParserFactory();
+                $parser = $structureParserFactory->getInstance(
+                    $fileEntry->getType(),
+                    $fileEntry->getPath(),
+                    $this->structureMap,
+                    $this->structureDefinitionHierarchy
+                );
+
+                // Get the definition
+                $dependencyDefinition = $parser->getDefinition(
+                    $dependency,
+                    $getRecursive
+                );
 
                 // Only classes and traits have invariants
                 if ($fileEntry->getType() === 'class') {
@@ -257,7 +238,7 @@ class ClassParser extends AbstractStructureParser
 
                 // Iterate over all dependencies and combine method conditions if method match
                 $functionIterator = $classDefinition->functionDefinitions->getIterator();
-                foreach($functionIterator as $function) {
+                foreach ($functionIterator as $function) {
 
                     // Get the ancestral function of the one we currently have a look at.
                     // If we got it we have to get their conditions

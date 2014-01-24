@@ -145,7 +145,16 @@ class InterfaceDefinition implements StructureDefinitionInterface
      */
     public function getDependencies()
     {
-        return $this->extends;
+        // Get our interfaces
+        $result = $this->extends;
+
+        // We got an error that this is nor array, weird but build up a final frontier here
+        if (!is_array($result)) {
+
+            $result = array($result);
+        }
+
+        return $result;
     }
 
     /**
