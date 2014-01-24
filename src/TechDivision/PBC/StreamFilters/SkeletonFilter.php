@@ -40,7 +40,7 @@ class SkeletonFilter extends AbstractFilter
     /**
      * @var array
      */
-    private $neededActions = array('injectMagicConstants' => 1);
+    private $neededActions = array('injectMagicConstants' => 1, 'injectOriginalPathHint' => 1);
 
     /**
      * @return int
@@ -80,13 +80,8 @@ class SkeletonFilter extends AbstractFilter
             // Lets cave in the original filepath and the modification time
             if ($firstIteration === true) {
 
-                $bucket->data = str_replace(
-                    '<?php',
-                    '<?php /* ' . PBC_ORIGINAL_PATH_HINT . $path . '#' . filemtime(
-                        $path
-                    ) . PBC_ORIGINAL_PATH_HINT . ' */',
-                    $bucket->data
-                );
+                $this->injectOriginalPathHint($bucket->data, $path);
+
                 $firstIteration = false;
             }
 
@@ -248,6 +243,36 @@ class SkeletonFilter extends AbstractFilter
         );
 
         // Still here? Success then.
+        return true;
+    }
+
+    /**
+     * Will inject the code to declare our local constants PBC_FILE_SUBSTITUTE and PBC_DIR_SUBSTITUTE
+     * which are used for substitution of __FILE__ and __DIR__.
+     *
+     * @param $bucketData
+     * @param string $file
+     * @return bool
+     */
+    private function injectOriginalPathHint(& $bucketData, $file)
+    {
+        // Do need to do this?
+        if ($this->neededActions[__FUNCTION__] <= 0 || strpos($bucketData, '<?php') === false) {
+
+            return false;
+        }
+
+        // Build up the needed code for our hint
+        $code = ' /* ' . PBC_ORIGINAL_PATH_HINT . $file . '#' . filemtime(
+                $file
+            ) . PBC_ORIGINAL_PATH_HINT . ' */';
+
+        // Inject the code
+        $index = strpos($bucketData, '<?php');
+        $bucketData = substr_replace($bucketData, $code, $index + 5, 0);
+
+        // Still here? Success then.
+        $this->neededActions[__FUNCTION__]--;
         return true;
     }
 

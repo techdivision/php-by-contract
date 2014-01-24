@@ -192,9 +192,6 @@ class ClassParser extends AbstractStructureParser
         // Get all class constants
         $classDefinition->constants = $this->getConstants($tokens);
 
-        // Lets get the attributes the class might have
-        $classDefinition->attributeDefinitions = $this->getAttributes($tokens, $classDefinition->invariantConditions);
-
         // Only thing still missing are the methods, so ramp up our FunctionParser
         $functionParser = new FunctionParser($this->structureMap, $this->structureDefinitionHierarchy);
         $classDefinition->functionDefinitions = $functionParser->getDefinitionListFromTokens($tokens, $getRecursive);
@@ -265,6 +262,9 @@ class ClassParser extends AbstractStructureParser
                 $this->structureDefinitionHierarchy->insert($dependencyDefinition);
             }
         }
+
+        // Lets get the attributes the class might have
+        $classDefinition->attributeDefinitions = $this->getAttributes($tokens, $classDefinition->getInvariants());
 
         // Before exiting we will add the entry to the current structure definition hierarchy
         $this->structureDefinitionHierarchy->insert($classDefinition);
@@ -373,10 +373,10 @@ class ClassParser extends AbstractStructureParser
      *
      * @access private
      * @param array $tokens
-     * @param AssertionList $invariants
+     * @param TypedListList $invariants
      * @return AttributeDefinitionList
      */
-    private function getAttributes(array $tokens, AssertionList $invariants = null)
+    private function getAttributes(array $tokens, TypedListList $invariants = null)
     {
         // Check the tokens
         $attributes = new AttributeDefinitionList();
@@ -432,28 +432,39 @@ class ClassParser extends AbstractStructureParser
         if ($invariants !== null) {
 
             // Lets iterate over all the attributes and check them against the invariants we got
-            $invariantIterator = $invariants->getIterator();
-            $invariantCount = $invariantIterator->count();
+            $listIterator = $invariants->getIterator();
+            $listCount = $listIterator->count();
             $attributeIterator = $attributes->getIterator();
-            for ($i = 0; $i < $attributeIterator->count(); $i++) {
+            $attributeCount = $attributeIterator->count();
+            for ($i = 0; $i < $attributeCount; $i++) {
 
                 // Do we have any of these attributes in our invariants?
-                $invariantIterator = $invariants->getIterator();
-                for ($j = 0; $j < $invariantCount; $j++) {
+                $listIterator = $invariants->getIterator();
+                for ($j = 0; $j < $listCount; $j++) {
 
-                    if (strpos(
-                            $invariantIterator->current()->getString(),
-                            '$this->' . ltrim($attributeIterator->current()->name, '$')
-                        ) !== false
-                    ) {
+                    // Did we get anything useful?
+                    if ($listIterator->current() === null) {
 
-                        // Tell them we were mentioned and persist it
-                        $attributeIterator->current()->inInvariant = true;
+                        continue;
                     }
+                    $invariantIterator = $listIterator->current()->getIterator();
+                    $invariantCount = $invariantIterator->count();
+                    for ($k = 0; $k < $invariantCount; $k++) {
 
-                    $invariantIterator->next();
+                        if (strpos(
+                                $invariantIterator->current()->getString(),
+                                '$this->' . ltrim($attributeIterator->current()->name, '$')
+                            ) !== false
+                        ) {
+
+                            // Tell them we were mentioned and persist it
+                            $attributeIterator->current()->inInvariant = true;
+                        }
+
+                        $invariantIterator->next();
+                    }
+                    $listIterator->next();
                 }
-
                 $attributeIterator->next();
             }
         }
