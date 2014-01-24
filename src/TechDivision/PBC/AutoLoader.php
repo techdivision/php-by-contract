@@ -50,6 +50,21 @@ class AutoLoader
      */
     public function loadClass($className)
     {
+        // There was no file in our cache dir, so lets hope we know the original path of the file.
+        $autoLoaderConfig = $this->config->getConfig('autoloader');
+
+        // Might the class be a omitted one? If so we can require the original.
+        if (isset($autoLoaderConfig['omit'])) {
+
+            foreach ($autoLoaderConfig['omit'] as $omitted) {
+
+                // If our class name begins with the omitted part e.g. it's namespace
+                if (strpos($className, $omitted) === 0) {
+
+                    return false;
+                }
+            }
+        }
 
         // Do we have the file in our cache dir? If we are in development mode we have to ignore this.
         $cacheConfig = $this->config->getConfig('cache');
@@ -87,9 +102,6 @@ class AutoLoader
             }
         }
 
-        // There was no file in our cache dir, so lets hope we know the original path of the file.
-        $autoLoaderConfig = $this->config->getConfig('autoloader');
-
         // If we are loading something of our own library we can skip to composer
         if (strpos($className, 'TechDivision\PBC') === 0 || strpos($className, 'PHP') === 0 ) {
 
@@ -104,20 +116,6 @@ class AutoLoader
         if ($file === false) {
 
             return false;
-        }
-
-        // Might the class be a omitted one? If so we can require the original.
-        if (isset($autoLoaderConfig['omit'])) {
-
-            foreach ($autoLoaderConfig['omit'] as $omitted) {
-
-                // If our class name begins with the omitted part e.g. it's namespace
-                if (strpos($className, $omitted) === 0) {
-
-                    require $file->getPath();
-                    return true;
-                }
-            }
         }
 
         // We are still here, so we know the class and it is not omitted. Does it contain contracts then?
