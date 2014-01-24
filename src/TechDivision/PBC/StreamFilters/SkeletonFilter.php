@@ -13,6 +13,7 @@
 namespace TechDivision\PBC\StreamFilters;
 
 use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
+use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Exceptions\GeneratorException;
 
 /**
@@ -284,13 +285,13 @@ class SkeletonFilter extends AbstractFilter
         $bucketData = str_replace($functionHook, $functionHook . $code, $bucketData);
 
         // Still here? Success then.
-        $this->neededActions[__FUNCTION__] --;
+        $this->neededActions[__FUNCTION__]--;
         return true;
     }
 
     /**
-     * @param   FunctionDefinition $functionDefinition
-     * @return  string
+     * @param FunctionDefinition $functionDefinition
+     * @return string
      */
     private function generateFunctionCode(FunctionDefinition $functionDefinition)
     {
@@ -309,8 +310,10 @@ class SkeletonFilter extends AbstractFilter
         // Now just place all the placeholder for other filters to come
         $code .= '{' . PBC_CONTRACT_CONTEXT . ' = \TechDivision\PBC\ContractContext::open();';
 
-        // Invariant is not needed in private functions
-        if ($functionDefinition->visibility !== 'private && !' . $functionDefinition->isStatic) {
+        // Invariant is not needed in private or static functions.
+        // Also make sure that there is none in front of the constructor check
+        if ($functionDefinition->visibility !== 'private' &&
+            !$functionDefinition->isStatic && $functionDefinition->name !== '__construct') {
 
             $code .= PBC_INVARIANT_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE;
         }
@@ -340,8 +343,8 @@ class SkeletonFilter extends AbstractFilter
         // No just place all the other placeholder for other filters to come
         $code .= PBC_POSTCONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
 
-        // Invariant is not needed in private functions
-        if ($functionDefinition->visibility !== 'private && !' . $functionDefinition->isStatic) {
+        // Invariant is not needed in private or static functions
+        if ($functionDefinition->visibility !== 'private' && !$functionDefinition->isStatic) {
 
             $code .= PBC_INVARIANT_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE;
         }
