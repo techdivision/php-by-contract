@@ -51,4 +51,12 @@ class MethodTestClass
     {
         return __FILE__;
     }
+
+    public function iHaveALambdaFunction()
+    {
+        // Process can not handle env values that are arrays
+        $test = array_filter(array(array(), 'test'), function ($value) { if (!is_array($value)) { return true; } });
+
+        return $test;
+    }
 } 

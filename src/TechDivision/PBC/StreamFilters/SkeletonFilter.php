@@ -137,7 +137,7 @@ class SkeletonFilter extends AbstractFilter
 
                 }
                 // Did we find a function? If so check if we know that thing and insert the code of its preconditions.
-                if (is_array($tokens[$i]) && $tokens[$i][0] === T_FUNCTION) {
+                if (is_array($tokens[$i]) && $tokens[$i][0] === T_FUNCTION && @$tokens[$i + 2][0] === T_STRING) {
 
                     // Get the name of the function
                     $functionName = $tokens[$i + 2][1];
