@@ -118,8 +118,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
     {
         // We have to load the config for regular expressions in the project dirs
         $config = Config::getInstance();
-        $config = $config->load(__DIR__ . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'RegexTest' .
-            DIRECTORY_SEPARATOR . 'regextest.conf.json');
+        $config = $config->load(
+            __DIR__ . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'RegexTest' .
+            DIRECTORY_SEPARATOR . 'regextest.conf.json'
+        );
 
         $e = null;
         try {

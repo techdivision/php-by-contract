@@ -15,7 +15,7 @@ class MethodTest extends PHPUnit_Framework_TestCase
      */
     public function testMagicMethod()
     {
-        $this->magicMethodTestClass = 
+        $this->magicMethodTestClass =
             new \TechDivision\Tests\Method\MagicMethodTestClass();
     }
 
@@ -48,6 +48,9 @@ class MethodTest extends PHPUnit_Framework_TestCase
 
         // Did we get the right $e and right file?
         $this->assertNull($e);
-        $this->assertEquals($file, __DIR__ . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'MethodTestClass.php');
+        $this->assertEquals(
+            $file,
+            __DIR__ . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'MethodTestClass.php'
+        );
     }
 }
