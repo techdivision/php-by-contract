@@ -44,8 +44,9 @@ class Config implements ConfigInterface
     }
 
     /**
+     * @param null $configFile
      * @param string $context
-     * @return Config
+     * @return mixed
      */
     public static function getInstance($context = '')
     {
@@ -97,29 +98,44 @@ class Config implements ConfigInterface
         }
 
         // We will normalize the pathes we got and check if they are valid
-        $tmp = $this->normalizePath($configCandidate['cache']['dir']);
+        if (isset($configCandidate['cache']['dir'])) {
+            $tmp = $this->normalizePath($configCandidate['cache']['dir']);
 
-        if (is_writable($tmp)) {
+            if (is_writable($tmp)) {
 
-            $configCandidate['cache']['dir'] = $tmp;
-
-        } else {
-
-            return false;
-        }
-
-        // Same for project-dirs
-        foreach ($configCandidate['project-dirs'] as $key => $projectDir) {
-
-            $tmp = $this->normalizePath($projectDir);
-
-            if (is_readable($tmp)) {
-
-                $configCandidate['project-dirs'][$key] = $tmp;
+                $configCandidate['cache']['dir'] = $tmp;
 
             } else {
 
                 return false;
+            }
+        }
+
+        // Same for project-dirs
+        if (isset($configCandidate['project-dirs'])) {
+            foreach ($configCandidate['project-dirs'] as $key => $projectDir) {
+
+                $tmp = $this->normalizePath($projectDir);
+
+                if (is_readable($tmp)) {
+
+                    $configCandidate['project-dirs'][$key] = $tmp;
+
+                } elseif (preg_match('/\[|\]|\*|\+|\.|\(|\)|\?|\^/', $tmp)) {
+
+                    // Kill the original path entry so the iterators wont give us a bad time
+                    unset($configCandidate['project-dirs'][$key]);
+
+                    // We will open up the paths with glob
+                    foreach (glob($tmp, GLOB_ERR) as $regexlessPath) {
+
+                        $configCandidate['project-dirs'][] = $regexlessPath;
+                    }
+
+                } else {
+
+                    return false;
+                }
             }
         }
 
