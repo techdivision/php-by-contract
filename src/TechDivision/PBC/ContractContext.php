@@ -37,9 +37,10 @@ class ContractContext
         if (self::$ongoingContract === false) {
 
             self::$ongoingContract = true;
+
             return true;
 
-        }   else {
+        } else {
 
             return false;
         }
@@ -67,11 +68,12 @@ class ContractContext
         if (self::$ongoingContract === true) {
 
             self::$ongoingContract = false;
+
             return true;
 
-        }   else {
+        } else {
 
             return false;
         }
     }
-} 
+}

@@ -70,6 +70,7 @@ class PreconditionFilter extends AbstractFilter
      * @param $out
      * @param $consumed
      * @param $closing
+     *
      * @return int|void
      */
     public function filter($in, $out, &$consumed, $closing)
@@ -127,6 +128,7 @@ class PreconditionFilter extends AbstractFilter
 
     /**
      * @param TypedListList $assertionLists
+     *
      * @return string
      */
     private function generateCode(TypedListList $assertionLists)

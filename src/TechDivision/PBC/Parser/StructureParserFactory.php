@@ -26,6 +26,7 @@ class StructureParserFactory
 {
     /**
      * @param $type
+     *
      * @return string
      */
     public function getClassName($type)
@@ -34,10 +35,11 @@ class StructureParserFactory
     }
 
     /**
-     * @param $type
-     * @param $file
-     * @param StructureMap $structureMap
+     * @param                              $type
+     * @param                              $file
+     * @param StructureMap                 $structureMap
      * @param StructureDefinitionHierarchy $structureDefinitionHierarchy
+     *
      * @return mixed
      */
     public function getInstance(
@@ -47,11 +49,13 @@ class StructureParserFactory
         StructureDefinitionHierarchy & $structureDefinitionHierarchy
     ) {
         $name = $this->getName($type);
+
         return new $name($file, $structureMap, $structureDefinitionHierarchy);
     }
 
     /**
      * @param $type
+     *
      * @return string
      * @throws ParserException
      */
@@ -81,4 +85,4 @@ class StructureParserFactory
             return __NAMESPACE__ . '\\' . $name;
         }
     }
-} 
+}

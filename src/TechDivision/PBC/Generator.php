@@ -50,7 +50,7 @@ class Generator
 
     /**
      * @param StructureMap $structureMap
-     * @param CacheMap $cache
+     * @param CacheMap     $cache
      */
     public function __construct(StructureMap $structureMap, CacheMap $cache)
     {
@@ -66,6 +66,7 @@ class Generator
 
     /**
      * @param $className
+     *
      * @return bool
      */
     public function update($className)
@@ -75,7 +76,8 @@ class Generator
 
     /**
      * @param Structure $mapEntry
-     * @param bool $update
+     * @param bool      $update
+     *
      * @return bool
      * @throws GeneratorException
      */
@@ -126,6 +128,7 @@ class Generator
 
     /**
      * @param $className
+     *
      * @return string
      */
     private function createFilePath($className)
@@ -139,8 +142,9 @@ class Generator
     }
 
     /**
-     * @param $targetFileName
+     * @param                              $targetFileName
      * @param StructureDefinitionInterface $structureDefinition
+     *
      * @return mixed
      * @throws \InvalidArgumentException
      */
@@ -168,8 +172,8 @@ class Generator
      * We will just copy the file here until the autoloader got refactored.
      * TODO remove when autoloader is able to recoginize and skip interfaces
      *
-     * @param $targetFileName
-     * @param FileDefinition $fileDefinition
+     * @param                     $targetFileName
+     * @param FileDefinition      $fileDefinition
      * @param InterfaceDefinition $structureDefinition
      */
     private function createFileFromInterfaceDefinition(
@@ -193,8 +197,9 @@ class Generator
     }
 
     /**
-     * @param $targetFileName
+     * @param                 $targetFileName
      * @param ClassDefinition $structureDefinition
+     *
      * @return bool
      */
     private function createFileFromClassDefinition(
@@ -221,6 +226,7 @@ class Generator
         if ($tmp > 0) {
 
             fclose($res);
+
             return true;
 
         } else {
@@ -234,6 +240,7 @@ class Generator
             );
 
             fclose($res);
+
             return false;
         }
     }
@@ -241,8 +248,9 @@ class Generator
     /**
      * Will append all needed filters based on the enforcement level stated in the configuration file.
      *
-     * @param $res
+     * @param                              $res
      * @param StructureDefinitionInterface $structureDefinition
+     *
      * @return bool
      */
     protected function appendFilter(
@@ -338,253 +346,6 @@ class Generator
 
         // We arrived here without any thrown exceptions, return true
         return true;
-    }
-
-    /**
-     * @param $for
-     * @param $message
-     * @return string
-     */
-    private function generateReactionCode($for, $message)
-    {
-        $code = '';
-
-        // What kind of reaction should we create?
-        switch ($this->config['processing']) {
-
-            case 'exception':
-
-                // What kind of exception do we need?
-                switch ($for) {
-
-                    case 'precondition':
-
-                        $exception = 'BrokenPreconditionException';
-                        break;
-
-                    case 'postcondition':
-
-                        $exception = 'BrokenPostconditionException';
-                        break;
-
-                    case 'invariant':
-
-                        $exception = 'BrokenInvariantException';
-                        break;
-
-                    default:
-
-                        $exception = '\Exception';
-                        break;
-                }
-                // Create the code
-                $code .= '$this->' . PBC_CONTRACT_DEPTH . '--;
-                throw new ' . $exception . '(\'' . $message . '\');';
-
-                break;
-
-            case 'logging':
-
-                // Create the code
-                $code .= '$logger = new \\' . $this->config['logger'] . '();
-                $logger->error(\'Broken ' . $for . ' with message: ' . $message . ' in \' . __METHOD__);';
-                break;
-
-            default:
-
-                break;
-        }
-
-        return $code;
-    }
-
-    /**
-     * @param TypedListList $conditionLists
-     * @param $methodName
-     * @param $type
-     * @return string
-     */
-    private function generateAroundAdviceCode(TypedListList $conditionLists, $methodName, $type)
-    {
-        // What kind of types do we handle?
-        $allowedTypes = array_flip(array('precondition', 'postcondition', 'invariant'));
-
-        if (!isset($allowedTypes[$type])) {
-
-            return '';
-        }
-
-        // We only use contracting if we're not inside another contract already
-        $code = 'if ($this->' . PBC_CONTRACT_DEPTH . ' < 2) {';
-
-        // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
-        if ($type === 'precondition') {
-
-            $code .= '$passedOne = false;
-                $failedAssertion = array();';
-
-        }
-
-        // We need a counter to check how much conditions we got
-        $conditionCounter = 0;
-        $listIterator = $conditionLists->getIterator();
-        for ($i = 0; $i < $listIterator->count(); $i++) {
-
-            // Create the inner loop for the different assertions
-            $assertionIterator = $listIterator->current()->getIterator();
-
-            // Only act if we got actual entries
-            if ($assertionIterator->count() === 0) {
-
-                // increment the outer loop
-                $listIterator->next();
-                continue;
-            }
-
-            $codeFragment = array();
-            for ($j = 0; $j < $assertionIterator->count(); $j++) {
-
-                $codeFragment[] = $assertionIterator->current()->getString();
-
-                $assertionIterator->next();
-            }
-
-            // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
-            $conditionCounter++;
-            if ($type === 'precondition') {
-
-                $code .= 'if ($passedOne === false && !((';
-                $code .= implode(') && (', $codeFragment) . '))){';
-                $code .= '$failedAssertion[] = \'(' . str_replace('\'', '"', implode(') && (', $codeFragment)) . ')\';';
-                $code .= '} else {$passedOne = true;}';
-
-            } else {
-
-                $code .= 'if (!((';
-                $code .= implode(') && (', $codeFragment) . '))){';
-                $code .= $this->generateReactionCode(
-                    $type,
-                    'Assertion (' . str_replace('\'', '"', implode(') && (', $codeFragment)) .
-                    ') failed'
-                );
-                $code .= '}';
-            }
-
-            // increment the outer loop
-            $listIterator->next();
-        }
-
-        // Preconditions need or-ed conditions so we make sure only one conditionlist gets checked
-        if ($type === 'precondition' && $conditionCounter > 0) {
-
-            $code .= 'if ($passedOne === false){';
-            $code .= $this->generateReactionCode($type, 'Assertions \' . implode(", ", $failedAssertion) . \' failed');
-            $code .= '}';
-        }
-
-        // Closing bracket for contract depth check
-        $code .= '}';
-
-        return $code;
-    }
-
-    /**
-     * @param StructureDefinition $structureDefinition
-     * @return string
-     */
-    private function createInvariantCode(StructureDefinition $structureDefinition)
-    {
-        // We might have ancestral, interface and direct invariants, so collect them first so we can better handle them later
-        $invariants = $structureDefinition->ancestralInvariants;
-        $invariants->add($structureDefinition->invariantConditions);
-
-        $code = '';
-
-        $invariantIterator = $invariants->getIterator();
-        for ($i = 0; $i < $invariantIterator->count(); $i++) {
-
-            // Create the inner loop for the different assertions
-            if ($invariantIterator->current()->count() !== 0) {
-                $assertionIterator = $invariantIterator->current()->getIterator();
-                $codeFragment = array();
-                for ($j = 0; $j < $assertionIterator->count(); $j++) {
-
-                    $codeFragment[] = $assertionIterator->current()->getString();
-
-                    $assertionIterator->next();
-                }
-                $code .= 'if (!(';
-                $code .= implode(' && ', $codeFragment) . ')){';
-                $code .= 'throw new BrokenInvariantException(\'Assertion ' . str_replace(
-                        '\'',
-                        '"',
-                        implode(' && ', $codeFragment)
-                    ) .
-                    ' failed in ' . PBC_CLASS_INVARIANT_NAME . '.\');';
-                $code .= '}';
-            }
-            // increment the outer loop
-            $invariantIterator->next();
-        }
-
-        return $code;
-    }
-
-    /**
-     * @param $invariantUsed
-     * @param $position
-     * @return string
-     */
-    private function createInvariantCall($invariantUsed, $position)
-    {
-        $allowed_positions = array_flip(array('entry', 'exit'));
-
-        if ($invariantUsed !== true || !isset($allowed_positions[$position])) {
-
-            return '';
-        }
-
-        // Decide how our if statement should look depending on the position of the invariant
-        if ($position === 'entry') {
-
-            $code = 'if ($this->' . PBC_CONTRACT_DEPTH . ' === 0) {
-            $this->' . PBC_CLASS_INVARIANT_NAME . '();}
-            // Tell them we entered a contracted method
-            $this->' . PBC_CONTRACT_DEPTH . '++;';
-
-        } elseif ($position === 'exit') {
-
-            $code = 'if ($this->' . PBC_CONTRACT_DEPTH . ' === 1) {
-            $this->' . PBC_CLASS_INVARIANT_NAME . '();}
-            // Tell them we are done at this level
-            $this->' . PBC_CONTRACT_DEPTH . '--;';
-        }
-
-        return $code;
-    }
-
-    /**
-     * @param Assertion $assertion
-     * @param $functionName
-     * @param string $exceptionType
-     * @return string
-     */
-    private function createAroundAdviceCode(Assertion $assertion, $functionName, $exceptionType = 'Exception')
-    {
-        $result = '';
-
-        // The beginning is always the same
-        $result .= 'if (' . $assertion->getInvertString();
-        $result .= '){';
-        $result .= '    throw new ' . $exceptionType . '(\'Assertion ' . str_replace(
-                '\'',
-                '"',
-                $assertion->getString()
-            ) .
-            ' failed in ' . $functionName . '.\');';
-        $result .= '}';
-
-        return $result;
     }
 
     /**

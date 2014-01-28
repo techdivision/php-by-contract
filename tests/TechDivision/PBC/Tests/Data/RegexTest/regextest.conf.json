@@ -1,0 +1,6 @@
+{
+    "project-dirs": [
+        "./../../../tests/TechDivision/PBC/Tests/Data/RegexTest/MultiRegex/*/Data",
+        "./../../../tests/TechDivision/PBC/Tests/Data/RegexTest/RegexTest?"
+    ]
+}

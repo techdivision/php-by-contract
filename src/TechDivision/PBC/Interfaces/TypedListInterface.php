@@ -13,6 +13,7 @@ interface TypedListInterface
 {
     /**
      * @param $value
+     *
      * @return mixed
      */
     public function getOffset($value);
@@ -28,6 +29,7 @@ interface TypedListInterface
 
     /**
      * @param $offset
+     *
      * @return mixed
      */
     public function delete($offset);

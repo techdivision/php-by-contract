@@ -21,6 +21,7 @@ class FunctionParser extends AbstractParser
 {
     /**
      * @param $tokens
+     *
      * @return bool|FunctionDefinitionList
      */
     public function getDefinitionListFromTokens(array $tokens, $getRecursive = true)
@@ -71,7 +72,9 @@ class FunctionParser extends AbstractParser
      * possible information from it. This information will be entered into a FunctionDefinition object.
      *
      * @access private
+     *
      * @param $tokens
+     *
      * @return FunctionDefinition
      */
     private function getDefinitionFromTokens(array $tokens)
@@ -116,6 +119,7 @@ class FunctionParser extends AbstractParser
 
     /**
      * @param array $tokens
+     *
      * @return ParameterDefinitionList
      */
     private function getParameterDefinitionList(array $tokens)
@@ -217,6 +221,7 @@ class FunctionParser extends AbstractParser
 
     /**
      * @param $tokens
+     *
      * @return string
      */
     private function getFunctionName(array $tokens)
@@ -238,11 +243,13 @@ class FunctionParser extends AbstractParser
 
     /**
      * @param $tokens
+     *
      * @return string
      */
     private function getFunctionBody(array $tokens)
     {
-        // We will iterate over the token array and collect everything from the first opening curly bracket until the last
+        // We will iterate over the token array and collect everything
+        // from the first opening curly bracket until the last
         $functionBody = '';
         for ($i = 0; $i < count($tokens); $i++) {
 
@@ -294,6 +301,7 @@ class FunctionParser extends AbstractParser
 
     /**
      * @param $tokens
+     *
      * @return array|bool
      *s
      */
@@ -377,6 +385,7 @@ class FunctionParser extends AbstractParser
 
     /**
      * @param array $tokens
+     *
      * @return string
      */
     private function getFunctionVisibility(array $tokens)

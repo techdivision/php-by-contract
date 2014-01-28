@@ -18,8 +18,9 @@ use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 class FileParser extends AbstractParser
 {
     /**
-     * @param $file
+     * @param      $file
      * @param bool $getRecursive
+     *
      * @return bool|FileDefinition
      */
     public function getDefinitionFromFile($file, $getRecursive = null)
@@ -139,6 +140,7 @@ class FileParser extends AbstractParser
 
     /**
      * @param $file
+     *
      * @return bool
      */
     private function containsValidClass($file)

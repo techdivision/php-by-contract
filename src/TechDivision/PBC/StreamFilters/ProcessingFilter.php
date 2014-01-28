@@ -71,6 +71,7 @@ class ProcessingFilter extends AbstractFilter
      * @param $out
      * @param $consumed
      * @param $closing
+     *
      * @return int
      * @throws \TechDivision\PBC\Exceptions\GeneratorException
      */
@@ -114,6 +115,7 @@ class ProcessingFilter extends AbstractFilter
     /**
      * @param $config
      * @param $for
+     *
      * @return string
      */
     private function generateCode($config, $for)
@@ -157,4 +159,4 @@ class ProcessingFilter extends AbstractFilter
 
         return $code;
     }
-} 
+}

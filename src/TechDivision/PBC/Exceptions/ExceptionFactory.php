@@ -23,6 +23,7 @@ class ExceptionFactory
 {
     /**
      * @param $type
+     *
      * @return string
      */
     public function getClassName($type)
@@ -31,18 +32,21 @@ class ExceptionFactory
     }
 
     /**
-     * @param $type
+     * @param       $type
      * @param array $params
+     *
      * @return \Exception
      */
     public function getInstance($type, $params = array())
     {
         $name = $this->getName($type);
+
         return call_user_func_array($name->__construct(), $params);
     }
 
     /**
      * @param $type
+     *
      * @return string
      */
     private function getName($type)
@@ -76,4 +80,4 @@ class ExceptionFactory
             return __NAMESPACE__ . '\\' . $name;
         }
     }
-} 
+}

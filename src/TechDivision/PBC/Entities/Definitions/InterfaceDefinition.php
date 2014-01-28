@@ -159,6 +159,7 @@ class InterfaceDefinition implements StructureDefinitionInterface
 
     /**
      * @param $ancestorDefinitions
+     *
      * @return bool
      */
     protected function getAncestralConditions($ancestorDefinitions)

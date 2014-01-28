@@ -31,6 +31,7 @@ class StructureDefinitionHierarchy
      *
      *
      * @param StructureDefinitionInterface $node
+     *
      * @return bool
      */
     public function insert(StructureDefinitionInterface $node)
@@ -65,6 +66,7 @@ class StructureDefinitionHierarchy
 
     /**
      * @param $entryName
+     *
      * @return bool
      */
     public function getEntry($entryName)
@@ -79,6 +81,7 @@ class StructureDefinitionHierarchy
 
     /**
      * @param $entryName
+     *
      * @return bool
      */
     public function entryExists($entryName)
@@ -100,7 +103,7 @@ class StructureDefinitionHierarchy
      */
     public function isComplete()
     {
-        foreach($this->nodes as $node) {
+        foreach ($this->nodes as $node) {
 
             if (is_null($node)) {
 

@@ -55,6 +55,7 @@ class BeautifyFilter extends AbstractFilter
      * @param $out
      * @param $consumed
      * @param $closing
+     *
      * @return int|void
      * @throws \Exception
      * @throws PHPParser_Error

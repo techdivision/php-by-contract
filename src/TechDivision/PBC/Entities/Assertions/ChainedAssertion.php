@@ -40,7 +40,7 @@ class ChainedAssertion extends AbstractAssertion
 
     /**
      * @param AssertionList $_assertionList
-     * @param $_combinators
+     * @param               $_combinators
      *
      * @throws  \InvalidArgumentException
      */

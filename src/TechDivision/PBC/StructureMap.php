@@ -1,5 +1,13 @@
 <?php
-
+/**
+ * TechDivision\PBC\StructureMap
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ */
 namespace TechDivision\PBC;
 
 use TechDivision\PBC\Entities\Definitions\Structure;
@@ -11,9 +19,11 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'Entities' . DIRECTORY_SEPARATOR .
     'Definitions' . DIRECTORY_SEPARATOR . 'Structure.php';
 
 /**
- * Class StructureMap
- *
- * @package TechDivision\PBC
+ * @package     TechDivision\PBC
+ * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
+ * @license     http://opensource.org/licenses/osl-3.0.php
+ *              Open Software License (OSL 3.0)
+ * @author      Bernhard Wick <b.wick@techdivision.com>
  */
 class StructureMap implements MapInterface
 {
@@ -43,9 +53,9 @@ class StructureMap implements MapInterface
     protected $config;
 
     /**
-     * @param $rootPathes
+     * @param        $rootPathes
      * @param Config $config
-     * @param array $omittedPathes
+     * @param array  $omittedPathes
      */
     public function __construct($rootPathes, Config $config = null, $omittedPathes = array())
     {
@@ -96,6 +106,7 @@ class StructureMap implements MapInterface
      * Will return all entries in our map.
      *
      * @param bool $contracted
+     *
      * @return Structure
      */
     public function getEntries($contracted = false)
@@ -111,11 +122,13 @@ class StructureMap implements MapInterface
                 continue;
             }
 
-            $structures[] = new Structure($entry['cTime'],
+            $structures[] = new Structure(
+                $entry['cTime'],
                 $entry['identifier'],
                 $entry['path'],
                 $entry['type'],
-                $entry['hasContracts']);
+                $entry['hasContracts']
+            );
         }
 
         // Return the structure DTOs
@@ -126,6 +139,7 @@ class StructureMap implements MapInterface
      * Will add a structure entry to the map.
      *
      * @param Structure $structure
+     *
      * @return bool
      */
     public function add(Structure $structure)
@@ -145,6 +159,7 @@ class StructureMap implements MapInterface
 
     /**
      * @param $identifier
+     *
      * @return bool
      */
     public function entryExists($identifier)
@@ -162,6 +177,7 @@ class StructureMap implements MapInterface
      * If none is found, false will be returned.
      *
      * @param $identifier
+     *
      * @return bool|Structure
      */
     public function getEntry($identifier)
@@ -170,11 +186,13 @@ class StructureMap implements MapInterface
 
             // We got it, lets biuld a structure object
             $entry = $this->map[$identifier];
-            $structure = new Structure($entry['cTime'],
+            $structure = new Structure(
+                $entry['cTime'],
                 $entry['identifier'],
                 $entry['path'],
                 $entry['type'],
-                $entry['hasContracts']);
+                $entry['hasContracts']
+            );
 
             // Return the structure DTO
             return $structure;
@@ -190,6 +208,7 @@ class StructureMap implements MapInterface
      * If not it will check if the whole map is current.
      *
      * @param null|string $structure
+     *
      * @return  bool
      */
     public function isCurrent($identifier = null)
@@ -228,6 +247,7 @@ class StructureMap implements MapInterface
      * Will return an array of all classes which are stored in this map.
      *
      * @param string $type
+     *
      * @return array
      */
     public function getIdentifiers($type = null)
@@ -257,6 +277,7 @@ class StructureMap implements MapInterface
      * Will include the full path if $fullPath is true.
      *
      * @param   $fullPath
+     *
      * @return  array
      */
     public function getFiles($fullPath = true)
@@ -285,6 +306,7 @@ class StructureMap implements MapInterface
      * Removes an entry from the map of structures.
      *
      * @param $identifier
+     *
      * @return bool
      */
     public function remove($identifier)
@@ -292,6 +314,7 @@ class StructureMap implements MapInterface
         if (isset($this->map[$identifier])) {
 
             unset($this->map[$identifier]);
+
             return true;
 
         } else {
@@ -311,8 +334,10 @@ class StructureMap implements MapInterface
         $directoryIterators = array();
         foreach ($this->rootPathes as $rootPath) {
 
-            $directoryIterators[] = new \RecursiveDirectoryIterator($rootPath,
-                \RecursiveDirectoryIterator::KEY_AS_PATHNAME);
+            $directoryIterators[] = new \RecursiveDirectoryIterator(
+                $rootPath,
+                \RecursiveDirectoryIterator::KEY_AS_PATHNAME
+            );
         }
 
         // We got them all, now append them onto a new RecursiveIteratorIterator and return it.
@@ -320,9 +345,11 @@ class StructureMap implements MapInterface
         foreach ($directoryIterators as $directoryIterator) {
 
             $recursiveIterator->append(
-                new \RecursiveIteratorIterator($directoryIterator,
+                new \RecursiveIteratorIterator(
+                    $directoryIterator,
                     \RecursiveIteratorIterator::SELF_FIRST,
-                    \RecursiveIteratorIterator::CATCH_GET_CHILD)
+                    \RecursiveIteratorIterator::CATCH_GET_CHILD
+                )
             );
         }
 
@@ -361,6 +388,7 @@ class StructureMap implements MapInterface
 
     /**
      * @param $file
+     *
      * @return bool
      */
     protected function findContracts($file)
@@ -406,6 +434,7 @@ class StructureMap implements MapInterface
 
     /**
      * @param $file
+     *
      * @return array|bool
      * @throws Exceptions\CacheException
      */
@@ -509,6 +538,7 @@ class StructureMap implements MapInterface
         if (is_readable($this->mapPath)) {
 
             $this->map = unserialize(file_get_contents($this->mapPath));
+
             return true;
         }
 

@@ -1,17 +1,25 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 26.06.13
- * Time: 09:44
- * To change this template use File | Settings | File Templates.
+ * TechDivision\PBC\Config
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  */
-
 namespace TechDivision\PBC;
 
 use TechDivision\PBC\Interfaces\ConfigInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @package     TechDivision\PBC
+ * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
+ * @license     http://opensource.org/licenses/osl-3.0.php
+ *              Open Software License (OSL 3.0)
+ * @author      Bernhard Wick <b.wick@techdivision.com>
+ */
 class Config implements ConfigInterface
 {
 
@@ -44,8 +52,9 @@ class Config implements ConfigInterface
     }
 
     /**
-     * @param null $configFile
+     * @param null   $configFile
      * @param string $context
+     *
      * @return mixed
      */
     public static function getInstance($context = '')
@@ -56,11 +65,13 @@ class Config implements ConfigInterface
         }
 
         self::$instances[$context]->context = $context;
+
         return self::$instances[$context];
     }
 
     /**
      * @param   string $file
+     *
      * @throws \Exception
      */
     public function load($file)
@@ -74,6 +85,7 @@ class Config implements ConfigInterface
 
         $this->config = array_replace_recursive($this->config, $configCandidate);
         self::$instances[$this->context] = $this;
+
         return self::$instances[$this->context];
     }
 
@@ -84,6 +96,7 @@ class Config implements ConfigInterface
 
     /**
      * @param $file
+     *
      * @return bool
      * @throws \Exception
      */
@@ -164,6 +177,7 @@ class Config implements ConfigInterface
      * Will break up any path into a canonical form like realpath(), but does not require the file to exist.
      *
      * @param $path
+     *
      * @return mixed
      */
     private function normalizePath($path)
@@ -192,4 +206,3 @@ class Config implements ConfigInterface
         );
     }
 }
-

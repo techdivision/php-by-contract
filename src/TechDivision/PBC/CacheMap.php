@@ -1,15 +1,31 @@
 <?php
-
+/**
+ * TechDivision\PBC\CacheMap
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ */
 namespace TechDivision\PBC;
 
 use TechDivision\PBC\Entities\Definitions\Structure;
 
+/**
+ * @package     TechDivision\PBC
+ * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
+ * @license     http://opensource.org/licenses/osl-3.0.php
+ *              Open Software License (OSL 3.0)
+ * @author      Bernhard Wick <b.wick@techdivision.com>
+ */
 class CacheMap extends StructureMap
 {
     /**
      * Will add a structure entry to the map.
      *
      * @param Structure $structure
+     *
      * @return bool
      */
     public function add(Structure $structure)
@@ -28,6 +44,7 @@ class CacheMap extends StructureMap
 
     /**
      * @param $identifier
+     *
      * @return bool
      */
     public function entryExists($identifier)
@@ -45,6 +62,7 @@ class CacheMap extends StructureMap
      * If none is found, false will be returned.
      *
      * @param $identifier
+     *
      * @return bool|Structure
      */
     public function getEntry($identifier)
@@ -53,10 +71,12 @@ class CacheMap extends StructureMap
 
             // We got it, lets biuld a structure object
             $entry = $this->map[$identifier];
-            $structure = new Structure($entry['cTime'],
+            $structure = new Structure(
+                $entry['cTime'],
                 $entry['identifier'],
                 $entry['path'],
-                $entry['type']);
+                $entry['type']
+            );
 
             // Return the structure DTO
             return $structure;
@@ -72,6 +92,7 @@ class CacheMap extends StructureMap
      * If not it will check if the whole map is current.
      *
      * @param null|string $structure
+     *
      * @return  bool
      */
     public function isCurrent($identifier = null)
@@ -110,6 +131,7 @@ class CacheMap extends StructureMap
      * Will return an array of all classes which are stored in this map.
      *
      * @param string $type
+     *
      * @return array
      */
     public function getIdentifiers($type = null)
@@ -139,6 +161,7 @@ class CacheMap extends StructureMap
      * Will include the full path if $fullPath is true.
      *
      * @param   $fullPath
+     *
      * @return  array
      */
     public function getFiles($fullPath = true)
@@ -167,6 +190,7 @@ class CacheMap extends StructureMap
      * Removes an entry from the map of structures.
      *
      * @param $identifier
+     *
      * @return bool
      */
     public function remove($identifier)
@@ -174,6 +198,7 @@ class CacheMap extends StructureMap
         if (is_string($identifier) && isset($this->map[$identifier])) {
 
             unset($this->map[$identifier]);
+
             return true;
 
         } else {

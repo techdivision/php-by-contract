@@ -1,22 +1,28 @@
 <?php
-
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 19.06.13
- * Time: 16:01
- * To change this template use File | Settings | File Templates.
+ * TechDivision\PBC\Entities\Definitions\FunctionDefinition
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
  */
-
 namespace TechDivision\PBC\Entities\Definitions;
 
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 
 /**
- * Class FunctionDefinition
+ * @package     TechDivision\PBC
+ * @subpackage  Entities
+ * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
+ * @license     http://opensource.org/licenses/osl-3.0.php
+ *              Open Software License (OSL 3.0)
+ * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-class FunctionDefinition {
+class FunctionDefinition
+{
 
     /**
      * @var string
@@ -86,7 +92,8 @@ class FunctionDefinition {
     /**
      * Default constructor
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->docBlock = '';
         $this->isFinal = false;
         $this->isAbstract = false;
@@ -107,7 +114,8 @@ class FunctionDefinition {
      *
      * @return TypedListList
      */
-    public function getPreconditions() {
+    public function getPreconditions()
+    {
         $preconditions = $this->ancestralPreconditions;
         $preconditions->add($this->preconditions);
 
@@ -119,7 +127,8 @@ class FunctionDefinition {
      *
      * @return TypedListList
      */
-    public function getPostconditions() {
+    public function getPostconditions()
+    {
         $postconditions = $this->ancestralPostconditions;
         $postconditions->add($this->postconditions);
 
@@ -131,10 +140,11 @@ class FunctionDefinition {
      * String will stop after the closing ")" bracket, so the string can be used for interfaces as well.
      *
      * @param   string $type Can be either "call" or "definition"
-     * @param   bool $markAsOriginal
+     * @param   bool   $markAsOriginal
+     *
      * @return  string
      */
-    public function getHeader($type, $markAsOriginal = false) 
+    public function getHeader($type, $markAsOriginal = false)
     {
         $header = '';
 
@@ -177,7 +187,7 @@ class FunctionDefinition {
         if ($type === 'closure') {
 
             $header .= 'function()';
-            
+
         } else {
 
             // Function name
@@ -206,11 +216,11 @@ class FunctionDefinition {
         }
 
         if ($type === 'closure' && !empty($parameterString)) {
-            
+
             $header .= ' use ';
-            
+
         }
-        
+
         // Check if we even got something. If not a closure header would be malformed.
         if ($type !== 'closure' || !empty($parameterString)) {
             // Explode to insert commas
@@ -219,8 +229,7 @@ class FunctionDefinition {
             // Append the parameters to the header
             $header .= '(' . $parameterString . ')';
         }
-        
+
         return $header;
     }
-
 }

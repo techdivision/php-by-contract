@@ -42,8 +42,8 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
     protected $tokenCount;
 
     /**
-     * @param $file
-     * @param StructureMap $structureMap
+     * @param                              $file
+     * @param StructureMap                 $structureMap
      * @param StructureDefinitionHierarchy $structureDefinitionHierarchy
      *
      * @throws ParserException
@@ -111,10 +111,11 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
      * Will check if a certain structure was mentioned in one(!) use statement.
      * If we will return true we might also remove the use statement from our collection.
      *
-     * @param array $usedNamespaces
+     * @param array  $usedNamespaces
      * @param string $namespace
      * @param string $structureName
-     * @param bool $remove
+     * @param bool   $remove
+     *
      * @return bool|string
      */
     protected function resolveUsedNamespace(& $usedNamespaces, $namespace, $structureName, $remove = true)
@@ -202,6 +203,7 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
 
     /**
      * @param $structureToken
+     *
      * @return array|bool
      */
     protected function getStructureTokens($structureToken)
@@ -341,4 +343,4 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
         // Return what we did or did not found
         return $namespaces;
     }
-} 
+}

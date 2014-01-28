@@ -18,12 +18,14 @@ namespace TechDivision\PBC\Utils;
  *              Open Software License (OSL 3.0)
  * @author      Bernhard Wick <b.wick@techdivision.com>
  */
-class PhpLint {
+class PhpLint
+{
 
     /**
      * Will remove any PHP start or end tags from the code.
      *
      * @param $code
+     *
      * @return mixed
      */
     protected function removePhpTags($code)
@@ -35,6 +37,7 @@ class PhpLint {
      * Will check if code is PHP syntax conform.
      *
      * @param $code
+     *
      * @return boolean
      * @throws \Exception
      */
@@ -70,4 +73,4 @@ class PhpLint {
         // Return our result
         return $result;
     }
-} 
+}

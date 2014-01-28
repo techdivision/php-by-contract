@@ -28,9 +28,10 @@ use TechDivision\PBC\Exceptions\ParserException;
 class ClassParser extends AbstractStructureParser
 {
     /**
-     * @param $file
+     * @param                $file
      * @param FileDefinition $fileDefinition
-     * @param bool $getRecursive
+     * @param bool           $getRecursive
+     *
      * @return bool|StructureDefinitionList
      */
     public function getDefinitionListFromFile($file, FileDefinition $fileDefinition, $getRecursive = true)
@@ -64,6 +65,7 @@ class ClassParser extends AbstractStructureParser
     /**
      * @param null $className
      * @param bool $getRecursive
+     *
      * @return bool|StructureDefinitionInterface
      */
     public function getDefinition($className = null, $getRecursive = true)
@@ -118,8 +120,10 @@ class ClassParser extends AbstractStructureParser
      * possible information from it. This information will be entered into a ClassDefinition object.
      *
      * @access private
-     * @param $tokens
+     *
+     * @param      $tokens
      * @param bool $getRecursive
+     *
      * @return StructureDefinitionInterface
      */
     private function getDefinitionFromTokens($tokens, $getRecursive = true)
@@ -268,11 +272,13 @@ class ClassParser extends AbstractStructureParser
 
         // Before exiting we will add the entry to the current structure definition hierarchy
         $this->structureDefinitionHierarchy->insert($classDefinition);
+
         return $classDefinition;
     }
 
     /**
      * @param $tokens
+     *
      * @return string
      */
     private function getName($tokens)
@@ -300,6 +306,7 @@ class ClassParser extends AbstractStructureParser
 
     /**
      * @param $tokens
+     *
      * @return string
      */
     private function getParent($tokens)
@@ -331,6 +338,7 @@ class ClassParser extends AbstractStructureParser
 
     /**
      * @param ClassDefinition $classDefinition
+     *
      * @return array
      */
     private function getInterfaces(ClassDefinition & $classDefinition)
@@ -344,7 +352,9 @@ class ClassParser extends AbstractStructureParser
 
                 for ($j = $i + 1; $j < $this->tokenCount; $j++) {
 
-                    if ($this->tokens[$j] === '{' || $this->tokens[$j][0] === T_CURLY_OPEN || $this->tokens[$j][0] === T_EXTENDS) {
+                    if ($this->tokens[$j] === '{' || $this->tokens[$j][0] === T_CURLY_OPEN ||
+                        $this->tokens[$j][0] === T_EXTENDS
+                    ) {
 
                         return $interfaces;
 
@@ -372,8 +382,10 @@ class ClassParser extends AbstractStructureParser
      * To retrieve the different properties of an attribute it relies on $this::getAttributeProperties().
      *
      * @access private
-     * @param array $tokens
+     *
+     * @param array         $tokens
      * @param TypedListList $invariants
+     *
      * @return AttributeDefinitionList
      */
     private function getAttributes(array $tokens, TypedListList $invariants = null)
@@ -451,10 +463,15 @@ class ClassParser extends AbstractStructureParser
                     $invariantCount = $invariantIterator->count();
                     for ($k = 0; $k < $invariantCount; $k++) {
 
-                        if (strpos(
-                                $invariantIterator->current()->getString(),
-                                '$this->' . ltrim($attributeIterator->current()->name, '$')
-                            ) !== false
+                        $attributePosition = strpos(
+                            $invariantIterator->current()->getString(),
+                            '$this->' . ltrim(
+                                $attributeIterator->current()->name,
+                                '$'
+                            )
+                        );
+
+                        if ($attributePosition !== false
                         ) {
 
                             // Tell them we were mentioned and persist it
@@ -474,7 +491,8 @@ class ClassParser extends AbstractStructureParser
 
     /**
      * @param array $tokens
-     * @param $attributePosition
+     * @param       $attributePosition
+     *
      * @return AttributeDefinition
      */
     private function getAttributeProperties(array $tokens, $attributePosition)

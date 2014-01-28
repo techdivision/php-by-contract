@@ -70,6 +70,7 @@ class PostconditionFilter extends AbstractFilter
      * @param $out
      * @param $consumed
      * @param $closing
+     *
      * @return int|void
      */
     public function filter($in, $out, &$consumed, $closing)
@@ -133,6 +134,7 @@ class PostconditionFilter extends AbstractFilter
      *
      * @param $bucketData
      * @param $functionDefinition
+     *
      * @return boolean
      *
      * @throws \TechDivision\PBC\Exceptions\GeneratorException
@@ -164,6 +166,7 @@ class PostconditionFilter extends AbstractFilter
 
     /**
      * @param TypedListList $assertionLists
+     *
      * @return string
      */
     private function generateCode(TypedListList $assertionLists)
@@ -226,4 +229,4 @@ class PostconditionFilter extends AbstractFilter
 
         return $code;
     }
-} 
+}

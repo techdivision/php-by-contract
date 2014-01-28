@@ -16,7 +16,9 @@
         "psr/log": "*"
     },
     "autoload": {
-        "psr-0": {"TechDivision": "src/"}
+        "psr-0": {
+            "TechDivision": "src/"
+        }
     },
     "minimum-stability": "dev"
 }

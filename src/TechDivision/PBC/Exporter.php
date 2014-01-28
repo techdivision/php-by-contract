@@ -31,6 +31,7 @@ class Exporter
     /**
      * @param $source
      * @param $target
+     *
      * @return bool
      * @throws \InvalidArgumentException
      * @throws \Exception
@@ -114,6 +115,7 @@ class Exporter
 
     /**
      * @param array $fileList
+     *
      * @return array
      */
     private function getCachedFiles(array $fileList)
@@ -136,6 +138,7 @@ class Exporter
 
     /**
      * @param array $fileList
+     *
      * @return array
      */
     private function getFreshlyParsedFiles(array $fileList)

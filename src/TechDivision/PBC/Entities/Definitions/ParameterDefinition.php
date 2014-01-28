@@ -40,6 +40,7 @@ class ParameterDefinition
 
     /**
      * @param string $mode
+     *
      * @return string
      */
     public function getString($mode = 'definition')

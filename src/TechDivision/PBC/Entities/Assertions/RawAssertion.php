@@ -41,6 +41,7 @@ class RawAssertion extends AbstractAssertion
 
             $this->content = '!(' . $this->content . ')';
             $this->inverted = true;
+
             return true;
 
         } elseif ($this->inverted === true) {
@@ -51,6 +52,7 @@ class RawAssertion extends AbstractAssertion
             unset($this->content[strlen($this->content) - 1]);
 
             $this->inverted = false;
+
             return true;
 
         } else {

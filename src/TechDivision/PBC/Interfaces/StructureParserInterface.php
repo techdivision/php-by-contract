@@ -16,14 +16,16 @@ interface StructureParserInterface extends ParserInterface
     /**
      * @param null $structureName
      * @param bool $getRecursive
+     *
      * @return mixed
      */
     public function getDefinition($structureName = null, $getRecursive = true);
 
     /**
-     * @param $file
+     * @param                $file
      * @param FileDefinition $fileDefinition
-     * @param bool $getRecursive
+     * @param bool           $getRecursive
+     *
      * @return mixed
      */
     public function getDefinitionListFromFile($file, FileDefinition $fileDefinition, $getRecursive = true);

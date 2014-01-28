@@ -50,6 +50,7 @@ abstract class AbstractTypedList implements TypedListInterface
 
     /**
      * @param $value
+     *
      * @return bool|mixed
      */
     public function getOffset($value)
@@ -84,6 +85,7 @@ abstract class AbstractTypedList implements TypedListInterface
 
     /**
      * @param $offset
+     *
      * @return mixed|void
      */
     public function delete($offset)
@@ -111,6 +113,7 @@ abstract class AbstractTypedList implements TypedListInterface
     /**
      * @param $offset
      * @param $value
+     *
      * @return \TechDivision\PBC\Interfaces\UnexpectedValueException|void
      * @throws \UnexpectedValueException
      */
@@ -128,6 +131,7 @@ abstract class AbstractTypedList implements TypedListInterface
 
     /**
      * @param $value
+     *
      * @return mixed|void
      * @throws \UnexpectedValueException
      */
@@ -153,6 +157,7 @@ abstract class AbstractTypedList implements TypedListInterface
 
     /**
      * @param TypedList $foreignList
+     *
      * @throws \Exception
      * @throws \UnexpectedValueException
      */

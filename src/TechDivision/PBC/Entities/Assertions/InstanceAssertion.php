@@ -59,12 +59,14 @@ class InstanceAssertion extends AbstractAssertion
 
             $this->operand = '!' . $this->operand;
             $this->inverted = true;
+
             return true;
 
         } elseif ($this->inverted === true) {
 
             $this->operand = ltrim($this->operand, '!');
             $this->inverted = false;
+
             return true;
 
         } else {

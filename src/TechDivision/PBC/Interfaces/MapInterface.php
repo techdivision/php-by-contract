@@ -28,6 +28,7 @@ interface MapInterface
      * structures will be returned.
      *
      * @param bool $contracted
+     *
      * @return mixed
      */
     public function getEntries($contracted = false);
@@ -36,18 +37,21 @@ interface MapInterface
      * Will add a structure entry to the map.
      *
      * @param Structure $structure
+     *
      * @return bool
      */
     public function add(Structure $structure);
 
     /**
      * @param $identifier
+     *
      * @return bool
      */
     public function entryExists($identifier);
 
     /**
      * @param Structure $structure
+     *
      * @return mixed
      */
     public function update(Structure $structure = null);
@@ -57,6 +61,7 @@ interface MapInterface
      * If none is found, false will be returned.
      *
      * @param $identifier
+     *
      * @return bool|Structure
      */
     public function getEntry($identifier);
@@ -66,6 +71,7 @@ interface MapInterface
      * If not it will check if the whole map is current.
      *
      * @param null|string $identifier
+     *
      * @return  bool
      */
     public function isCurrent($identifier = null);
@@ -74,6 +80,7 @@ interface MapInterface
      * Will return an array of all classes which are stored in this map.
      *
      * @param string $type
+     *
      * @return array
      */
     public function getIdentifiers($type = null);
@@ -83,6 +90,7 @@ interface MapInterface
      * Will include the full path if $fullPath is true.
      *
      * @param   $fullPath
+     *
      * @return  array
      */
     public function getFiles($fullPath = true);
@@ -91,7 +99,8 @@ interface MapInterface
      * Removes an entry from the map of structures.
      *
      * @param $identifier
+     *
      * @return bool
      */
     public function remove($identifier);
-} 
+}

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * TechDivision\PBC\StreamFilters\SkeletonFilter
  *
@@ -65,6 +64,7 @@ class SkeletonFilter extends AbstractFilter
      * @param $out
      * @param $consumed
      * @param $closing
+     *
      * @return int|void
      * @throws \TechDivision\PBC\Exceptions\GeneratorException
      */
@@ -159,7 +159,7 @@ class SkeletonFilter extends AbstractFilter
 
                         //  $this->injectFunctionCode($bucket->data, $functionDefinition);
 
-                        // We have to set the visibility to private to avoid 
+                        // We have to set the visibility to private to avoid
                         // issues with missing child implementations
                         $visibilityHook = '';
                         $visibility = '';
@@ -231,6 +231,7 @@ class SkeletonFilter extends AbstractFilter
      * emulate original original filesystem context when in cache folder.
      *
      * @param $bucketData
+     *
      * @return bool
      */
     private function substituteMagicConstants(& $bucketData)
@@ -250,8 +251,9 @@ class SkeletonFilter extends AbstractFilter
      * Will inject the code to declare our local constants PBC_FILE_SUBSTITUTE and PBC_DIR_SUBSTITUTE
      * which are used for substitution of __FILE__ and __DIR__.
      *
-     * @param $bucketData
+     * @param        $bucketData
      * @param string $file
+     *
      * @return bool
      */
     private function injectOriginalPathHint(& $bucketData, $file)
@@ -263,7 +265,8 @@ class SkeletonFilter extends AbstractFilter
         }
 
         // Build up the needed code for our hint
-        $code = ' /* ' . PBC_ORIGINAL_PATH_HINT . $file . '#' . filemtime(
+        $code = ' /* ' . PBC_ORIGINAL_PATH_HINT . $file . '#' .
+            filemtime(
                 $file
             ) . PBC_ORIGINAL_PATH_HINT . ' */';
 
@@ -273,6 +276,7 @@ class SkeletonFilter extends AbstractFilter
 
         // Still here? Success then.
         $this->neededActions[__FUNCTION__]--;
+
         return true;
     }
 
@@ -280,8 +284,9 @@ class SkeletonFilter extends AbstractFilter
      * Will inject the code to declare our local constants PBC_FILE_SUBSTITUTE and PBC_DIR_SUBSTITUTE
      * which are used for substitution of __FILE__ and __DIR__.
      *
-     * @param $bucketData
+     * @param        $bucketData
      * @param string $file
+     *
      * @return bool
      */
     private function injectMagicConstants(& $bucketData, $file)
@@ -311,11 +316,13 @@ class SkeletonFilter extends AbstractFilter
 
         // Still here? Success then.
         $this->neededActions[__FUNCTION__]--;
+
         return true;
     }
 
     /**
      * @param FunctionDefinition $functionDefinition
+     *
      * @return string
      */
     private function generateFunctionCode(FunctionDefinition $functionDefinition)
@@ -338,7 +345,8 @@ class SkeletonFilter extends AbstractFilter
         // Invariant is not needed in private or static functions.
         // Also make sure that there is none in front of the constructor check
         if ($functionDefinition->visibility !== 'private' &&
-            !$functionDefinition->isStatic && $functionDefinition->name !== '__construct') {
+            !$functionDefinition->isStatic && $functionDefinition->name !== '__construct'
+        ) {
 
             $code .= PBC_INVARIANT_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE;
         }
@@ -362,7 +370,8 @@ class SkeletonFilter extends AbstractFilter
         // Finish the try ... catch and place the inject marker
         if ($injectNeeded === true) {
 
-            $code .= '} catch (\Exception $e) {}' . PBC_METHOD_INJECT_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
+            $code .= '} catch (\Exception $e) {}' . PBC_METHOD_INJECT_PLACEHOLDER .
+                $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
         }
 
         // No just place all the other placeholder for other filters to come
@@ -379,5 +388,4 @@ class SkeletonFilter extends AbstractFilter
 
         return $code;
     }
-
 }

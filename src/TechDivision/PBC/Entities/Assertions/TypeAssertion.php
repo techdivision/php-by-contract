@@ -34,7 +34,7 @@ class TypeAssertion extends AbstractAssertion
     /**
      *
      * @param string $_operand
-     * @param $_type
+     * @param        $_type
      */
     public function __construct($_operand, $_type)
     {
@@ -76,12 +76,14 @@ class TypeAssertion extends AbstractAssertion
 
             $this->validatesTo = false;
             $this->inverted = true;
+
             return true;
 
         } elseif ($this->validatesTo === false) {
 
             $this->validatesTo = true;
             $this->inverted = false;
+
             return true;
 
         } else {

@@ -12,6 +12,7 @@ class InterfaceParser extends AbstractStructureParser
     /**
      * @param null $interfaceName
      * @param bool $getRecursive
+     *
      * @return bool|mixed|FileDefinition
      */
     public function getDefinition($interfaceName = null, $getRecursive = false)
@@ -54,9 +55,10 @@ class InterfaceParser extends AbstractStructureParser
     }
 
     /**
-     * @param $file
+     * @param                $file
      * @param FileDefinition $fileDefinition
-     * @param bool $getRecursive
+     * @param bool           $getRecursive
+     *
      * @return bool|StructureDefinitionList
      */
     public function getDefinitionListFromFile($file, FileDefinition $fileDefinition, $getRecursive = false)
@@ -89,6 +91,7 @@ class InterfaceParser extends AbstractStructureParser
 
     /**
      * @param $tokens
+     *
      * @return string
      */
     private function getName($tokens)
@@ -116,6 +119,7 @@ class InterfaceParser extends AbstractStructureParser
 
     /**
      * @param $tokens
+     *
      * @return string
      */
     private function getParents($tokens)
@@ -174,7 +178,9 @@ class InterfaceParser extends AbstractStructureParser
      * possible information from it. This information will be entered into a ClassDefinition object.
      *
      * @access private
+     *
      * @param $tokens
+     *
      * @return FileDefinition
      */
     private function getDefinitionFromTokens($tokens, $getRecursive = true)
@@ -243,5 +249,4 @@ class InterfaceParser extends AbstractStructureParser
 
         return $interfaceDefinition;
     }
-
 }

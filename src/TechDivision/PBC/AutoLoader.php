@@ -1,14 +1,24 @@
 <?php
-
+/**
+ * TechDivision\PBC\AutoLoader
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ */
 namespace TechDivision\PBC;
 
 // Load the constants if not already done
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'Constants.php';
 
 /**
- * Class AutoLoader
- *
- * @package TechDivision\PBC
+ * @package     TechDivision\PBC
+ * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
+ * @license     http://opensource.org/licenses/osl-3.0.php
+ *              Open Software License (OSL 3.0)
+ * @author      Bernhard Wick <b.wick@techdivision.com>
  */
 class AutoLoader
 {
@@ -103,7 +113,9 @@ class AutoLoader
         }
 
         // If we are loading something of our own library we can skip to composer
-        if (strpos($className, 'TechDivision\PBC') === 0 || strpos($className, 'PHP') === 0 ) {
+        if ((strpos($className, 'TechDivision\PBC') === 0 && strpos($className, 'TechDivision\PBC\Tests') === false) ||
+            strpos($className, 'PHP') === 0
+        ) {
 
             return false;
         }
@@ -122,6 +134,7 @@ class AutoLoader
         if ($file->hasContracts() === false) {
 
             require $file->getPath();
+
             return true;
         }
 
@@ -129,19 +142,20 @@ class AutoLoader
         // Get a current cache instance if we do not have one already.
         if ($this->cache === null) {
 
-                // We also require the classes of our maps as we do not have proper autoloading in place
-                $this->cache = new CacheMap($cacheConfig['dir'], $this->config);
-            }
-            $this->generator = new Generator($structureMap, $this->cache);
+            // We also require the classes of our maps as we do not have proper autoloading in place
+            $this->cache = new CacheMap($cacheConfig['dir'], $this->config);
+        }
+        $this->generator = new Generator($structureMap, $this->cache);
 
-            // Create the new class definition
-            if ($this->generator->create($file) === true) {
+        // Create the new class definition
+        if ($this->generator->create($file) === true) {
 
-                // Require the new class, it should have been created now
-                $file = $this->generator->getFileName($className);
-                if (is_readable($file) === true) {
+            // Require the new class, it should have been created now
+            $file = $this->generator->getFileName($className);
+            if (is_readable($file) === true) {
 
                 require $file;
+
                 return true;
             }
 

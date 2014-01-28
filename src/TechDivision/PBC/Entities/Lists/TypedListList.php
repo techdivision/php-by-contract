@@ -34,6 +34,7 @@ class TypedListList extends AbstractTypedList
      * as a whole.
      *
      * @param bool $countChildren
+     *
      * @return int|void
      */
     public function count($countChildren = false)

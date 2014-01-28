@@ -21,4 +21,5 @@ namespace TechDivision\PBC\Interfaces;
  */
 interface ParserInterface
 {
+
 }

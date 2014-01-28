@@ -41,6 +41,7 @@ abstract class AbstractParser implements ParserInterface
      * @param $tokens
      * @param $searchedToken
      * @param $parsedEntity
+     *
      * @return bool
      */
     protected function hasSignatureToken($tokens, $searchedToken, $parsedEntity)
@@ -84,6 +85,7 @@ abstract class AbstractParser implements ParserInterface
     /**
      * @param $string
      * @param $bracket
+     *
      * @return bool|int
      */
     protected function getBracketCount($string, $bracket)
@@ -112,6 +114,7 @@ abstract class AbstractParser implements ParserInterface
     /**
      * @param $tokens
      * @param $structureToken
+     *
      * @return string
      */
     protected function getDocBlock($tokens, $structureToken)

@@ -28,5 +28,4 @@ abstract class AbstractFilter extends \php_user_filter implements StreamFilter
      * @var string
      */
     public $filtername = __CLASS__;
-
 }

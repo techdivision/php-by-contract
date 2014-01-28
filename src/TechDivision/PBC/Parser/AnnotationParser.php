@@ -69,6 +69,7 @@ class AnnotationParser extends AbstractParser
     /**
      * @param $docBlock
      * @param $conditionKeyword
+     *
      * @return bool|AssertionList
      */
     public function getConditions($docBlock, $conditionKeyword)
@@ -133,8 +134,9 @@ class AnnotationParser extends AbstractParser
     }
 
     /**
-     * @param $docString
+     * @param      $docString
      * @param null $usedAnnotation
+     *
      * @return bool
      */
     private function parseAssertion($docString, $usedAnnotation = null)
@@ -345,10 +347,12 @@ class AnnotationParser extends AbstractParser
 
             // Check if we got a variable
             $stringPiece = trim($stringPiece);
-            if (strpos(
-                    $stringPiece,
-                    '$'
-                ) === 0 || $stringPiece === PBC_KEYWORD_RESULT || $stringPiece === PBC_KEYWORD_OLD
+            $dollarPosition = strpos(
+                $stringPiece,
+                '$'
+            );
+
+            if ($dollarPosition === 0 || $stringPiece === PBC_KEYWORD_RESULT || $stringPiece === PBC_KEYWORD_OLD
             ) {
 
                 return $stringPiece;
@@ -387,6 +391,7 @@ class AnnotationParser extends AbstractParser
 
             $stringPiece = explode('array<', $docString);
             $stringPiece = $stringPiece[1];
+
             return strstr($stringPiece, '>', true);
         }
 
@@ -396,6 +401,7 @@ class AnnotationParser extends AbstractParser
 
     /**
      * @param $docString
+     *
      * @return bool|string
      * @throws \InvalidArgumentException
      */

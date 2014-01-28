@@ -72,6 +72,7 @@ class InvariantFilter extends AbstractFilter
      * @param $out
      * @param $consumed
      * @param $closing
+     *
      * @return int
      * @throws GeneratorException
      */
@@ -188,6 +189,7 @@ class InvariantFilter extends AbstractFilter
 
     /**
      * @param AttributeDefinitionList $attributeDefinitions
+     *
      * @return string
      */
     private function generateAttributeCode(AttributeDefinitionList $attributeDefinitions)
@@ -233,6 +235,7 @@ class InvariantFilter extends AbstractFilter
 
     /**
      * @param $hasParents
+     *
      * @return string
      */
     private function generateSetCode($hasParents, $injected = false)
@@ -319,6 +322,7 @@ class InvariantFilter extends AbstractFilter
 
     /**
      * @param $hasParents
+     *
      * @return string
      */
     private function generateGetCode($hasParents, $injected = false)
@@ -397,6 +401,7 @@ class InvariantFilter extends AbstractFilter
 
     /**
      * @param $bucketData
+     *
      * @return bool
      */
     private function injectInvariantCall(& $bucketData)
@@ -417,6 +422,7 @@ class InvariantFilter extends AbstractFilter
 
     /**
      * @param TypedListList $assertionLists
+     *
      * @return string
      */
     private function generateFunctionCode(TypedListList $assertionLists)
@@ -454,5 +460,4 @@ class InvariantFilter extends AbstractFilter
 
         return $code;
     }
-
 }

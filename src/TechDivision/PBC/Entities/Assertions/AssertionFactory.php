@@ -22,4 +22,4 @@ namespace TechDivision\PBC\Entities\Assertions;
 class AssertionFactory
 {
 
-} 
+}
