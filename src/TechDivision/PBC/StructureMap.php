@@ -13,6 +13,7 @@ namespace TechDivision\PBC;
 use TechDivision\PBC\Entities\Definitions\Structure;
 use TechDivision\PBC\Exceptions\CacheException;
 use TechDivision\PBC\Interfaces\MapInterface;
+use TechDivision\PBC\Utils\Formatting;
 
 // Load the constants if not already done
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'Constants.php';
@@ -170,6 +171,11 @@ class StructureMap implements MapInterface
         return isset($this->map[$identifier]);
     }
 
+    /**
+     * @param Structure $structure
+     *
+     * @return void
+     */
     public function update(Structure $structure = null)
     {
 
@@ -324,6 +330,61 @@ class StructureMap implements MapInterface
 
             return false;
         }
+    }
+
+    /**
+     * Will reindex the structure map aka create it anew.
+     * If $specificPath is supplied we will reindex the specified path only and add it to the map.
+     * $specificPath MUST be within the root pathes of this StructureMap instance, otherwise it is no REindexing.
+     *
+     * @param string|null $specificPath A certain path which will be reindexed
+     *
+     * @return bool
+     */
+    public function reIndex($specificPath = null)
+    {
+        // If we have no specific path we will delete the current map
+        if ($specificPath === null) {
+
+            // Make our map empty
+            $this->map = array();
+
+        } else {
+
+            // We need some formatting utilities and normalize the path as it might contain regex
+            $formattingUtil = new Formatting();
+            $specificPath = $formattingUtil->normalizePath($specificPath);
+
+            // If there was a specific path give, we have to check it for compatibility with $this.
+            // First thing: is it contained in one of $this root pathes, if not it is no REindexing
+            $isContained = false;
+            foreach ($this->rootPathes as $rootPath) {
+
+                if (strpos($specificPath, $rootPath) === 0) {
+
+                    $isContained = true;
+                    break;
+                }
+            }
+
+            // Did we find it?
+            if (!$isContained) {
+
+                return false;
+            }
+
+            // Second thing: is the path readable?
+            if (!is_readable($specificPath)) {
+
+                return false;
+            }
+
+            // Everything fine, set the root path to our specific path
+            $this->rootPathes = array($specificPath);
+        }
+
+        // Generate the map, all needed details have been altered above
+        return $this->generate();
     }
 
     /**

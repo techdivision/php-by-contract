@@ -12,6 +12,7 @@ namespace TechDivision\PBC;
 
 use TechDivision\PBC\Interfaces\ConfigInterface;
 use Psr\Log\LoggerInterface;
+use TechDivision\PBC\Utils\Formatting;
 
 /**
  * @package     TechDivision\PBC
@@ -52,10 +53,9 @@ class Config implements ConfigInterface
     }
 
     /**
-     * @param null   $configFile
      * @param string $context
      *
-     * @return mixed
+     * @return Config
      */
     public static function getInstance($context = '')
     {
@@ -110,10 +110,13 @@ class Config implements ConfigInterface
             throw new \Exception('Could not parse configuration file ' . $file);
         }
 
+        // We need some formatting utilities
+        $formattingUtil = new Formatting();
+
         // We will normalize the pathes we got and check if they are valid
         if (isset($configCandidate['cache']['dir'])) {
-            $tmp = $this->normalizePath($configCandidate['cache']['dir']);
-
+            $tmp = $formattingUtil->normalizePath($configCandidate['cache']['dir']);
+            var_dump($tmp);
             if (is_writable($tmp)) {
 
                 $configCandidate['cache']['dir'] = $tmp;
@@ -128,7 +131,7 @@ class Config implements ConfigInterface
         if (isset($configCandidate['project-dirs'])) {
             foreach ($configCandidate['project-dirs'] as $key => $projectDir) {
 
-                $tmp = $this->normalizePath($projectDir);
+                $tmp = $formattingUtil->normalizePath($projectDir);
 
                 if (is_readable($tmp)) {
 
@@ -171,38 +174,5 @@ class Config implements ConfigInterface
 
             return $this->config;
         }
-    }
-
-    /**
-     * Will break up any path into a canonical form like realpath(), but does not require the file to exist.
-     *
-     * @param $path
-     *
-     * @return mixed
-     */
-    private function normalizePath($path)
-    {
-        return array_reduce(
-            explode('/', $path),
-            create_function(
-                '$a, $b',
-                '
-                           if($a === 0)
-                               $a = "/";
-
-                           if($b === "")
-                               return $a;
-
-                           if($b === ".")
-                               return __DIR__;
-
-                           if($b === "..")
-                               return dirname($a);
-
-                           return preg_replace("/\/+/", "/", "$a/$b");
-                       '
-            ),
-            0
-        );
     }
 }
