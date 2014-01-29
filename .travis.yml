@@ -10,5 +10,5 @@ before_script:
   - phpenv rehash
 
 script:
-  - phpcs --report=summary --standard=PSR2 --ignore=*/vendor/* -p .
-  - phpunit AllTests tests/TechDivision/PBC/AllTests.php
+  - phpcs --report=summary --standard=PSR2 --ignore=*/vendor/* -pn .
+  - phpunit AllTests tests/TechDivision/PBC/Tests/AllTests.php
