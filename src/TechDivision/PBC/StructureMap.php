@@ -14,6 +14,9 @@ use TechDivision\PBC\Entities\Definitions\Structure;
 use TechDivision\PBC\Exceptions\CacheException;
 use TechDivision\PBC\Interfaces\MapInterface;
 
+// Load the constants if not already done
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'Constants.php';
+
 // We might run into a situation where we do not have proper autoloading in place here. So require our DTO.
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'Entities' . DIRECTORY_SEPARATOR .
     'Definitions' . DIRECTORY_SEPARATOR . 'Structure.php';
