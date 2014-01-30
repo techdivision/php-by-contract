@@ -23,32 +23,32 @@ class Structure
     /**
      * @var array
      */
-    private $allowedTypes = array('class', 'interface', 'trait');
+    protected $allowedTypes = array('class', 'interface', 'trait');
 
     /**
      * @var int
      */
-    private $cTime;
+    protected $cTime;
 
     /**
      * @var string
      */
-    private $identifier;
+    protected $identifier;
 
     /**
      * @var string
      */
-    private $path;
+    protected $path;
 
     /*
      * @var string
      */
-    private $type;
+    protected $type;
 
     /**
      * @var boolean
      */
-    private $hasContracts;
+    protected $hasContracts;
 
     /**
      * @param $cTime
