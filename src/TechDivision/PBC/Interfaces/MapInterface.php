@@ -74,7 +74,7 @@ interface MapInterface
      *
      * @return  bool
      */
-    public function isCurrent($identifier = null);
+    public function isRecent($identifier = null);
 
     /**
      * Will return an array of all classes which are stored in this map.

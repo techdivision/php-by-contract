@@ -116,7 +116,7 @@ class Config implements ConfigInterface
         // We will normalize the pathes we got and check if they are valid
         if (isset($configCandidate['cache']['dir'])) {
             $tmp = $formattingUtil->normalizePath($configCandidate['cache']['dir']);
-            var_dump($tmp);
+
             if (is_writable($tmp)) {
 
                 $configCandidate['cache']['dir'] = $tmp;

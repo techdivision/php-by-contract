@@ -32,32 +32,42 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'Entities' . DIRECTORY_SEPARATOR .
 class StructureMap implements MapInterface
 {
     /**
-     * @var array
+     * @var array $map
      */
     protected $map = array();
 
     /**
-     * @var array
+     * @var array $rootPathes
      */
     protected $rootPathes;
 
     /**
-     * @var string
+     * @var string $mapPath
      */
     protected $mapPath;
 
     /**
-     * @var array
+     * @var array $omittedPathes
      */
     protected $omittedPathes;
 
     /**
-     * @var Config
+     * @var Config $config
      */
     protected $config;
 
     /**
-     * @param        $rootPathes
+     * @var \Iterator|null $projectIterator Will hold the iterator over the project root pathes if needed
+     */
+    protected $projectIterator;
+
+    /**
+     * @var string $version Will hold the version of the currently loaded map
+     */
+    protected $version;
+
+    /**
+     * @param array  $rootPathes
      * @param Config $config
      * @param array  $omittedPathes
      */
@@ -121,7 +131,7 @@ class StructureMap implements MapInterface
         foreach ($this->map as $entry) {
 
             // If we only need contracted only
-            if ($contracted === true && $entry['hasContracts'] === false) {
+            if (($contracted === true && $entry['hasContracts'] === false) ) {
 
                 continue;
             }
@@ -220,7 +230,7 @@ class StructureMap implements MapInterface
      *
      * @return  bool
      */
-    public function isCurrent($identifier = null)
+    public function isRecent($identifier = null)
     {
         // Our result
         $result = false;
@@ -237,15 +247,12 @@ class StructureMap implements MapInterface
 
         // We got no class name, check the whole thing
         if ($identifier === null) {
-            /*
-                        // Get an iterator over all files in the root path
-                        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->rootPath),
-                            RecursiveIteratorIterator::SELF_FIRST);
 
-                        foreach($objects as $name => $object){
-                            echo "$name\n";
-                        }*/
-            return true;
+            // Is the saved version the same as of the current file system?
+            if ($this->version === $this->findVersion()) {
+
+                return true;
+            }
         }
 
         // Still here? That seems wrong.
@@ -388,19 +395,47 @@ class StructureMap implements MapInterface
     }
 
     /**
-     * Will generate the structure map within the specified root path.
+     * Will return a "version" of the current project file base by checking the cTime of all directories
+     * within the project root paths and create a sha1 hash over them.
      *
-     * @return  bool
+     * @return string
      */
-    private function generate()
+    protected function findVersion()
     {
+        $recursiveIteratore = $this->getProjectIterator();
+
+        $tmp = '';
+        foreach ($recursiveIteratore as $fileInfo) {
+
+            if ($fileInfo->isDir()) {
+
+                $tmp += $fileInfo->getCTime();
+            }
+        }
+
+        return sha1($tmp);
+    }
+
+    /**
+     * Will Return an iterator over our project files
+     *
+     * @return \Iterator
+     */
+    protected function getProjectIterator()
+    {
+        // If we already got it we can return it directly
+        if (isset($this->projectIterator)) {
+
+            return $this->projectIterator;
+        }
+
         // As we might have several rootPathes we have to create several RecursiveDirectoryIterators.
         $directoryIterators = array();
         foreach ($this->rootPathes as $rootPath) {
 
             $directoryIterators[] = new \RecursiveDirectoryIterator(
                 $rootPath,
-                \RecursiveDirectoryIterator::KEY_AS_PATHNAME
+                \RecursiveDirectoryIterator::SKIP_DOTS
             );
         }
 
@@ -408,6 +443,7 @@ class StructureMap implements MapInterface
         $recursiveIterator = new \AppendIterator();
         foreach ($directoryIterators as $directoryIterator) {
 
+            // Append the directory iterator
             $recursiveIterator->append(
                 new \RecursiveIteratorIterator(
                     $directoryIterator,
@@ -416,6 +452,25 @@ class StructureMap implements MapInterface
                 )
             );
         }
+
+        // Save our result for later reuse
+        $this->projectIterator = $recursiveIterator;
+
+        return $recursiveIterator;
+    }
+
+    /**
+     * Will generate the structure map within the specified root path.
+     *
+     * @return  bool
+     */
+    protected function generate()
+    {
+        // First of all we will get the version, so we will later know about changes made DURING indexing
+        $this->version = $this->findVersion();
+
+        // Get the iterator over our project files
+        $recursiveIterator = $this->getProjectIterator();
 
         // Lets prepare the patter based on the existence of omitted pathes.
         if (!empty($this->omittedPathes)) {
@@ -599,9 +654,15 @@ class StructureMap implements MapInterface
      */
     protected function load()
     {
+        // Can we read the intended path?
         if (is_readable($this->mapPath)) {
 
+            // Get the map
             $this->map = unserialize(file_get_contents($this->mapPath));
+
+            // Get the version and remove it from the map
+            $this->version = $this->map['version'];
+            unset($this->map['version']);
 
             return true;
         }
@@ -616,12 +677,20 @@ class StructureMap implements MapInterface
      */
     protected function save()
     {
+        // Add the version to the map
+        $this->map['version'] = $this->version;
+
+        // try to serialize into the known path
         if (file_put_contents($this->mapPath, serialize($this->map)) >= 0) {
 
+            // Remove the version entry and return the result
+            unset($this->map['version']);
             return true;
 
         } else {
 
+            // Remove the version entry and return the result
+            unset($this->map['version']);
             return false;
         }
     }
