@@ -131,7 +131,7 @@ class StructureMap implements MapInterface
         foreach ($this->map as $entry) {
 
             // If we only need contracted only
-            if (($contracted === true && $entry['hasContracts'] === false) ) {
+            if (($contracted === true && $entry['hasContracts'] === false)) {
 
                 continue;
             }
@@ -685,12 +685,14 @@ class StructureMap implements MapInterface
 
             // Remove the version entry and return the result
             unset($this->map['version']);
+
             return true;
 
         } else {
 
             // Remove the version entry and return the result
             unset($this->map['version']);
+
             return false;
         }
     }
