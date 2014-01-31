@@ -7,7 +7,7 @@ php:
 before_script:
   - pear install PHP_CodeSniffer
   - phpenv rehash
-  - phpcs --report=summary --standard=PSR2 --ignore=*/vendor/* -pn .
+  - phpcs --report=summary -pn .
   - composer install
 
 script:
