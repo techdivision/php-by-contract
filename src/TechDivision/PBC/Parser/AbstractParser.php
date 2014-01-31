@@ -33,6 +33,33 @@ abstract class AbstractParser implements ParserInterface
     }
 
     /**
+     * Will return the length of the string a token array is based on.
+     *
+     * @param $tokens
+     *
+     * @return int
+     */
+    protected function getStringLength($tokens)
+    {
+        // Iterator over the tokens and get their lengt
+        $result = 0;
+        $tokenCount = count($tokens);
+        for ($i = 0; $i < $tokenCount; $i++) {
+
+            if (is_array($tokens[$i])) {
+
+                $result += strlen($tokens[$i][1]);
+
+            } else {
+
+                $result += strlen($tokens[$i]);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Will search for a certain token in a certain entity.
      *
      * This method will search the signature of either a class or a function for a certain token e.g. final.

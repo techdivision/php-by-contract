@@ -12,7 +12,7 @@ namespace TechDivision\PBC\Utils;
 
 /**
  * @package     TechDivisionPBCUtils
- * @subpackage  
+ * @subpackage
  * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
  * @license     http://opensource.org/licenses/osl-3.0.php
  *              Open Software License (OSL 3.0)
@@ -51,6 +51,22 @@ class Formatting
                        '
             ),
             0
+        );
+    }
+
+    /**
+     * Converts a string by escaping all regex relevant characters in it.
+     *
+     * @param $string
+     *
+     * @return string|array
+     */
+    public function toRegex($string)
+    {
+        return str_replace(
+            array('$', '(', ')', '*', '[', ']', ' ', '/'),
+            array('\$', '\(', '\)', '\*', '\[', '\]', '\s*', '\/'),
+            $string
         );
     }
 }
