@@ -1,7 +1,37 @@
 <?php
+/**
+ * File containing the StructureDefinitionInterface interface
+ *
+ * PHP version 5
+ *
+ * @category   php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
+ */
 
 namespace TechDivision\PBC\Interfaces;
 
+use TechDivision\PBC\Entities\Lists\TypedListList;
+
+/**
+ * TechDivision\PBC\Interfaces\StructureDefinitionInterface
+ *
+ * Public interface for structure definitions
+ *
+ * @category   php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Interfaces
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
+ */
 interface StructureDefinitionInterface
 {
     /**
@@ -36,7 +66,7 @@ interface StructureDefinitionInterface
     /**
      * Will return all invariants of a structure.
      *
-     * @return TypedListLists
+     * @return TypedListList
      */
     public function getInvariants();
 }

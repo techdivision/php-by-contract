@@ -1,108 +1,142 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 20.06.13
- * Time: 10:31
- * To change this template use File | Settings | File Templates.
+ * File containing the ClassDefinition class
+ *
+ * PHP version 5
+ *
+ * @category   php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
+
 namespace TechDivision\PBC\Entities\Definitions;
 
-use TechDivision\PBC\StructureMap;
-use TechDivision\PBC\Config;
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
-use TechDivision\PBC\Parser\ClassParser;
-use TechDivision\PBC\Parser\InterfaceParser;
-use TechDivision\PBC\Proxies\Cache;
-use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
 
 /**
- * Class ClassDefinition
+ * TechDivision\PBC\Entities\Definitions\ClassDefinition
+ *
+ * This class acts as a DTO-like (we are not immutable due to protected visibility)
+ * entity for describing class definitions
+ *
+ * @category   php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
-class ClassDefinition implements StructureDefinitionInterface
+class ClassDefinition extends AbstractStructureDefinition
 {
     /**
-     * @var string
+     * @var string $path File path to the class definition
      */
-    public $path;
+    protected $path;
 
     /**
-     * @var string
+     * @var string $namespace The namespace the class belongs to
      */
-    public $namespace;
+    protected $namespace;
 
     /**
-     * @var array
+     * @var array $usedNamespaces All classes which are referenced by the "use" keyword
      */
-    public $usedNamespaces;
+    protected $usedNamespaces;
 
     /**
-     * @var string
+     * @var string $docBlock The initial class docblock header
      */
-    public $docBlock;
+    protected $docBlock;
 
     /**
-     * @var boolean
+     * @var boolean $isFinal Is this a final class
      */
-    public $isFinal;
+    protected $isFinal;
 
     /**
-     * @var boolean
+     * @var boolean $isAbstract Is this class abstract
      */
-    public $isAbstract;
+    protected $isAbstract;
 
     /**
-     * @var string
+     * @var string $name Name of the class
      */
-    public $name;
+    protected $name;
 
     /**
-     * @var string
+     * @var string $extends Name of the parent class (if any)
      */
-    public $extends;
+    protected $extends;
 
     /**
-     * @var array
+     * @var array $implements Array of interface names this class implements
      */
-    public $implements;
+    protected $implements;
 
     /**
-     * @var array
+     * @var array $constants Class constants
      */
-    public $constants;
+    protected $constants;
 
     /**
-     * @var AttributeDefinitionList
+     * @var AttributeDefinitionList $attributeDefinitions List of defined attributes
      */
-    public $attributeDefinitions;
+    protected $attributeDefinitions;
 
     /**
-     * @var AssertionList
+     * @var AssertionList $invariantConditions List of directly defined invariant conditions
      */
-    public $invariantConditions;
+    protected $invariantConditions;
 
     /**
-     * @var TypedListList
+     * @var TypedListList $ancestralInvariants List of lists of any ancestral invariants
      */
-    public $ancestralInvariants;
+    protected $ancestralInvariants;
 
     /**
-     * @var FunctionDefinitionList
+     * @var FunctionDefinitionList $functionDefinitions List of methods this class defines
      */
-    public $functionDefinitions;
+    protected $functionDefinitions;
 
     /**
-     * @const   string
+     * @const string TYPE The structure type
      */
     const TYPE = 'class';
 
     /**
      * Default constructor
+     *
+     * @param string $path
+     * @param string $namespace
+     * @param array  $usedNamespaces
+     * @param string $docBlock
+     * @param bool   $isFinal
+     * @param bool   $isAbstract
+     * @param string $name
+     * @param string $extends
+     * @param array  $implements
+     * @param array  $constants
+     * @param null   $attributeDefinitions
+     * @param null   $invariantConditions
+     * @param null   $ancestralInvariants
+     * @param null   $functionDefinitions
+     *
+     * @return null
      */
     public function __construct(
+        $path = '',
+        $namespace = '',
+        $usedNamespaces = array(),
         $docBlock = '',
         $isFinal = false,
         $isAbstract = false,
@@ -115,6 +149,9 @@ class ClassDefinition implements StructureDefinitionInterface
         $ancestralInvariants = null,
         $functionDefinitions = null
     ) {
+        $this->path = $path;
+        $this->namespace = $namespace;
+        $this->usedNamespaces = $usedNamespaces;
         $this->docBlock = $docBlock;
         $this->isFinal = $isFinal;
         $this->isAbstract = $isAbstract;
@@ -130,6 +167,146 @@ class ClassDefinition implements StructureDefinitionInterface
         $this->functionDefinitions = is_null(
             $functionDefinitions
         ) ? new FunctionDefinitionList() : $functionDefinitions;
+    }
+
+    /**
+     * Getter method for attribute $ancestralInvariants
+     *
+     * @return null|TypedListList
+     */
+    public function getAncestralInvariants()
+    {
+        return $this->ancestralInvariants;
+    }
+
+    /**
+     * Getter method for attribute $attributeDefinitions
+     *
+     * @return null|AttributeDefinitionList
+     */
+    public function getAttributeDefinitions()
+    {
+        return $this->attributeDefinitions;
+    }
+
+    /**
+     * Getter method for attribute $constants
+     *
+     * @return array
+     */
+    public function getConstants()
+    {
+        return $this->constants;
+    }
+
+    /**
+     * Getter method for attribute $docBlock
+     *
+     * @return string
+     */
+    public function getDocBlock()
+    {
+        return $this->docBlock;
+    }
+
+    /**
+     * Getter method for attribute $extends
+     *
+     * @return string
+     */
+    public function getExtends()
+    {
+        return $this->extends;
+    }
+
+    /**
+     * Getter method for attribute $functionDefinitions
+     *
+     * @return null|FunctionDefinitionList
+     */
+    public function getFunctionDefinitions()
+    {
+        return $this->functionDefinitions;
+    }
+
+    /**
+     * Getter method for attribute $implements
+     *
+     * @return array
+     */
+    public function getImplements()
+    {
+        return $this->implements;
+    }
+
+    /**
+     * Getter method for attribute $invariantConditions
+     *
+     * @return null|AssertionList
+     */
+    public function getInvariantConditions()
+    {
+        return $this->invariantConditions;
+    }
+
+    /**
+     * Getter method for attribute $isAbstract
+     *
+     * @return bool
+     */
+    public function getIsAbstract()
+    {
+        return $this->isAbstract;
+    }
+
+    /**
+     * Getter method for attribute $isFinal
+     *
+     * @return bool
+     */
+    public function getIsFinal()
+    {
+        return $this->isFinal;
+    }
+
+    /**
+     * Getter method for attribute $name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Getter method for attribute $namespace
+     *
+     * @return string
+     */
+    public function getNamespace()
+    {
+        return $this->namespace;
+    }
+
+    /**
+     * Getter method for attribute $path
+     *
+     * @return string
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * Getter method for attribute $usedNamespace
+     *
+     * @return array
+     */
+    public function getUsedNamespaces()
+    {
+        return $this->usedNamespaces;
     }
 
     /**
@@ -195,115 +372,11 @@ class ClassDefinition implements StructureDefinitionInterface
         }
 
         // Add our parent class (if any)
-        if ($this->extends !== '') {
+        if (!empty($this->extends)) {
 
             $result[] = $this->extends;
         }
 
         return $result;
-    }
-
-    /**
-     * @param $ancestorDefinitions
-     *
-     * @return bool
-     */
-    protected function getAncestralConditions($ancestorDefinitions)
-    {
-        // Maybe we do not have to do anything
-        if (count($ancestorDefinitions) === 0) {
-
-            return false;
-        }
-
-        // We have to get a map of all the methods we have to know which got overridden
-        if ($this->functionDefinitions->count() === 0) {
-
-            return false;
-
-        } else {
-
-            foreach ($ancestorDefinitions as $ancestorDefinition) {
-
-                $functionIterator = $ancestorDefinition->functionDefinitions->getIterator();
-                for ($j = 0; $j < $functionIterator->count(); $j++) {
-
-                    // Do we have a method like that?
-                    $function = $this->functionDefinitions->get($functionIterator->current()->name);
-
-                    if ($function !== false) {
-
-                        // Get the pre- and postconditions of the ancestor
-                        if ($functionIterator->current()->preconditions->count() > 0) {
-
-                            $function->ancestralPreconditions->add($functionIterator->current()->preconditions);
-                        }
-                        if ($functionIterator->current()->postconditions->count() > 0) {
-
-                            $function->ancestralPostconditions->add($functionIterator->current()->postconditions);
-                        }
-
-                        // Check if we have to use the old keyword now
-                        if ($functionIterator->current()->usesOld === true) {
-
-                            $function->usesOld = true;
-                        }
-
-                        // Safe the enhanced functionDefinition back
-                        $this->functionDefinitions->set($function->name, $function);
-                    }
-
-                    // increment iterator
-                    $functionIterator->next();
-                }
-            }
-        }
-
-        // We are still here, seems good
-        return true;
-    }
-
-    /**
-     *
-     */
-    protected function getAncestralInvariant($ancestorDefinitions)
-    {
-        // We have to get all the contracts for our interfaces and parent class
-        if ($this->extends !== '') {
-
-            // Get the definition of our parent
-            $classParser = new ClassParser();
-            $cache = Cache::getInstance();
-            $files = $cache->getFiles();
-
-            if (isset($files[$this->extends])) {
-
-                $parent = $classParser->getDefinition($files[$this->extends]['path'], $this->extends);
-
-                // Make the parent get their parent's invariant contracts
-                $isChild = $parent->getAncestralInvariant($ancestorDefinitions);
-
-                // Add them to this invariant list
-                $this->ancestralInvariants->add($parent->invariantConditions);
-
-                // If our parent is a child as well we need their invariants too
-                if ($isChild === true) {
-
-                    // Add them to this invariant list
-                    $iterator = $parent->ancestralInvariants->getIterator();
-                    for ($i = 0; $i < $iterator->count(); $i++) {
-
-                        $this->ancestralInvariants->add($iterator->current());
-
-                        // Set the iterator to the next iteration
-                        $iterator->next();
-                    }
-                }
-
-                return true;
-            }
-        }
-
-        return false;
     }
 }

@@ -84,7 +84,7 @@ class InvariantFilter extends AbstractFilter
         // checking mechanism.
         $obsoleteProperties = array();
         $propertyReplacements = array();
-        $iterator = $structureDefinition->attributeDefinitions->getIterator();
+        $iterator = $structureDefinition->getAttributeDefinitions()->getIterator();
         for ($i = 0; $i < $iterator->count(); $i++) {
 
             // Get the current attribute for more easy access
@@ -112,7 +112,7 @@ class InvariantFilter extends AbstractFilter
                 $functionHook = PBC_FUNCTION_HOOK_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE;
 
                 // Get the code for our attribute storage
-                $attributeCode = $this->generateAttributeCode($structureDefinition->attributeDefinitions);
+                $attributeCode = $this->generateAttributeCode($structureDefinition->getAttributeDefinitions());
 
                 // Get the code for the assertions
                 $code = $this->generateFunctionCode($structureDefinition->getInvariants());
@@ -131,7 +131,7 @@ class InvariantFilter extends AbstractFilter
                 );
 
                 // Determine if we need the __set method to be injected
-                if ($structureDefinition->functionDefinitions->entryExists('__set')) {
+                if ($structureDefinition->getFunctionDefinitions()->entryExists('__set')) {
 
                     // Get the code for our __set() method
                     $setCode = $this->generateSetCode($structureDefinition->hasParents(), true);
@@ -152,7 +152,7 @@ class InvariantFilter extends AbstractFilter
                 }
 
                 // Determine if we need the __get method to be injected
-                if ($structureDefinition->functionDefinitions->entryExists('__get')) {
+                if ($structureDefinition->getFunctionDefinitions()->entryExists('__get')) {
 
                     // Get the code for our __set() method
                     $getCode = $this->generateGetCode($structureDefinition->hasParents(), true);

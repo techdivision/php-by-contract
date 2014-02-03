@@ -71,8 +71,7 @@ class SkeletonFilter extends AbstractFilter
      */
     public function filter($in, $out, &$consumed, $closing)
     {
-        $path = $this->params->path;
-        $functionDefinitions = $this->params->functionDefinitions;
+        $structureDefinition = $this->params;
         // Get our buckets from the stream
         $functionHook = '';
         $firstIteration = true;
@@ -81,7 +80,7 @@ class SkeletonFilter extends AbstractFilter
             // Lets cave in the original filepath and the modification time
             if ($firstIteration === true) {
 
-                $this->injectOriginalPathHint($bucket->data, $path);
+                $this->injectOriginalPathHint($bucket->data, $structureDefinition->getPath());
 
                 $firstIteration = false;
             }
@@ -134,7 +133,7 @@ class SkeletonFilter extends AbstractFilter
 
                     // We have to create the local constants which will substitute __DIR__ and __FILE__
                     // within the cache folder.
-                    $this->injectMagicConstants($bucket->data, $path);
+                    $this->injectMagicConstants($bucket->data, $structureDefinition->getPath());
 
                 }
                 // Did we find a function? If so check if we know that thing and insert the code of its preconditions.
@@ -144,7 +143,7 @@ class SkeletonFilter extends AbstractFilter
                     $functionName = $tokens[$i + 2][1];
 
                     // Check if we got the function in our list, if not continue
-                    $functionDefinition = $functionDefinitions->get($functionName);
+                    $functionDefinition = $structureDefinition->getFunctionDefinitions()->get($functionName);
                     if (!$functionDefinition instanceof FunctionDefinition ||
                         $functionDefinition->isAbstract === true
                     ) {

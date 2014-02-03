@@ -1,32 +1,58 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 16.07.13
- * Time: 12:55
- * To change this template use File | Settings | File Templates.
+ * File containing the StructureParserInterface interface
+ *
+ * PHP version 5
+ *
+ * @category   php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Interfaces
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Interfaces;
 
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
+use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 
+/**
+ * TechDivision\PBC\Interfaces\StructureParserInterface
+ *
+ * Interface which describes parsers for structures like classes, interfaces and traits.
+ *
+ * @category   php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Interfaces
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
+ */
 interface StructureParserInterface extends ParserInterface
 {
     /**
-     * @param null $structureName
-     * @param bool $getRecursive
+     * Will return a structure definition. If a name is gives method will search for this particular structure.
      *
-     * @return mixed
+     * @param null $structureName Name of a certain structure we are searching for
+     * @param bool $getRecursive  Will recursively load all conditions of ancestral structures
+     *
+     * @return StructureDefinitionInterface The definition of a the searched structure
      */
     public function getDefinition($structureName = null, $getRecursive = true);
 
     /**
-     * @param                $file
-     * @param FileDefinition $fileDefinition
-     * @param bool           $getRecursive
+     * Will return a list of structures found in a certain file
      *
-     * @return mixed
+     * @param string         $file           The path of the file to search in
+     * @param FileDefinition $fileDefinition Definition of the file to pick details from
+     * @param bool           $getRecursive   Do we need our ancestral information?
+     *
+     * @return StructureDefinitionList
      */
     public function getDefinitionListFromFile($file, FileDefinition $fileDefinition, $getRecursive = true);
 }

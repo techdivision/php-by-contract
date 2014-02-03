@@ -1,10 +1,17 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 26.06.13
- * Time: 13:19
- * To change this template use File | Settings | File Templates.
+ * File containing the AbstractStructureParser for class structures
+ *
+ * PHP version 5
+ *
+ * @category   php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Parser
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Parser;
@@ -23,7 +30,18 @@ use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
 use TechDivision\PBC\Exceptions\ParserException;
 
 /**
- * Class ClassParser
+ * TechDivision\PBC\Parser\ClassParser
+ *
+ * This class implements the StructureParserInterface for class structures
+ *
+ * @category   php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Parser
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class ClassParser extends AbstractStructureParser
 {
@@ -119,14 +137,12 @@ class ClassParser extends AbstractStructureParser
      * This method will use a set of other methods to parse a token array and retrieve any
      * possible information from it. This information will be entered into a ClassDefinition object.
      *
-     * @access private
-     *
      * @param      $tokens
      * @param bool $getRecursive
      *
      * @return StructureDefinitionInterface
      */
-    private function getDefinitionFromTokens($tokens, $getRecursive = true)
+    protected function getDefinitionFromTokens($tokens, $getRecursive = true)
     {
         // First of all we need a new ClassDefinition to fill
         $classDefinition = new ClassDefinition();
@@ -145,7 +161,7 @@ class ClassParser extends AbstractStructureParser
         // So we got our docBlock, now we can parse the invariant annotations from it
         $annotationParser = new AnnotationParser();
         $classDefinition->invariantConditions = $annotationParser->getConditions(
-            $classDefinition->docBlock,
+            $classDefinition->getDocBlock(),
             PBC_KEYWORD_INVARIANT
         );
 
@@ -154,43 +170,14 @@ class ClassParser extends AbstractStructureParser
         $classDefinition->isAbstract = $this->hasSignatureToken($this->tokens, T_ABSTRACT, T_CLASS);
 
         // Lets check if there is any inheritance, or if we implement any interfaces
-        $parentName = $this->getParent($tokens);
-        if ($parentName === '') {
-
-            $classDefinition->extends = $parentName;
-
-        } elseif (count($classDefinition->usedNamespaces) === 0) {
-
-            if (strpos($parentName, '\\') !== false) {
-
-                $classDefinition->extends = $parentName;
-
-            } else {
-
-                $classDefinition->extends = '\\' . $classDefinition->namespace . '\\' . $parentName;
-            }
-
-        } else {
-
-            foreach ($classDefinition->usedNamespaces as $alias) {
-
-                if (strpos($alias, $parentName) !== false) {
-
-                    $classDefinition->extends = '\\' . $alias;
-                }
-            }
-        }
-
-        // Clean possible double-\
         $classDefinition->extends = trim(
             $this->resolveUsedNamespace(
-                $classDefinition->usedNamespaces,
-                $classDefinition->namespace,
-                str_replace('\\\\', '\\', $classDefinition->extends)
+                $classDefinition,
+                $this->getParent($tokens)
             ),
             '\\'
         );
-// Get all the interfaces we have
+        // Get all the interfaces we have
         $classDefinition->implements = $this->getInterfaces($classDefinition);
 
         // Get all class constants
@@ -238,12 +225,12 @@ class ClassParser extends AbstractStructureParser
                 }
 
                 // Iterate over all dependencies and combine method conditions if method match
-                $functionIterator = $classDefinition->functionDefinitions->getIterator();
+                $functionIterator = $classDefinition->getFunctionDefinitions()->getIterator();
                 foreach ($functionIterator as $function) {
 
                     // Get the ancestral function of the one we currently have a look at.
                     // If we got it we have to get their conditions
-                    $ancestralFunction = $dependencyDefinition->functionDefinitions->get($function->name);
+                    $ancestralFunction = $dependencyDefinition->getFunctionDefinitions()->get($function->name);
                     if ($ancestralFunction instanceof FunctionDefinition) {
 
                         // If the ancestral function uses the old keyword we have to do too
@@ -257,7 +244,7 @@ class ClassParser extends AbstractStructureParser
                         $function->ancestralPostconditions = $ancestralFunction->getPostconditions();
 
                         // Save if back into the definition
-                        $classDefinition->functionDefinitions->set($function->name, $function);
+                        $classDefinition->getFunctionDefinitions()->set($function->name, $function);
                     }
                 }
 
@@ -270,6 +257,9 @@ class ClassParser extends AbstractStructureParser
         // Lets get the attributes the class might have
         $classDefinition->attributeDefinitions = $this->getAttributes($tokens, $classDefinition->getInvariants());
 
+        // Lock the definition
+        $classDefinition->lock();
+
         // Before exiting we will add the entry to the current structure definition hierarchy
         $this->structureDefinitionHierarchy->insert($classDefinition);
 
@@ -281,7 +271,7 @@ class ClassParser extends AbstractStructureParser
      *
      * @return string
      */
-    private function getName($tokens)
+    protected function getName($tokens)
     {
         // Check the tokens
         $className = '';
@@ -309,7 +299,7 @@ class ClassParser extends AbstractStructureParser
      *
      * @return string
      */
-    private function getParent($tokens)
+    protected function getParent($tokens)
     {
         // Check the tokens
         $className = '';
@@ -341,7 +331,7 @@ class ClassParser extends AbstractStructureParser
      *
      * @return array
      */
-    private function getInterfaces(ClassDefinition & $classDefinition)
+    protected function getInterfaces(ClassDefinition & $classDefinition)
     {
         // Check the tokens
         $interfaces = array();
@@ -361,8 +351,7 @@ class ClassParser extends AbstractStructureParser
                     } elseif ($this->tokens[$j][0] === T_STRING) {
 
                         $interfaces[] = $this->resolveUsedNamespace(
-                            $classDefinition->usedNamespaces,
-                            $classDefinition->namespace,
+                            $classDefinition,
                             $this->tokens[$j][1]
                         );
                     }
@@ -388,7 +377,7 @@ class ClassParser extends AbstractStructureParser
      *
      * @return AttributeDefinitionList
      */
-    private function getAttributes(array $tokens, TypedListList $invariants = null)
+    protected function getAttributes(array $tokens, TypedListList $invariants = null)
     {
         // Check the tokens
         $attributes = new AttributeDefinitionList();
@@ -490,12 +479,14 @@ class ClassParser extends AbstractStructureParser
     }
 
     /**
+     *
+     *
      * @param array $tokens
-     * @param       $attributePosition
+     * @param int   $attributePosition
      *
      * @return AttributeDefinition
      */
-    private function getAttributeProperties(array $tokens, $attributePosition)
+    protected function getAttributeProperties(array $tokens, $attributePosition)
     {
         // We got the tokens and the position of the attribute, so look in front of it for visibility and a
         // possible static keyword

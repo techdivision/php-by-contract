@@ -10,6 +10,7 @@
  */
 namespace TechDivision\PBC\Parser;
 
+use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
 use TechDivision\PBC\Interfaces\StructureParserInterface;
 use TechDivision\PBC\Exceptions\ParserException;
 use TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy;
@@ -109,16 +110,14 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
 
     /**
      * Will check if a certain structure was mentioned in one(!) use statement.
-     * If we will return true we might also remove the use statement from our collection.
      *
-     * @param array  $usedNamespaces
-     * @param string $namespace
-     * @param string $structureName
-     * @param bool   $remove
+     * @param StructureDefinitionInterface $structureDefinition The structure $structureName is compared against
+     * @param string                       $structureName       The name of the structure we have to check against the
+     *                                                          use statements of the definition
      *
      * @return bool|string
      */
-    protected function resolveUsedNamespace(& $usedNamespaces, $namespace, $structureName, $remove = true)
+    protected function resolveUsedNamespace(StructureDefinitionInterface & $structureDefinition, $structureName)
     {
         // If there was no useful name passed we can fail right here
         if (empty($structureName)) {
@@ -127,19 +126,12 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
         }
 
         // Walk over all namespaces and if we find something we will act accordingly.
-        $result = $structureName;
-        foreach ($usedNamespaces as $key => $usedNamespace) {
+        $result = $structureDefinition->getQualifiedName();
+        foreach ($structureDefinition->getUsedNamespaces() as $key => $usedNamespace) {
 
             // Check if the last part of the use statement is our structure
             $tmp = explode('\\', $usedNamespace);
             if (array_pop($tmp) === $structureName) {
-
-                // Should we remove it from the array? Did we succeed before too? If so we have to fail to not remove
-                // the wrong statement.
-                if ($remove === true) {
-
-                    unset($usedNamespaces[$key]);
-                }
 
                 // Tell them we succeeded
                 return trim(implode('\\', $tmp) . '\\' . $structureName, '\\');
@@ -147,9 +139,9 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
         }
 
         // We did not seem to have found anything. Might it be that we are in our own namespace?
-        if ($namespace !== null && strpos($structureName, '\\') !== 0) {
+        if ($structureDefinition->getNamespace() !== null && strpos($structureName, '\\') !== 0) {
 
-            return $namespace . '\\' . $structureName;
+            return $structureDefinition->getNamespace() . '\\' . $structureName;
         }
 
         // Still here? Return what we got.

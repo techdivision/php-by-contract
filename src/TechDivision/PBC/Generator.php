@@ -1,10 +1,16 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 19.06.13
- * Time: 15:26
- * To change this template use File | Settings | File Templates.
+ * File containing the Generator class
+ *
+ * PHP version 5
+ *
+ * @category   php-by-contract
+ * @package    TechDivision\PBC
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC;
@@ -24,7 +30,17 @@ use TechDivision\PBC\Parser\StructureParserFactory;
 use TechDivision\PBC\Config;
 
 /**
- * Class Generator
+ * TechDivision\PBC\Generator
+ *
+ * This class initiates the creation of enforced structure definitions.
+ *
+ * @category   php-by-contract
+ * @package    TechDivision\PBC
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class Generator
 {
@@ -181,14 +197,14 @@ class Generator
         InterfaceDefinition $structureDefinition
     ) {
         // Get the content of the file
-        $content = file_get_contents($structureDefinition->path);
+        $content = file_get_contents($structureDefinition->getPath());
 
         // Make the one change we need, the original file path and modification timestamp
         $content = str_replace(
             '<?php',
-            '<?php /* ' . PBC_ORIGINAL_PATH_HINT . $structureDefinition->path . '#' .
+            '<?php /* ' . PBC_ORIGINAL_PATH_HINT . $structureDefinition->getPath() . '#' .
             filemtime(
-                $structureDefinition->path
+                $structureDefinition->getPath()
             ) . PBC_ORIGINAL_PATH_HINT . ' */',
             $content
         );
@@ -206,8 +222,6 @@ class Generator
         $targetFileName,
         ClassDefinition $structureDefinition
     ) {
-        // Before using the definition we have to finalize it
-        // $structureDefinition->finalize();
 
         $res = fopen(
             $this->createFilePath($structureDefinition->getQualifiedName()),
@@ -219,7 +233,7 @@ class Generator
 
         $tmp = fwrite(
             $res,
-            file_get_contents($structureDefinition->path, time())
+            file_get_contents($structureDefinition->getPath(), time())
         );
 
         // Did we write something?
@@ -280,7 +294,7 @@ class Generator
 
             // Do we even got any preconditions?
             $filterNeeded = false;
-            $iterator = $structureDefinition->functionDefinitions->getIterator();
+            $iterator = $structureDefinition->getFunctionDefinitions()->getIterator();
             foreach ($iterator as $functionDefinition) {
 
                 if ($functionDefinition->getPreconditions()->count() !== 0) {
@@ -297,7 +311,7 @@ class Generator
                     $res,
                     'PreconditionFilter',
                     STREAM_FILTER_WRITE,
-                    $structureDefinition->functionDefinitions
+                    $structureDefinition->getFunctionDefinitions()
                 );
             }
         }
@@ -307,7 +321,7 @@ class Generator
 
             // Do we even got any postconditions?
             $filterNeeded = false;
-            $iterator = $structureDefinition->functionDefinitions->getIterator();
+            $iterator = $structureDefinition->getFunctionDefinitions()->getIterator();
             foreach ($iterator as $functionDefinition) {
 
                 if ($functionDefinition->getPostconditions()->count() !== 0) {
@@ -324,7 +338,7 @@ class Generator
                     $res,
                     'PostconditionFilter',
                     STREAM_FILTER_WRITE,
-                    $structureDefinition->functionDefinitions
+                    $structureDefinition->getFunctionDefinitions()
                 );
             }
         }
