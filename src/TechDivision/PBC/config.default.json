@@ -23,6 +23,6 @@
     },
 
     "project-dirs": [
-        "./../../../tests"
+        "./Tests"
     ]
 }
