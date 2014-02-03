@@ -190,4 +190,3 @@ abstract class AbstractStructureDefinition extends AbstractLockableEntity implem
         return !empty($this->extends);
     }
 }
-
