@@ -1,32 +1,43 @@
 <?php
 /**
- * TechDivision\PBC\Tests\ParserTest
+ * File containing the ParserTest class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Tests
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
+
 namespace TechDivision\PBC\Tests;
 
 use TechDivision\PBC\Config;
 
-require_once 'PHPUnit/Autoload.php';
-require_once __DIR__ . "/../../../../src/TechDivision/PBC/Bootstrap.php";
-
 /**
- * @package     TechDivision\PBC
- * @subpackage  Tests
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\Tests\ParserTest
+ *
+ * Will test basic parser usage
+ *
+ * @category   php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Tests
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class ParserTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * Will test parsing of special annotations like typed arrays
      *
+     * @return null
      */
     public function testAnnotationParsing()
     {
@@ -105,7 +116,9 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Will check for proper method parsing
      *
+     * @return null
      */
     public function testMethodParsing()
     {
@@ -122,7 +135,9 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Will test if a configuration using regexed paths can be used properly
      *
+     * @return null
      */
     public function testRegexMapping()
     {
