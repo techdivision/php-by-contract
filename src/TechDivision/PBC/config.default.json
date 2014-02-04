@@ -20,9 +20,5 @@
         "enforce-default-type-safety": true,
         "processing": "exception",
         "level": 7
-    },
-
-    "project-dirs": [
-        "./Tests"
-    ]
+    }
 }
