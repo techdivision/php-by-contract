@@ -4,7 +4,7 @@
  *
  * PHP version 5
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Tests
  * @author     Bernhard Wick <b.wick@techdivision.com>
@@ -23,7 +23,7 @@ use TechDivision\Example\Servlets\IndexServlet;
  *
  * Will test with a real class taken from a random project
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Tests
  * @author     Bernhard Wick <b.wick@techdivision.com>

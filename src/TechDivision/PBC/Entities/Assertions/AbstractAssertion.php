@@ -1,10 +1,17 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 19.06.13
- * Time: 16:20
- * To change this template use File | Settings | File Templates.
+ * File containing the AbstractAssertion class
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Entities\Assertions;
@@ -14,19 +21,28 @@ use TechDivision\PBC\Interfaces\Assertion;
 use TechDivision\PBC\Utils\PhpLint;
 
 /**
- * Class Assertion
+ * TechDivision\PBC\Entities\Assertions\AbstractAssertion
  *
  * This class is used to provide an object base way to pass assertions as e.g. a precondition.
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 abstract class AbstractAssertion implements Assertion
 {
     /**
-     * @var boolean
+     * @var boolean $inverted If the logical meaning was inverted
      */
     protected $inverted;
 
     /**
-     *
+     * Default constructor
      */
     public function __construct()
     {
@@ -39,7 +55,9 @@ abstract class AbstractAssertion implements Assertion
     }
 
     /**
+     * Will return a string representing the inverted logical meaning
      *
+     * @return string
      */
     public function getInvertString()
     {
@@ -53,6 +71,8 @@ abstract class AbstractAssertion implements Assertion
     }
 
     /**
+     * Will return true if the assertion is in an inverted state
+     *
      * @return bool
      */
     public function isInverted()
@@ -61,8 +81,9 @@ abstract class AbstractAssertion implements Assertion
     }
 
     /**
+     * Will test if the assertion will result in a valid PHP statement
+     *
      * @return bool
-     * @throws \TechDivision\PBC\Exceptions\ParserException
      */
     public function isValid()
     {

@@ -1,46 +1,56 @@
 <?php
 /**
- * TechDivision\PBC\Entities\Assertions\BasicAssertion
+ * File containing the BasicAssertion class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
+
 namespace TechDivision\PBC\Entities\Assertions;
 
 /**
- * This class is used to provide an object base way to pass assertions as e.g. a precondition.
+ * TechDivision\PBC\Entities\Assertions\BasicAssertion
  *
- * @package     TechDivision\PBC
- * @subpackage  Entities
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * Basic assertions to compare two values
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class BasicAssertion extends AbstractAssertion
 {
     /**
-     * @var
+     * @var string $firstOperand The first operand to compare
      */
     public $firstOperand;
 
     /**
-     * @var
+     * @var string $secondOperand The second operand to compare
      */
     public $secondOperand;
 
     /**
-     * @var
+     * @var string $operator The operator used for comparison
      */
     public $operator;
 
     /**
-     * @var array
+     * @var array $inversionMapping A map to inverse operators
      */
-    private $inversionMapping;
+    protected $inversionMapping;
 
     /**
      * @param $_firstOperand

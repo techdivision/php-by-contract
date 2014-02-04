@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Lets run the ant pre-commit target (if any) and save the result to a variable
+ant pre-commit;
+returnValue=$?
+
+# If the result indicates an error we will fail with 1
+if [ $returnValue -ne 0 ]
+then
+        exit 1
+fi
+
+# If we reach this point we succeeded and are ready to commit
+exit 0

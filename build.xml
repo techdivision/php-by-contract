@@ -148,4 +148,21 @@
     	<antcall target="phpmd"/>
     </target>
 
+    <!-- ==================================================================== -->
+    <!-- Runs several targets which are needed to ensure we commit good work  -->
+    <!-- ==================================================================== -->
+    <target name="pre-commit" description="Runs several targets which are needed to ensure we commit good work.">
+        <antcall target="run-tests"/>
+        <antcall target="phpcs"/>
+    </target>
+
+    <!-- ==================================================================== -->
+    <!-- Will deploy our git hooks if any ant target gets executed            -->
+    <!-- ==================================================================== -->
+    <copy todir=".git/hooks">
+        <fileset dir="hooks">
+            <include name="**/*" />
+        </fileset>
+    </copy>
+    <chmod dir=".git/hooks" perm="755" includes="**/*"/>
 </project>

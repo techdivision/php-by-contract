@@ -1,23 +1,35 @@
 <?php
 /**
- * TechDivision\PBC\Entities\Assertions\AssertionFactory
+ * File containing the AssertionFactory class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Entities\Assertions;
 
 /**
- * @package     TechDivision\PBC
- * @subpackage  Entities
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\Entities\Assertions\AssertionFactory
+ *
+ * This class will help instantiating the right assertion class for any given assertion string
+ * TODO Implement all the features
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class AssertionFactory
 {
