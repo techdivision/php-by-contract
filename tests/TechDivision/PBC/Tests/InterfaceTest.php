@@ -4,7 +4,7 @@
  *
  * PHP version 5
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Tests
  * @author     Bernhard Wick <b.wick@techdivision.com>
@@ -21,7 +21,7 @@ namespace TechDivision\PBC\Tests;
  *
  * Will test basic interface usage
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Tests
  * @author     Bernhard Wick <b.wick@techdivision.com>
