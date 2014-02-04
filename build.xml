@@ -20,7 +20,6 @@
 	<!-- ==================================================================== -->
 	<target name="clean" description="Cleans almost everything, so use carefully.">
 		<delete dir="${php-target.dir}" includeemptydirs="true" quiet="false" verbose="true" failonerror="true"/>
-        <symlink action="delete" link="instance-src"/>
 	</target>
 
 	<!-- ==================================================================== -->
@@ -55,8 +54,8 @@
     <!-- Runs the code sniffer and generates a report                         -->
     <!-- ==================================================================== -->
     <target name="phpcs" description="Runs the code sniffer and generates a report.">
-        <exec executable="phpcs">
-            <arg line="--extensions=php --standard=phpcs.xml --report=checkstyle --report-file=${php-target.dir}/reports/checkstyle.xml ${php-src.dir}"/>
+        <exec executable="phpcs" failonerror="true">
+            <arg line="-n --extensions=php --standard=PSR2 ${php-src.dir}"/>
         </exec>
     </target>
 
@@ -152,7 +151,6 @@
     <!-- Runs several targets which are needed to ensure we commit good work  -->
     <!-- ==================================================================== -->
     <target name="pre-commit" description="Runs several targets which are needed to ensure we commit good work.">
-        <antcall target="run-tests"/>
         <antcall target="phpcs"/>
     </target>
 

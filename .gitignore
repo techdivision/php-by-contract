@@ -18,3 +18,4 @@ build.properties
 # IDE settings
 .project
 .settings
+.idea
