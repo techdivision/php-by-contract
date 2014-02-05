@@ -1,43 +1,63 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 19.06.13
- * Time: 16:20
- * To change this template use File | Settings | File Templates.
+ * File containing the InstanceAssertion class
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Entities\Assertions;
 
 /**
- * Class InstanceAssertion
+ * TechDivision\PBC\Entities\Assertions\InstanceAssertion
  *
  * This class is used to provide an object base way to pass assertions as e.g. a precondition.
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class InstanceAssertion extends AbstractAssertion
 {
     /**
-     * @var
+     * @var string $operand The operand we have to check
      */
     public $operand;
 
     /**
-     * @var
+     * @var string $class The name of the class we have to check for
      */
     public $class;
 
     /**
-     * @param $_operand
-     * @param $_class
+     * Default constructor
+     *
+     * @param string $operand The operand we have to check
+     * @param string $class   The name of the class we have to check for
      */
-    public function __construct($_operand, $_class)
+    public function __construct($operand, $class)
     {
-        $this->operand = $_operand;
-        $this->class = $_class;
+        $this->operand = $operand;
+        $this->class = $class;
     }
 
     /**
-     * @return bool|string
+     * Will return a string representation of this assertion
+     *
+     * @return string
      */
     public function getString()
     {
@@ -51,6 +71,8 @@ class InstanceAssertion extends AbstractAssertion
     }
 
     /**
+     * Invert the logical meaning of this assertion
+     *
      * @return bool
      */
     public function invert()

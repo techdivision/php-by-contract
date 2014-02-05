@@ -4,7 +4,7 @@
  *
  * PHP version 5
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Parser
  * @author     Bernhard Wick <b.wick@techdivision.com>
@@ -34,7 +34,7 @@ use TechDivision\PBC\Exceptions\ParserException;
  *
  * This class implements the StructureParserInterface for class structures
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Parser
  * @author     Bernhard Wick <b.wick@techdivision.com>

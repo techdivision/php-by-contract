@@ -1,23 +1,34 @@
 <?php
 /**
- * TechDivision\PBC\CacheMap
+ * File containing the CacheMap class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category  Php-by-contract
+ * @package   TechDivision\PBC
+ * @author    Bernhard Wick <b.wick@techdivision.com>
+ * @copyright 2014 TechDivision GmbH - <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php
+ *            Open Software License (OSL 3.0)
+ * @link      http://www.techdivision.com/
  */
+
 namespace TechDivision\PBC;
 
 use TechDivision\PBC\Entities\Definitions\Structure;
 
 /**
- * @package     TechDivision\PBC
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\CacheMap
+ *
+ * This class implements a structure map for the purpose of keeping track of our cache
+ *
+ * @category  Php-by-contract
+ * @package   TechDivision\PBC
+ * @author    Bernhard Wick <b.wick@techdivision.com>
+ * @copyright 2014 TechDivision GmbH - <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php
+ *            Open Software License (OSL 3.0)
+ * @link      http://www.techdivision.com/
  */
 class CacheMap extends StructureMap
 {

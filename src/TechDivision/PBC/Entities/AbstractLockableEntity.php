@@ -4,7 +4,7 @@
  *
  * PHP version 5
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
@@ -25,7 +25,7 @@ namespace TechDivision\PBC\Entities;
  * This is used to implement entities based on the DTO pattern (immutable) + the possibility to set attributes
  * dynamically during a more complex creation procedure.
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
@@ -44,8 +44,8 @@ abstract class AbstractLockableEntity
     /**
      * Will set the child classes properties if the entity is not locked
      *
-     * @param $attribute
-     * @param $value
+     * @param string $attribute The name of the attribute we want to set
+     * @param mixed  $value     The value we want to assign to it
      *
      * @return null
      * @throws \IllegalArgumentException

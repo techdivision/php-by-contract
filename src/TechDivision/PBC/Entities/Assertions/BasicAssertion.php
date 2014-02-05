@@ -53,15 +53,17 @@ class BasicAssertion extends AbstractAssertion
     protected $inversionMapping;
 
     /**
-     * @param $_firstOperand
-     * @param $_secondOperand
-     * @param $_operator
+     * Default constructor
+     *
+     * @param string $firstOperand  The first operand to compare
+     * @param string $secondOperand The second operand to compare
+     * @param string $operator      The operator used for comparison
      */
-    public function __construct($_firstOperand = '', $_secondOperand = '', $_operator = '')
+    public function __construct($firstOperand = '', $secondOperand = '', $operator = '')
     {
-        $this->firstOperand = $_firstOperand;
-        $this->secondOperand = $_secondOperand;
-        $this->operator = $_operator;
+        $this->firstOperand = $firstOperand;
+        $this->secondOperand = $secondOperand;
+        $this->operator = $operator;
 
         // Set the mapping for our inversion
         $this->inversionMapping = array(
@@ -78,6 +80,8 @@ class BasicAssertion extends AbstractAssertion
     }
 
     /**
+     * Will return a string representation of this assertion
+     *
      * @return string
      */
     public function getString()
@@ -86,6 +90,9 @@ class BasicAssertion extends AbstractAssertion
     }
 
     /**
+     * Will return an inverted string representation.
+     * Implemented here, as we want to check if there is an entry in our inversion map we can use
+     *
      * @return string
      */
     public function getInvertString()
@@ -98,6 +105,8 @@ class BasicAssertion extends AbstractAssertion
     }
 
     /**
+     * Invert the logical meaning of this assertion
+     *
      * @return bool
      */
     public function invert()

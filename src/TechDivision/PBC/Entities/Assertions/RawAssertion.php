@@ -1,30 +1,57 @@
 <?php
+/**
+ * File containing the RawAssertion class
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
+ */
 
 namespace TechDivision\PBC\Entities\Assertions;
 
 /**
- * Class RawAssertion
+ * TechDivision\PBC\Entities\Assertions\RawAssertion
  *
- * This class is used to provide an object base way to pass assertions as e.g. a precondition.
+ * This class provides a way of using php syntax assertions
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class RawAssertion extends AbstractAssertion
 {
     /**
-     * @var string
+     * @var string $content Php code string we want to execute as an assertion
      */
     public $content;
 
     /**
-     * @param $_content
+     * Default constructor
+     *
+     * @param string $content Php code string we want to execute as an assertion
      */
-    public function __construct($_content)
+    public function __construct($content)
     {
-        $this->content = $_content;
+        $this->content = $content;
 
         parent::__construct();
     }
 
     /**
+     * Will return a string representation of this assertion
+     *
      * @return string
      */
     public function getString()
@@ -33,6 +60,8 @@ class RawAssertion extends AbstractAssertion
     }
 
     /**
+     * Invert the logical meaning of this assertion
+     *
      * @return bool
      */
     public function invert()

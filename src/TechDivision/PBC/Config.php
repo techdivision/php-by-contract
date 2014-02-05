@@ -1,51 +1,62 @@
 <?php
 /**
- * TechDivision\PBC\Config
+ * File containing the Config class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category  Php-by-contract
+ * @package   TechDivision\PBC
+ * @author    Bernhard Wick <b.wick@techdivision.com>
+ * @copyright 2014 TechDivision GmbH - <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php
+ *            Open Software License (OSL 3.0)
+ * @link      http://www.techdivision.com/
  */
+
 namespace TechDivision\PBC;
 
 use TechDivision\PBC\Interfaces\ConfigInterface;
-use Psr\Log\LoggerInterface;
 use TechDivision\PBC\Utils\Formatting;
+use Psr\Log\LoggerInterface;
 
 /**
- * @package     TechDivision\PBC
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\Config
+ *
+ * This class implements the access point for our global (oh no!) configuration
+ *
+ * @category  Php-by-contract
+ * @package   TechDivision\PBC
+ * @author    Bernhard Wick <b.wick@techdivision.com>
+ * @copyright 2014 TechDivision GmbH - <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php
+ *            Open Software License (OSL 3.0)
+ * @link      http://www.techdivision.com/
  */
 class Config implements ConfigInterface
 {
 
     /**
-     * @var null|Config
+     * @var array $instances Will contain the instances of this class
      */
     private static $instances = array();
 
     /**
-     * @const   string
+     * @const string DEFAULT_CONFIG Name of the default configuration file
      */
     const DEFAULT_CONFIG = 'config.default.json';
 
     /**
-     * @var array
+     * @var string $context The context for this instance e.g. app based configurations
      */
     protected $context;
 
     /**
-     * @var array
+     * @var array $config Configuration array
      */
     protected $config = array();
 
     /**
-     *
+     * Default constructor
      */
     private function __construct()
     {
@@ -53,9 +64,11 @@ class Config implements ConfigInterface
     }
 
     /**
-     * @param string $context
+     * Will return a singleton instance based on the context we are in
      *
-     * @return Config
+     * @param string $context The context for this instance e.g. app based configurations
+     *
+     * @return \TechDivision\PBC\Config
      */
     public static function getInstance($context = '')
     {
@@ -70,7 +83,11 @@ class Config implements ConfigInterface
     }
 
     /**
-     * @param   string $file
+     * Will load a certain configuration file into this instance. Might throw an exception if the file is not valid
+     *
+     * @param string $file The path of the configuration file we should load
+     *
+     * @return null
      *
      * @throws \Exception
      */
@@ -89,13 +106,10 @@ class Config implements ConfigInterface
         return self::$instances[$this->context];
     }
 
-    protected function checkRecency()
-    {
-
-    }
-
     /**
-     * @param $file
+     * Will validate a potential configuration file. Returns false if file is no valid PBC configuration
+     *
+     * @param string $file Path of the potential configuration file
      *
      * @return bool
      * @throws \Exception
@@ -160,7 +174,9 @@ class Config implements ConfigInterface
     }
 
     /**
-     * @param string $aspect
+     * Will return the whole configuration or, if $aspect is given, certain parts of it
+     *
+     * @param string $aspect The aspect of the configuration we are interested in e.g. 'autoloader'
      *
      * @return array
      */

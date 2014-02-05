@@ -1,10 +1,17 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 19.06.13
- * Time: 16:20
- * To change this template use File | Settings | File Templates.
+ * File containing the ChainedAssertion class
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Entities\Assertions;
@@ -12,42 +19,54 @@ namespace TechDivision\PBC\Entities\Assertions;
 use TechDivision\PBC\Entities\Lists\AssertionList;
 
 /**
- * Class TypeAssertion
+ * TechDivision\PBC\Entities\Assertions\ChainedAssertion
  *
- * This class is used to provide an object base way to pass assertions as e.g. a precondition.
+ * This class provides the possibility to chain several assertions together
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class ChainedAssertion extends AbstractAssertion
 {
     /**
-     * @var AssertionList
+     * @var \TechDivision\PBC\Entities\Lists\AssertionList $assertionList List of assertion to chain together
      */
     public $assertionList;
 
     /**
-     * @var array
+     * @var array $combinators The combinating operators we have to use
      */
     public $combinators;
 
     /**
-     * @var boolean
+     * @var boolean $validatesTo The bool value the assertion should validate to
      */
     public $validatesTo;
 
     /**
-     * @var array
+     * @var array $inversionMapping Mapping to inverse the logical meaning of this assertion
      */
     private $inversionMapping;
 
     /**
-     * @param AssertionList $_assertionList
-     * @param               $_combinators
+     * Default constructor
+     *
+     * @param \TechDivision\PBC\Entities\Lists\AssertionList $assertionList List of assertion to chain together
+     * @param array                                          $combinators   The combinating operators we have to use
      *
      * @throws  \InvalidArgumentException
      */
-    public function __construct(AssertionList $_assertionList, $_combinators)
+    public function __construct(AssertionList $assertionList, $combinators)
     {
-        $this->assertionList = $_assertionList;
-        $this->combinators = $_combinators;
+        // Set our attributes
+        $this->assertionList = $assertionList;
+        $this->combinators = $combinators;
 
         // Set the mapping for our inversion
         $this->inversionMapping = array(
@@ -60,24 +79,26 @@ class ChainedAssertion extends AbstractAssertion
         // There must be enough combinators to chain up the assertions.
         // If not, we do not stand a chance to make this work.
         // If we got only one combinator as a string (not in an array) we will use it throughout
-        if (!is_array($_combinators)) {
+        if (!is_array($combinators)) {
 
             $this->combinators = array();
-            for ($i = 1; $i < $_assertionList->count(); $i++) {
+            for ($i = 1; $i < $assertionList->count(); $i++) {
 
-                $this->combinators[] = $_combinators;
+                $this->combinators[] = $combinators;
             }
         }
 
         // No check if the counts are ok
-        if ($_assertionList->count() !== (count($this->combinators) + 1)) {
+        if ($assertionList->count() !== (count($this->combinators) + 1)) {
 
             throw new \InvalidArgumentException();
         }
     }
 
     /**
-     * @return bool|string
+     * Will return a string representation of this assertion
+     *
+     * @return string
      */
     public function getString()
     {
@@ -103,6 +124,8 @@ class ChainedAssertion extends AbstractAssertion
     }
 
     /**
+     * Invert the logical meaning of this assertion
+     *
      * @return bool
      */
     public function invert()
@@ -135,5 +158,7 @@ class ChainedAssertion extends AbstractAssertion
                 $this->combinators[$key] = $this->inversionMapping[$combinator];
             }
         }
+
+        return true;
     }
 }

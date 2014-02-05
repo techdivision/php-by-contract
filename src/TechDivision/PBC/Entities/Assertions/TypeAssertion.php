@@ -1,51 +1,70 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 19.06.13
- * Time: 16:20
- * To change this template use File | Settings | File Templates.
+ * File containing the TypeAssertion class
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Entities\Assertions;
 
 /**
- * Class TypeAssertion
+ * TechDivision\PBC\Entities\Assertions\TypeAssertion
  *
- * This class is used to provide an object base way to pass assertions as e.g. a precondition.
+ * This class will enable us to check for basic types
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class TypeAssertion extends AbstractAssertion
 {
     /**
-     * @var
+     * @var string $operand The operand we have to check
      */
     public $operand;
 
     /**
-     * @var
+     * @var string $type The type we have to check for
      */
     public $type;
 
     /**
-     * @var
+     * @var bool $validatesTo The bool value we should test against
      */
     public $validatesTo;
 
     /**
+     * Default constructor
      *
-     * @param string $_operand
-     * @param        $_type
+     * @param string $operand The operand we have to check
+     * @param   string     $type The type we have to check for
      */
-    public function __construct($_operand, $_type)
+    public function __construct($operand, $type)
     {
-        $this->operand = $_operand;
+        $this->operand = $operand;
         $this->validatesTo = true;
-        $this->type = $_type;
+        $this->type = $type;
 
         parent::__construct();
     }
 
     /**
+     * Will return a string representation of this assertion. Will return false if the type is unknown.
+     *
      * @return bool|string
      */
     public function getString()
