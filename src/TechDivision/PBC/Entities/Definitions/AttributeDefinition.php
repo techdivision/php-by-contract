@@ -1,10 +1,17 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 11.07.13
- * Time: 11:50
- * To change this template use File | Settings | File Templates.
+ * File containing the AttributeDefinition class
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Entities\Definitions;
@@ -12,34 +19,43 @@ namespace TechDivision\PBC\Entities\Definitions;
 use TechDivision\PBC\Interfaces\DefinitionInterface;
 
 /**
- * Class AttributeDefinition
+ * TechDivision\PBC\Entities\Definitions\AttributeDefinition
+ *
+ * Provides a definition of class and trait attributes
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class AttributeDefinition implements DefinitionInterface
 {
     /**
-     * @var string
+     * @var string $visibility Visibility of the attribute
      */
     public $visibility;
 
     /**
-     * @var boolean
+     * @var boolean $isStatic Is this attribute static?
      */
     public $isStatic;
 
     /**
-     * @var string
+     * @var string $name Name of the class attribute
      */
     public $name;
 
     /**
-     * @var mixed
+     * @var mixed $defaultValue Default value (if any)
      */
     public $defaultValue;
 
     /**
-     * Is this attribute part of the invariant?
-     *
-     * @var bool
+     * @var bool $inInvariant Is this attribute part of the invariant?
      */
     public $inInvariant;
 
@@ -56,6 +72,8 @@ class AttributeDefinition implements DefinitionInterface
     }
 
     /**
+     * Will return a string representation of this assertion
+     *
      * @return string
      */
     public function getString()

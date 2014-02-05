@@ -76,7 +76,7 @@ a concept first outlined by Bertrand Meyer in 1986, to make your applications mo
 This contains basic features as:
 
 - Use your basic docBlock annotations `@param` and `@return` as type hints (scalar and class/interface based), including
-    special features like "typed arrays" using e.g. `array<int>` (collections for scalar types only yet)
+    special features like "typed arrays" using e.g. `array<int>` (collections for complex types only yet)
 - Specify complex method contracts in PHP syntax using `@requires` as precondition and `@ensures` as postcondition
 - Specify a state of validity for your classes (e.g. `$this->attribute !== null`) which will be true all times using `@invariant`
 - The above (not including type safety) will be inherited by every child structure, strengthening your object hierarchies

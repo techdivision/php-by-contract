@@ -1,42 +1,62 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 20.06.13
- * Time: 14:43
- * To change this template use File | Settings | File Templates.
+ * File containing the FileDefinition class
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
+
 namespace TechDivision\PBC\Entities\Definitions;
 
 use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 
 /**
- * Class FileDefinition
+ * TechDivision\PBC\Entities\Definitions\FileDefinition
+ *
+ * Provides a definition of a file (containing a PHP structure)
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class FileDefinition
 {
     /**
-     * @var string
+     * @var string $path Path to the file
      */
     public $path;
 
     /**
-     * @var string
+     * @var string $name Name of the file including extension
      */
     public $name;
 
     /**
-     * @var string
+     * @var string $namespace Namespace of the enclosed structure (if any)
      */
     public $namespace;
 
     /**
-     * @var array
+     * @var array $usedNamespaces Qualified structure names referenced by use statements within the file
      */
     public $usedNamespaces;
 
     /**
-     * @var StructureDefinitionList
+     * @var \TechDivision\PBC\Entities\Lists\StructureDefinitionList $structureDefinitions
+     *          List of structures in the file
      */
     public $structureDefinitions;
 

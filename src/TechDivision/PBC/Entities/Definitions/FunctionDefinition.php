@@ -1,91 +1,105 @@
 <?php
 /**
- * TechDivision\PBC\Entities\Definitions\FunctionDefinition
+ * File containing the FunctionDefinition class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
+
 namespace TechDivision\PBC\Entities\Definitions;
 
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 
 /**
- * @package     TechDivision\PBC
- * @subpackage  Entities
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\Entities\Definitions\FunctionDefinition
+ *
+ * Provides a definition of a (generally speaking) function.
+ * This includes methods as well
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class FunctionDefinition
 {
 
     /**
-     * @var string
+     * @var string $docBlock DocBlock comment of the function
      */
     public $docBlock;
 
     /**
-     * @var boolean
+     * @var boolean $isFinal Is the function final?
      */
     public $isFinal;
 
     /**
-     * @var boolean
+     * @var boolean $isAbstract Is the function abstract?
      */
     public $isAbstract;
 
     /**
-     * @var string
+     * @var string $visibility Visibility of the method
      */
     public $visibility;
 
     /**
-     * @var boolean
+     * @var boolean $isStatic Is the method static?
      */
     public $isStatic;
 
     /**
-     * @var string
+     * @var string $name Name of the function
      */
     public $name;
 
     /**
-     * @var ParameterDefinitionList
+     * @var \TechDivision\PBC\Entities\Lists\ParameterDefinitionList $parameterDefinitions List of parameter definitions
      */
     public $parameterDefinitions;
 
     /**
-     * @var AssertionList
+     * @var \TechDivision\PBC\Entities\Lists\AssertionList $preconditions Preconditions of this function
      */
     public $preconditions;
 
     /**
-     * @var TypedListList
+     * @var \TechDivision\PBC\Entities\Lists\TypedListList $ancestralPreconditions Preconditions of any parent functions
      */
     public $ancestralPreconditions;
 
     /**
-     * @var boolean
+     * @var boolean $usesOld Does this function use the pbcOld keyword?
      */
     public $usesOld;
 
     /**
-     * @var string
+     * @var string $body Body of the function
      */
     public $body;
 
     /**
-     * @var AssertionList
+     * @var \TechDivision\PBC\Entities\Lists\AssertionList $postconditions Postconditions of this function
      */
     public $postconditions;
 
     /**
-     * @var TypedListList
+     * @var \TechDivision\PBC\Entities\Lists\TypedListList $ancestralPostconditions
+     *          Postconditions of any parent functions
      */
     public $ancestralPostconditions;
 
@@ -112,7 +126,7 @@ class FunctionDefinition
     /**
      * Will return all preconditions. Native as well as ancestral.
      *
-     * @return TypedListList
+     * @return \TechDivision\PBC\Entities\Lists\TypedListList
      */
     public function getPreconditions()
     {
@@ -125,7 +139,7 @@ class FunctionDefinition
     /**
      * Will return all postconditions. Native as well as ancestral.
      *
-     * @return TypedListList
+     * @return \TechDivision\PBC\Entities\Lists\TypedListList
      */
     public function getPostconditions()
     {
@@ -139,8 +153,8 @@ class FunctionDefinition
      * Will return the header of this function either in calling or in defining manner.
      * String will stop after the closing ")" bracket, so the string can be used for interfaces as well.
      *
-     * @param   string $type Can be either "call" or "definition"
-     * @param   bool   $markAsOriginal
+     * @param string $type           Can be either "call" or "definition"
+     * @param bool   $markAsOriginal Will mark a method as original by extending it with a suffix
      *
      * @return  string
      */

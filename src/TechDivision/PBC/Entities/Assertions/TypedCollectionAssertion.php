@@ -1,55 +1,70 @@
 <?php
 /**
- * TechDivision\PBC\Entities\Assertions\TypedCollectionAssertion
+ * File containing the TypedCollectionAssertion class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Entities\Assertions;
 
 /**
- * @package     TechDivision\PBC
- * @subpackage  Entities
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\Entities\Assertions\TypedCollectionAssertion
+ *
+ * Provides the option to check "collections" of the form array<Type>
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class TypedCollectionAssertion extends AbstractAssertion
 {
     /**
-     * @var string
+     * @var string $operand The operand to check
      */
     public $operand;
 
     /**
-     * @var string
+     * @var string $type The type are are checking against
      */
     public $type;
 
     /**
-     * @var string
+     * @var string $comparator Comparator, === by default
      */
     protected $comparator;
 
     /**
-     * @param $_operand
-     * @param $_type
+     * Default constructor
+     *
+     * @param string $operand The operand to check
+     * @param string $type    The type are are checking against
      */
-    public function __construct($_operand, $_type)
+    public function __construct($operand, $type)
     {
-        $this->operand = $_operand;
-        $this->type = $_type;
+        $this->operand = $operand;
+        $this->type = $type;
         $this->comparator = '===';
 
         parent::__construct();
     }
 
     /**
+     * Will return a string representation of this assertion
+     *
      * @return string
      */
     public function getString()
@@ -65,6 +80,8 @@ class TypedCollectionAssertion extends AbstractAssertion
     }
 
     /**
+     * Invert the logical meaning of this assertion
+     *
      * @return bool
      */
     public function invert()

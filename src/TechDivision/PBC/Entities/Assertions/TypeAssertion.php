@@ -51,7 +51,7 @@ class TypeAssertion extends AbstractAssertion
      * Default constructor
      *
      * @param string $operand The operand we have to check
-     * @param   string     $type The type we have to check for
+     * @param string $type    The type we have to check for
      */
     public function __construct($operand, $type)
     {
@@ -87,6 +87,8 @@ class TypeAssertion extends AbstractAssertion
     }
 
     /**
+     * Invert the logical meaning of this assertion
+     *
      * @return bool
      */
     public function invert()
