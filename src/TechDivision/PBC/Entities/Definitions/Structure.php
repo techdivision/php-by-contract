@@ -23,7 +23,7 @@ class Structure
     /**
      * @var array
      */
-    protected $allowedTypes = array('class', 'interface', 'trait');
+    protected $allowedTypes;
 
     /**
      * @var int
@@ -66,6 +66,7 @@ class Structure
         $this->identifier = $identifier;
         $this->path = $path;
         $this->hasContracts = $hasContracts;
+        $this->allowedTypes = array('class', 'interface', 'trait');
 
         // Check if we got an allowed value for the type.
         $allowedTypes = array_flip($this->allowedTypes);
