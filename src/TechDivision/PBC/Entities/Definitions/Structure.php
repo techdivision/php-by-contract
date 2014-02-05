@@ -1,61 +1,75 @@
 <?php
 /**
- * TechDivision\PBC\Entities\Definitions\Structure
+ * File containing the Structure class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
+
 namespace TechDivision\PBC\Entities\Definitions;
 
 /**
- * @package     TechDivision\PBC
- * @subpackage  Entities
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\Entities\Definitions\Structure
+ *
+ * This class is used as a DTO fort our structure map and etc.
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class Structure
 {
     /**
-     * @var array
+     * @var array $allowedTypes Will contain types which are allowed for a structure instance
      */
     protected $allowedTypes;
 
     /**
-     * @var int
+     * @var int $cTime The manipulation time of the structure file
      */
     protected $cTime;
 
     /**
-     * @var string
+     * @var string $identifier The identifier (namespace + structure name) of the structure
      */
     protected $identifier;
 
     /**
-     * @var string
+     * @var string $path Path to the file containing the structure definition
      */
     protected $path;
 
     /*
-     * @var string
+     * @var string $type Type of the structure e.g. "class"
      */
     protected $type;
 
     /**
-     * @var boolean
+     * @var boolean $hasContracts Does the structure even have contracts
      */
     protected $hasContracts;
 
     /**
-     * @param $cTime
-     * @param $identifier
-     * @param $path
-     * @param $type
-     * @param $hasContracts
+     * Default constructor
+     *
+     * @param int     $cTime        The manipulation time of the structure file
+     * @param string  $identifier   The identifier (namespace + structure name) of the structure
+     * @param string  $path         Path to the file containing the structure definition
+     * @param string  $type         Type of the structure e.g. "class"
+     * @param boolean $hasContracts Does the structure even have contracts
      *
      * @throws \InvalidArgumentException
      */
@@ -79,6 +93,8 @@ class Structure
     }
 
     /**
+     * Getter for manipulation time
+     *
      * @return int
      */
     public function getCTime()
@@ -87,6 +103,8 @@ class Structure
     }
 
     /**
+     * Getter for identifier
+     *
      * @return string
      */
     public function getIdentifier()
@@ -95,6 +113,8 @@ class Structure
     }
 
     /**
+     * Getter for the path of the structure
+     *
      * @return string
      */
     public function getPath()
@@ -103,6 +123,8 @@ class Structure
     }
 
     /**
+     * Getter for the structure type
+     *
      * @return mixed
      */
     public function getType()
@@ -111,6 +133,8 @@ class Structure
     }
 
     /**
+     * Does the structure have any contracts
+     *
      * @return bool
      */
     public function hasContracts()
