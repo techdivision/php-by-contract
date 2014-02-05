@@ -4,7 +4,7 @@
  *
  * PHP version 5
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
@@ -27,7 +27,7 @@ use TechDivision\PBC\Entities\Lists\TypedListList;
  * This class acts as a DTO-like (we are not immutable due to protected visibility)
  * entity for describing class definitions
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
@@ -116,20 +116,20 @@ class ClassDefinition extends AbstractStructureDefinition
     /**
      * Default constructor
      *
-     * @param string $path
-     * @param string $namespace
-     * @param array  $usedNamespaces
-     * @param string $docBlock
-     * @param bool   $isFinal
-     * @param bool   $isAbstract
-     * @param string $name
-     * @param string $extends
-     * @param array  $implements
-     * @param array  $constants
-     * @param null   $attributeDefinitions
-     * @param null   $invariantConditions
-     * @param null   $ancestralInvariants
-     * @param null   $functionDefinitions
+     * @param string $path                 File path to the class definition
+     * @param string $namespace            The namespace the class belongs to
+     * @param array  $usedNamespaces       All classes which are referenced by the "use" keyword
+     * @param string $docBlock             The initial class docblock header
+     * @param bool   $isFinal              Is this a final class
+     * @param bool   $isAbstract           Is this class abstract
+     * @param string $name                 Name of the class
+     * @param string $extends              Name of the parent class (if any)
+     * @param array  $implements           Array of interface names this class implements
+     * @param array  $constants            Class constants
+     * @param null   $attributeDefinitions List of defined attributes
+     * @param null   $invariantConditions  List of directly defined invariant conditions
+     * @param null   $ancestralInvariants  List of lists of any ancestral invariants
+     * @param null   $functionDefinitions  List of methods this class defines
      *
      * @return null
      */
@@ -337,6 +337,8 @@ class ClassDefinition extends AbstractStructureDefinition
     }
 
     /**
+     * Does this class have a parent class?
+     *
      * @return bool
      */
     public function hasParents()
@@ -345,11 +347,15 @@ class ClassDefinition extends AbstractStructureDefinition
     }
 
     /**
+     * Return all invariants, direct and introduced (by ancestral structures) alike
+     *
      * @return TypedListList
      */
     public function getInvariants()
     {
-        $invariants = $this->ancestralInvariants;
+        // We have to clone it here, otherwise we might have weird side effects, of having the "add()" operation
+        // persistent on $this->ancestralInvariants
+        $invariants = clone $this->ancestralInvariants;
         $invariants->add($this->invariantConditions);
 
         return $invariants;

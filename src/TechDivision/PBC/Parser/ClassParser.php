@@ -1,6 +1,6 @@
 <?php
 /**
- * File containing the AbstractStructureParser for class structures
+ * File containing the ClassParser class
  *
  * PHP version 5
  *
@@ -46,9 +46,11 @@ use TechDivision\PBC\Exceptions\ParserException;
 class ClassParser extends AbstractStructureParser
 {
     /**
-     * @param                $file
-     * @param FileDefinition $fileDefinition
-     * @param bool           $getRecursive
+     * Will return a list of found structures or false on error
+     *
+     * @param string         $file           Path of the file we are searching in
+     * @param FileDefinition $fileDefinition Definition of the file the class is in
+     * @param bool           $getRecursive   Do we have to get the ancestral conditions as well?
      *
      * @return bool|StructureDefinitionList
      */
@@ -81,8 +83,10 @@ class ClassParser extends AbstractStructureParser
     }
 
     /**
-     * @param null $className
-     * @param bool $getRecursive
+     * Will return the definition of a specified class
+     *
+     * @param null|string $className    The name of the class we are searching for
+     * @param bool        $getRecursive Do we have to get the ancestral conditions as well?
      *
      * @return bool|StructureDefinitionInterface
      */
@@ -137,8 +141,8 @@ class ClassParser extends AbstractStructureParser
      * This method will use a set of other methods to parse a token array and retrieve any
      * possible information from it. This information will be entered into a ClassDefinition object.
      *
-     * @param      $tokens
-     * @param bool $getRecursive
+     * @param array $tokens       The token array containing structure tokens
+     * @param bool  $getRecursive Do we have to get the ancestral conditions as well?
      *
      * @return StructureDefinitionInterface
      */
@@ -267,11 +271,13 @@ class ClassParser extends AbstractStructureParser
     }
 
     /**
-     * @param $tokens
+     * Will search for the name of this class
+     *
+     * @param array $tokens Array of tokens for this class
      *
      * @return string
      */
-    protected function getName($tokens)
+    protected function getName(array $tokens)
     {
         // Check the tokens
         $className = '';
@@ -295,11 +301,13 @@ class ClassParser extends AbstractStructureParser
     }
 
     /**
-     * @param $tokens
+     * Will find the parent class we have (if any). Will return an empty string if there is none.
+     *
+     * @param array $tokens Array of tokens for this class
      *
      * @return string
      */
-    protected function getParent($tokens)
+    protected function getParent(array $tokens)
     {
         // Check the tokens
         $className = '';
@@ -327,7 +335,9 @@ class ClassParser extends AbstractStructureParser
     }
 
     /**
-     * @param ClassDefinition $classDefinition
+     * Will return an array containing all interfaces this class implements
+     *
+     * @param ClassDefinition &$classDefinition Reference of class definition so we can resolve the namespaces
      *
      * @return array
      */
@@ -368,12 +378,11 @@ class ClassParser extends AbstractStructureParser
      *
      * This method will search for any attributes a class might have. Just pass the token array of the class.
      * Work is done using token definitions and common sense in regards to PHP syntax.
-     * To retrieve the different properties of an attribute it relies on $this::getAttributeProperties().
+     * To retrieve the different properties of an attribute it relies on getAttributeProperties().
+     * We need the list of invariants to mark attributes wo are under surveillance.
      *
-     * @access private
-     *
-     * @param array         $tokens
-     * @param TypedListList $invariants
+     * @param array         $tokens     Array of tokens for this class
+     * @param TypedListList $invariants List of invariants so we can compare the attributes to
      *
      * @return AttributeDefinitionList
      */
@@ -479,10 +488,10 @@ class ClassParser extends AbstractStructureParser
     }
 
     /**
+     * Will return a definition of an attribute as far as we can extract it from the token array
      *
-     *
-     * @param array $tokens
-     * @param int   $attributePosition
+     * @param array $tokens            Array of tokens for this class
+     * @param int   $attributePosition Position of the attribute within the token array
      *
      * @return AttributeDefinition
      */
