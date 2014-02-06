@@ -28,8 +28,8 @@ class AbstractStack
      */
     public function peek()
     {
-        $tmp = $this->pop();
-        $this->push($tmp);
+        $tmp = array_pop($this->container);
+        array_push($this->container, $tmp);
 
         return $tmp;
     }

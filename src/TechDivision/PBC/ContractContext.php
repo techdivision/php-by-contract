@@ -33,9 +33,14 @@ class ContractContext
 {
 
     /**
-     * @var boolean $ongoingContract Are we in the middle of an ongoing contract evaluation?
+     * @var int $contractDepth At which depth are we in the middle of an ongoing contract evaluation?
      */
-    private static $ongoingContract = false;
+    private static $contractDepth = 0;
+
+    /**
+     * @var int $maxDepth The maximum depth we allow. This will be set from configuration at first call
+     */
+    private static $maxDepth;
 
     /**
      * Will open a contract context for any current ongoing verification.
@@ -46,9 +51,15 @@ class ContractContext
      */
     public static function open()
     {
-        if (self::$ongoingContract === false) {
+        // If the max contract depth is not set we have to get it from configuration
+        if (!isset(self::$maxDepth)) {
 
-            self::$ongoingContract = true;
+            self::fetchMaxDepth();
+        }
+
+        if (self::$contractDepth < self::$maxDepth) {
+
+            self::$contractDepth++;
 
             return true;
 
@@ -59,13 +70,13 @@ class ContractContext
     }
 
     /**
-     * Is there an ongoing contract?
+     * Is there an ongoing contract beyond the maximal depth?
      *
      * @return bool
      */
     public static function isOngoing()
     {
-        return self::$ongoingContract;
+        return !(self::$contractDepth <= self::$maxDepth);
     }
 
     /**
@@ -73,19 +84,70 @@ class ContractContext
      * Will return true if contract was successfully closed and
      * false if there was no contract at all.
      *
+     * @throws \Exception
+     *
      * @return bool
      */
     public static function close()
     {
-        if (self::$ongoingContract === true) {
+        if (self::$contractDepth <= self::$maxDepth && self::$contractDepth > 0) {
 
-            self::$ongoingContract = false;
+            // Decrement the used depth
+            self::$contractDepth--;
 
             return true;
 
         } else {
 
+            // Did we reach a place where the sun does not shine (metaphorically speaking ;-)
+            if (self::$contractDepth < 0) {
+
+                // Reset the used up contract depth and fail
+                self::$contractDepth = 0;
+                throw new \Exception('Contract depth surveillance ran out of bounds!');
+            }
+
             return false;
         }
+    }
+
+    /**
+     * This will set the maximum depth to which contracts can be nested.
+     * Default should be 15 which should be fine for most applications.
+     *
+     * @throws \Exception
+     *
+     * @return null
+     */
+    public static function fetchMaxDepth()
+    {
+        // Get the config instance
+        $config = Config::getInstance();
+        $config = $config->getConfig('enforcement');
+
+        if (isset($config['max-nesting'])) {
+
+            self::$maxDepth = $config['max-nesting'];
+
+        } else {
+
+            // Reset the used up contract depth and fail
+            self::$contractDepth = 0;
+            throw new \Exception('We got not max-nesting configuration! Consult documentation and change this.');
+        }
+    }
+
+    /**
+     * This will set the maximum depth to which contracts can be nested.
+     * CAUTION: DO NOT SET THIS TOO HIGH!
+     * Default is 15 which should be fine for most applications
+     *
+     * @param int $maxDepth The maximum depth we allow
+     *
+     * @return null
+     */
+    public static function setMaxDepth($maxDepth)
+    {
+        self::$maxDepth = $maxDepth;
     }
 }

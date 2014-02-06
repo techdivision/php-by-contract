@@ -9,7 +9,7 @@ namespace TechDivision\PBC\Tests\Data\Stack;
 class UniqueStack2 extends AbstractStack
 {
     /**
-     * @requires    !in_array($obj, $this->container)
+     * @requires !in_array($obj, $this->container)
      */
     public function push($obj)
     {

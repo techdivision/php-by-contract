@@ -261,7 +261,7 @@ class SkeletonFilter extends AbstractFilter
     /**
      * Will generate the code used before the original function body
      *
-     * @param bool  $injectNeeded Determine if we have to use a try...catch block
+     * @param bool               $injectNeeded       Determine if we have to use a try...catch block
      * @param FunctionDefinition $functionDefinition The function definition object
      *
      * @return null
@@ -291,7 +291,7 @@ class SkeletonFilter extends AbstractFilter
     /**
      * Will generate the code used after the original function body
      *
-     * @param bool  $injectNeeded Determine if we have to use a try...catch block
+     * @param bool               $injectNeeded       Determine if we have to use a try...catch block
      * @param FunctionDefinition $functionDefinition The function definition object
      *
      * @return null

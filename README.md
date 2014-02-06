@@ -128,12 +128,9 @@ Default config looks like this:
 
         "enforce-default-type-safety": true,
         "processing": "exception",
-        "level": 7
-    },
-
-    "project-dirs": [
-        "./../../../tests"
-    ]
+        "level": 7,
+        "max-nesting": 10
+    }
 }
 ```
 
@@ -160,6 +157,8 @@ Configuration files can contain the following options:
         - 1 : Preconditions will be enforced
         - 2 : Postconditions will be enforced
         - 4 : Invariants will be enforced
+    * *max-nesting* : Contracts CAN use any function within their assertions, this option prevents a last line of defence
+        against unintended endless loops
 
 - *project-dirs* : List of directories which should be included into autoloading and enforcement mechanics. You can us
     [`glob`](<http://php.net/manual/en/function.glob.php>) regex here.

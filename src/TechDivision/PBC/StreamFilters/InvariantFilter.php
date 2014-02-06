@@ -427,7 +427,8 @@ class InvariantFilter extends AbstractFilter
      */
     private function generateFunctionCode(TypedListList $assertionLists)
     {
-        $code = 'protected function ' . PBC_CLASS_INVARIANT_NAME . '($callingMethod) {';
+        $code = 'protected function ' . PBC_CLASS_INVARIANT_NAME . '($callingMethod) {' .
+            PBC_CONTRACT_CONTEXT . ' = \TechDivision\PBC\ContractContext::open();if (' . PBC_CONTRACT_CONTEXT . ') {';
 
         $invariantIterator = $assertionLists->getIterator();
         for ($i = 0; $i < $invariantIterator->count(); $i++) {
@@ -456,7 +457,7 @@ class InvariantFilter extends AbstractFilter
             $invariantIterator->next();
         }
 
-        $code .= '}';
+        $code .= '}\TechDivision\PBC\ContractContext::close();}';
 
         return $code;
     }

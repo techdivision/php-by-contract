@@ -1,30 +1,49 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 16.07.13
- * Time: 14:05
- * To change this template use File | Settings | File Templates.
+ * File containing the ParameterDefinition class
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
+
 namespace TechDivision\PBC\Entities\Definitions;
 
 /**
- * Class ParameterDefinition
+ * TechDivision\PBC\Entities\Definitions\ParameterDefinition
+ *
+ * Allows us to keep track of a functions parameters
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class ParameterDefinition
 {
     /**
-     * @var string
+     * @var string $type Type hint (if any)
      */
     public $type;
 
     /**
-     * @var string
+     * @var string $name Name of the parameter
      */
     public $name;
 
     /**
-     * @var string
+     * @var mixed $defaultValue The parameter's default value (if any)
      */
     public $defaultValue;
 
@@ -39,7 +58,10 @@ class ParameterDefinition
     }
 
     /**
+     * Will return a string representation of the defined parameter
+     *
      * @param string $mode
+     *      We can switch how the string should be structured. Choose from "definition", "call" or "closure"
      *
      * @return string
      */
