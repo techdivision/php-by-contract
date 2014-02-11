@@ -67,6 +67,8 @@ class StructureMap implements MapInterface
     protected $version;
 
     /**
+     * Default constructor
+     *
      * @param array  $rootPathes
      * @param Config $config
      * @param array  $omittedPathes
@@ -117,11 +119,12 @@ class StructureMap implements MapInterface
     }
 
     /**
-     * Will return all entries in our map.
+     * Will return all entries within a map. If needed only entries of contracted
+     * structures will be returned.
      *
-     * @param bool $contracted
+     * @param boolean $contracted Do we only want entries containing contracts?
      *
-     * @return Structure
+     * @return mixed
      */
     public function getEntries($contracted = false)
     {
@@ -152,7 +155,7 @@ class StructureMap implements MapInterface
     /**
      * Will add a structure entry to the map.
      *
-     * @param Structure $structure
+     * @param \TechDivision\PBC\Entities\Definitions\Structure $structure The structure to add
      *
      * @return bool
      */
@@ -172,7 +175,9 @@ class StructureMap implements MapInterface
     }
 
     /**
-     * @param $identifier
+     * Do we have an entry for the given identifier
+     *
+     * @param string $identifier The identifier of the entry we try to find
      *
      * @return bool
      */
@@ -182,9 +187,14 @@ class StructureMap implements MapInterface
     }
 
     /**
-     * @param Structure $structure
+     * Will update a given structure.
+     * If the entry does not exist we will create it
+     *
+     * @param \TechDivision\PBC\Entities\Definitions\Structure $structure The structure to update
      *
      * @return void
+     *
+     * TODO implement this in the implementing classes
      */
     public function update(Structure $structure = null)
     {
@@ -195,7 +205,7 @@ class StructureMap implements MapInterface
      * Will return the entry specified by it's identifier.
      * If none is found, false will be returned.
      *
-     * @param $identifier
+     * @param string $identifier The identifier of the entry we try to find
      *
      * @return bool|Structure
      */
@@ -223,10 +233,10 @@ class StructureMap implements MapInterface
     }
 
     /**
-     * Checks if the entry for a certain structure is current if one was specified.
-     * If not it will check if the whole map is current.
+     * Checks if the entry for a certain structure is recent if one was specified.
+     * If not it will check if the whole map is recent.
      *
-     * @param null|string $structure
+     * @param null|string $identifier The identifier of the entry we try to find
      *
      * @return  bool
      */
@@ -260,9 +270,10 @@ class StructureMap implements MapInterface
     }
 
     /**
-     * Will return an array of all classes which are stored in this map.
+     * Will return an array of all entry identifiers which are stored in this map.
+     * We might filter by entry type
      *
-     * @param string $type
+     * @param string|null $type The type to filter by
      *
      * @return array
      */
@@ -292,7 +303,7 @@ class StructureMap implements MapInterface
      * Will return an array of all files which are stored in this map.
      * Will include the full path if $fullPath is true.
      *
-     * @param   $fullPath
+     * @param boolean $fullPath Do we need the full path?
      *
      * @return  array
      */
@@ -321,9 +332,9 @@ class StructureMap implements MapInterface
     /**
      * Removes an entry from the map of structures.
      *
-     * @param $identifier
+     * @param null|string $identifier The identifier of the entry we try to find
      *
-     * @return bool
+     * @return boolean
      */
     public function remove($identifier)
     {

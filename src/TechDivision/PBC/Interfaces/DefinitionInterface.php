@@ -1,16 +1,41 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 25.07.13
- * Time: 11:20
- * To change this template use File | Settings | File Templates.
+ * File containing the DefinitionInterface interface
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Interfaces
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Interfaces;
 
+/**
+ * TechDivision\PBC\Interfaces\DefinitionInterface
+ *
+ * An interface defining the minimal functionality of any possible definition class
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Interfaces
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
+ */
 interface DefinitionInterface
 {
-
+    /**
+     * Will return a string representation of this definition
+     *
+     * @return string
+     */
     public function getString();
 }

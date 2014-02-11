@@ -60,8 +60,8 @@ class ParameterDefinition
     /**
      * Will return a string representation of the defined parameter
      *
-     * @param string $mode
-     *      We can switch how the string should be structured. Choose from "definition", "call" or "closure"
+     * @param string $mode We can switch how the string should be structured.
+     *                     Choose from "definition", "call" or "closure"
      *
      * @return string
      */

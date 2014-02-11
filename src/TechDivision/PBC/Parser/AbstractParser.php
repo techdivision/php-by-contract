@@ -1,10 +1,17 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 11.07.13
- * Time: 16:42
- * To change this template use File | Settings | File Templates.
+ * File containing the AbstractParser class
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Parser
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Parser;
@@ -13,13 +20,29 @@ use TechDivision\PBC\Interfaces\ParserInterface;
 use TechDivision\PBC\StructureMap;
 use TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy;
 
+/**
+ * TechDivision\PBC\Parser\AbstractParser
+ *
+ * The abstract class AbstractParser which provides a basic implementation other parsers can inherit from
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Parser
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
+ */
 abstract class AbstractParser implements ParserInterface
 {
     /**
-     * @param $docBlock
-     * @param $keyword
+     * Does a certain block of code contain a certain keyword
      *
-     * @return bool
+     * @param string $docBlock The code block to search in
+     * @param string $keyword  The keyword to search for
+     *
+     * @return boolean
      */
     protected function usesKeyword($docBlock, $keyword)
     {
@@ -35,9 +58,9 @@ abstract class AbstractParser implements ParserInterface
     /**
      * Will return the length of the string a token array is based on.
      *
-     * @param $tokens
+     * @param array $tokens The token array
      *
-     * @return int
+     * @return integer
      */
     protected function getStringLength($tokens)
     {
@@ -65,11 +88,11 @@ abstract class AbstractParser implements ParserInterface
      * This method will search the signature of either a class or a function for a certain token e.g. final.
      * Will return true if the token is found, and false if not or an error occurred.
      *
-     * @param $tokens
-     * @param $searchedToken
-     * @param $parsedEntity
+     * @param array   $tokens        The token array to search in
+     * @param integer $searchedToken The token we search for, use PHP tokens here
+     * @param integer $parsedEntity  The type of entity we search in front of, use PHP tokens here
      *
-     * @return bool
+     * @return boolean
      */
     protected function hasSignatureToken($tokens, $searchedToken, $parsedEntity)
     {
@@ -110,10 +133,14 @@ abstract class AbstractParser implements ParserInterface
     }
 
     /**
-     * @param $string
-     * @param $bracket
+     * Will get the count of brackets (round or curly) within a string.
+     * Will return an integer which is calculated as the number of opening brackets against closing ones.
+     * Will return false if the bracket type is not recognized
      *
-     * @return bool|int
+     * @param string $string  The string to search in
+     * @param string $bracket Type of bracket we have. Might be (, ), { or }
+     *
+     * @return boolean|integer
      */
     protected function getBracketCount($string, $bracket)
     {
@@ -139,8 +166,10 @@ abstract class AbstractParser implements ParserInterface
     }
 
     /**
-     * @param $tokens
-     * @param $structureToken
+     * Will return the DocBlock of a certain entity.
+     *
+     * @param array   $tokens         The token array to search in
+     * @param integer $structureToken The type of entity we search in front of, use PHP tokens here
      *
      * @return string
      */

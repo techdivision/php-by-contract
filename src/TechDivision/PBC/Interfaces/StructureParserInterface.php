@@ -4,7 +4,7 @@
  *
  * PHP version 5
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Interfaces
  * @author     Bernhard Wick <b.wick@techdivision.com>
@@ -24,7 +24,7 @@ use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
  *
  * Interface which describes parsers for structures like classes, interfaces and traits.
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Interfaces
  * @author     Bernhard Wick <b.wick@techdivision.com>

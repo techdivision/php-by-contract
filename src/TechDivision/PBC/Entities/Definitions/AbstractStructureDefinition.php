@@ -4,7 +4,7 @@
  *
  * PHP version 5
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
@@ -34,7 +34,7 @@ use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
  * This class acts as a DTO-like (we are not immutable due to protected visibility)
  * entity for describing class definitions
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>

@@ -40,9 +40,9 @@ class StructureDefinitionHierarchy
     protected $nodes = array();
 
     /**
+     * Will insert a structure definition into our hierarchy
      *
-     *
-     * @param StructureDefinitionInterface $node
+     * @param \TechDivision\PBC\Interfaces\StructureDefinitionInterface $node The structure definition to insert
      *
      * @return bool
      */
@@ -77,7 +77,9 @@ class StructureDefinitionHierarchy
     }
 
     /**
-     * @param $entryName
+     * Will return an entry specified by it's name
+     *
+     * @param string $entryName Name of the entries we search for
      *
      * @return bool
      */
@@ -92,7 +94,9 @@ class StructureDefinitionHierarchy
     }
 
     /**
-     * @param $entryName
+     * Check if a certain entry exists
+     *
+     * @param string $entryName Name of the entries we search for
      *
      * @return bool
      */

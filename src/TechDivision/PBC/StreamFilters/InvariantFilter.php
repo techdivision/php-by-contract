@@ -52,6 +52,8 @@ class InvariantFilter extends AbstractFilter
     }
 
     /**
+     * Will return the order number the concrete filter has been constantly assigned
+     *
      * @return int
      */
     public function getFilterOrder()

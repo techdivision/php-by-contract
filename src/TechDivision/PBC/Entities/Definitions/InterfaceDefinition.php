@@ -4,7 +4,7 @@
  *
  * PHP version 5
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
@@ -27,7 +27,7 @@ use TechDivision\PBC\Entities\Lists\TypedListList;
  * This class acts as a DTO-like (we are not immutable due to protected visibility)
  * entity for describing interface definitions
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
@@ -35,75 +35,82 @@ use TechDivision\PBC\Entities\Lists\TypedListList;
  * @license    http://opensource.org/licenses/osl-3.0.php
  *             Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
+ *
+ * TODO make us of the lockable entity features
  */
 class InterfaceDefinition extends AbstractStructureDefinition
 {
     /**
-     * @var string
+     * @var string $path The path the definition resides in
      */
     public $path;
 
     /**
-     * @var string
+     * @var string $namespace The namespace the definition resides in
      */
     public $namespace;
 
     /**
-     * @var array
+     * @var array $usedNamespaces Structure names which are references using the use-statement
+     * TODO namespaces is not the right terminology
      */
     public $usedNamespaces;
 
     /**
-     * @var string
+     * @var string $docBlock DocBlock header of the interface
      */
     public $docBlock;
 
     /**
-     * @var string
+     * @var string $name Interface name
      */
     public $name;
 
     /**
-     * @var array
+     * @var array $extends The parent interfaces (if any)
      */
     public $extends;
 
     /**
-     * @var array
+     * @var array $constants Possible constants the interface defines
      */
     public $constants;
 
     /**
-     * @var AssertionList
+     * @var AssertionList $invariantConditions Invariant conditions
+     * TODO get rid of this as it breaks information hiding
      */
     public $invariantConditions;
 
     /**
-     * @var TypedListList
+     * @var TypedListList $ancestralInvariants Ancestral invariants
+     * TODO get rid of this as it breaks information hiding
      */
     public $ancestralInvariants;
 
     /**
-     * @var FunctionDefinitionList
+     * @var FunctionDefinitionList $functionDefinitions List of functions defined within the interface
      */
     public $functionDefinitions;
 
     /**
-     * @const   string
+     * @const string TYPE The structure type
      */
     const TYPE = 'interface';
 
     /**
      * Default constructor
      *
-     * @param string $docBlock
-     * @param string $name
-     * @param string $namespace
-     * @param array  $extends
-     * @param array  $constants
-     * @param null   $invariantConditions
-     * @param null   $ancestralInvariants
-     * @param null   $functionDefinitions
+     * TODO The constructor does not use all members
+     *
+     * @param string                      $docBlock            DocBlock header of the interface
+     * @param string                      $name                $name Interface name
+     * @param string                      $namespace           The namespace the definition resides in
+     * @param array                       $extends             The parent interfaces (if any)
+     * @param array                       $constants           Possible constants the interface defines
+     * @param AssertionList|null          $invariantConditions Invariant conditions
+     * @param TypedListList|null          $ancestralInvariants Ancestral invariants
+     * @param FunctionDefinitionList|null $functionDefinitions List of functions defined within the interface
      *
      * @return null
      */
@@ -140,11 +147,14 @@ class InterfaceDefinition extends AbstractStructureDefinition
     }
 
     /**
+     * Will return all invariants for this interface, direct or indirect
+     *
      * @return TypedListList
+     * TODO get rid of this
      */
     public function getInvariants()
     {
-        $invariants = $this->ancestralInvariants;
+        $invariants = clone $this->ancestralInvariants;
         $invariants->add($this->invariantConditions);
 
         return $invariants;

@@ -4,7 +4,7 @@
  *
  * PHP version 5
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
@@ -23,7 +23,7 @@ use TechDivision\PBC\Entities\Lists\TypedListList;
  *
  * Public interface for structure definitions
  *
- * @category   php-by-contract
+ * @category   Php-by-contract
  * @package    TechDivision\PBC
  * @subpackage Interfaces
  * @author     Bernhard Wick <b.wick@techdivision.com>

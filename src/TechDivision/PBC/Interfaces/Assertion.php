@@ -1,23 +1,72 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 04.07.13
- * Time: 11:03
- * To change this template use File | Settings | File Templates.
+ * File containing the Assertion interface
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Interfaces
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Interfaces;
 
+/**
+ * TechDivision\PBC\Interfaces\Assertion
+ *
+ * An interface defining the functionality of all assertion classes
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Interfaces
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
+ *
+ * TODO refactor to AssertionInterface
+ */
 interface Assertion
 {
+    /**
+     * Will return an inverted string representation.
+     * Implemented here, as we want to check if there is an entry in our inversion map we can use
+     *
+     * @return string
+     */
     public function getInvertString();
 
+    /**
+     * Will return a string representation of this assertion
+     *
+     * @return string
+     */
     public function getString();
 
+    /**
+     * Invert the logical meaning of this assertion
+     *
+     * @return bool
+     */
     public function invert();
 
+    /**
+     * Will return true if the assertion is in an inverted state
+     *
+     * @return bool
+     */
     public function isInverted();
 
+    /**
+     * Will test if the assertion will result in a valid PHP statement
+     *
+     * @return bool
+     */
     public function isValid();
 }

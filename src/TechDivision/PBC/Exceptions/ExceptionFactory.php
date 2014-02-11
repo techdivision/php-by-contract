@@ -1,28 +1,44 @@
 <?php
 /**
- * TechDivision\PBC\Exceptions\ExceptionFactory
+ * File containing the ExceptionFactory class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Exceptions
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Exceptions;
 
+use TechDivision\PBC\Interfaces\PBCException;
+
 /**
- * @package     TechDivision\PBC
- * @subpackage  Exceptions
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\Exceptions\ExceptionFactory
+ *
+ * Factory to get the right exception object (or class name) for the right occasion.
+ * This was implemented to enable custom exception mapping
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Exceptions
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class ExceptionFactory
 {
     /**
-     * @param $type
+     * Will return the name of the exception class for the needed error type
+     *
+     * @param string $type The type of exception we need
      *
      * @return string
      */
@@ -32,8 +48,10 @@ class ExceptionFactory
     }
 
     /**
-     * @param       $type
-     * @param array $params
+     * Will return an instance of the exception fitting the error type we specified
+     *
+     * @param string $type   The type of exception we need
+     * @param array  $params Parameter array we will pass to the exception's constructor
      *
      * @return \Exception
      */
@@ -45,7 +63,9 @@ class ExceptionFactory
     }
 
     /**
-     * @param $type
+     * Will return the name of the Exception class as it is mapped to a certain error type
+     *
+     * @param string $type The type of exception we need
      *
      * @return string
      */

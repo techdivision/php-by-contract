@@ -4,13 +4,13 @@
  *
  * PHP version 5
  *
- * @category   php-by-contract
- * @package    TechDivision\PBC
- * @author     Bernhard Wick <b.wick@techdivision.com>
- * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
- * @license    http://opensource.org/licenses/osl-3.0.php
- *             Open Software License (OSL 3.0)
- * @link       http://www.techdivision.com/
+ * @category  Php-by-contract
+ * @package   TechDivision\PBC
+ * @author    Bernhard Wick <b.wick@techdivision.com>
+ * @copyright 2014 TechDivision GmbH - <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php
+ *            Open Software License (OSL 3.0)
+ * @link      http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC;
@@ -34,28 +34,30 @@ use TechDivision\PBC\Config;
  *
  * This class initiates the creation of enforced structure definitions.
  *
- * @category   php-by-contract
- * @package    TechDivision\PBC
- * @author     Bernhard Wick <b.wick@techdivision.com>
- * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
- * @license    http://opensource.org/licenses/osl-3.0.php
- *             Open Software License (OSL 3.0)
- * @link       http://www.techdivision.com/
+ * @category  Php-by-contract
+ * @package   TechDivision\PBC
+ * @author    Bernhard Wick <b.wick@techdivision.com>
+ * @copyright 2014 TechDivision GmbH - <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php
+ *            Open Software License (OSL 3.0)
+ * @link      http://www.techdivision.com/
+ *
+ * TODO we are dealing with structures here, not just classes. Change variables and comments accordingly
  */
 class Generator
 {
     /**
-     * @var \TechDivision\PBC\CacheMap
+     * @var \TechDivision\PBC\CacheMap $cacheMap A cacheMap instance to organize our cache
      */
     protected $cacheMap;
 
     /**
-     * @var \TechDivision\PBC\StructureMap
+     * @var \TechDivision\PBC\StructureMap $structureMap A structureMap instance to organize the known structures
      */
     protected $structureMap;
 
     /**
-     * @var array
+     * @var array $config The aspect of the configuration we need
      */
     protected $config;
 
@@ -65,8 +67,10 @@ class Generator
     protected $structureDefinitionHierarchy;
 
     /**
-     * @param StructureMap $structureMap
-     * @param CacheMap     $cache
+     * Default constructor
+     *
+     * @param \TechDivision\PBC\StructureMap $structureMap A structureMap instance to organize the known structures
+     * @param \TechDivision\PBC\CacheMap     $cache        A cacheMap instance to organize our cache
      */
     public function __construct(StructureMap $structureMap, CacheMap $cache)
     {
@@ -81,9 +85,11 @@ class Generator
     }
 
     /**
-     * @param $className
+     * Method used to update certain structures
      *
-     * @return bool
+     * @param string $className Name of the structure we want to update
+     *
+     * @return boolean
      */
     public function update($className)
     {
@@ -91,11 +97,15 @@ class Generator
     }
 
     /**
-     * @param Structure $mapEntry
-     * @param bool      $update
+     * Will create an altered definition of the structure defined in the $mapEntry variable.
+     * Will also add it to the cache map
      *
-     * @return bool
-     * @throws GeneratorException
+     * @param \TechDivision\PBC\Entities\Definitions\Structure $mapEntry Entry of a StructureMap we want to create
+     * @param bool                                             $update   Should we make an update instead?
+     *
+     * @throws \TechDivision\PBC\Exceptions\GeneratorException
+     *
+     * @return boolean
      */
     public function create(Structure $mapEntry, $update = false)
     {
@@ -143,9 +153,13 @@ class Generator
     }
 
     /**
-     * @param $className
+     * Will return the path the cached and altered definition will have
+     *
+     * @param string $className Name of the structure we want to update
      *
      * @return string
+     *
+     * TODO implement this somewhere more accessible, others might need it too (e.g. autoloader)
      */
     private function createFilePath($className)
     {
@@ -158,11 +172,16 @@ class Generator
     }
 
     /**
-     * @param                              $targetFileName
-     * @param StructureDefinitionInterface $structureDefinition
+     * Will create a file containing the altered definition
      *
-     * @return mixed
+     * @param string                                                    $targetFileName      The intended name of the
+     *                                                                                       new file
+     * @param \TechDivision\PBC\Interfaces\StructureDefinitionInterface $structureDefinition The definition of the
+     *                                                                                       structure we will alter
+     *
      * @throws \InvalidArgumentException
+     *
+     * @return boolean
      */
     private function createFileFromDefinition(
         $targetFileName,
@@ -185,12 +204,17 @@ class Generator
     }
 
     /**
+     * Will create a file for a given interface definition.
      * We will just copy the file here until the autoloader got refactored.
-     * TODO remove when autoloader is able to recoginize and skip interfaces
      *
-     * @param                     $targetFileName
-     * @param FileDefinition      $fileDefinition
-     * @param InterfaceDefinition $structureDefinition
+     * @param string                                                     $targetFileName      The intended name of the
+     *                                                                                        new file
+     * @param \TechDivision\PBC\Entities\Definitions\InterfaceDefinition $structureDefinition The definition of the
+     *                                                                                        structure we will alter
+     *
+     * @return boolean
+     *
+     * TODO remove when autoloader is able to recognize and skip interfaces
      */
     private function createFileFromInterfaceDefinition(
         $targetFileName,
@@ -213,8 +237,12 @@ class Generator
     }
 
     /**
-     * @param                 $targetFileName
-     * @param ClassDefinition $structureDefinition
+     * Will create a file with the altered class definition as it's content
+     *
+     * @param string                                                 $targetFileName      The intended name of the
+     *                                                                                    new file
+     * @param \TechDivision\PBC\Entities\Definitions\ClassDefinition $structureDefinition The definition of the
+     *                                                                                    structure we will alter
      *
      * @return bool
      */
@@ -262,10 +290,15 @@ class Generator
     /**
      * Will append all needed filters based on the enforcement level stated in the configuration file.
      *
-     * @param                              $res
-     * @param StructureDefinitionInterface $structureDefinition
+     * @param resource                                                  &$res                The resource we will append
+     *                                                                                       the filters to
+     * @param \TechDivision\PBC\Interfaces\StructureDefinitionInterface $structureDefinition Structure definition
+     *                                                                                       providing needed
+     *                                                                                       information
      *
-     * @return bool
+     * @return boolean
+     *
+     * TODO more comments!
      */
     protected function appendFilter(
         & $res,
@@ -363,7 +396,9 @@ class Generator
     }
 
     /**
-     * @param $className
+     * Return the cache path (as organized by our cache map) for a given structure name
+     *
+     * @param string $className The structure we want the cache path for
      *
      * @return mixed
      */

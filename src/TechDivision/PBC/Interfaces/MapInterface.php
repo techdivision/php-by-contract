@@ -1,12 +1,17 @@
 <?php
 /**
- * TechDivision\PBC\Interfaces\MapInterface
+ * File containing the MapInterface interface
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Interfaces
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Interfaces;
@@ -14,12 +19,18 @@ namespace TechDivision\PBC\Interfaces;
 use TechDivision\PBC\Entities\Definitions\Structure;
 
 /**
- * @package     TechDivision\PBC
- * @subpackage  Interfaces
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\Interfaces\MapInterface
+ *
+ * An interface defining the functionality of any possible map class
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Interfaces
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 interface MapInterface
 {
@@ -27,7 +38,7 @@ interface MapInterface
      * Will return all entries within a map. If needed only entries of contracted
      * structures will be returned.
      *
-     * @param bool $contracted
+     * @param boolean $contracted Do we only want entries containing contracts?
      *
      * @return mixed
      */
@@ -36,23 +47,30 @@ interface MapInterface
     /**
      * Will add a structure entry to the map.
      *
-     * @param Structure $structure
+     * @param \TechDivision\PBC\Entities\Definitions\Structure $structure The structure to add
      *
      * @return bool
      */
     public function add(Structure $structure);
 
     /**
-     * @param $identifier
+     * Do we have an entry for the given identifier
+     *
+     * @param string $identifier The identifier of the entry we try to find
      *
      * @return bool
      */
     public function entryExists($identifier);
 
     /**
-     * @param Structure $structure
+     * Will update a given structure.
+     * If the entry does not exist we will create it
      *
-     * @return mixed
+     * @param \TechDivision\PBC\Entities\Definitions\Structure $structure The structure to update
+     *
+     * @return void
+     *
+     * TODO implement this in the implementing classes
      */
     public function update(Structure $structure = null);
 
@@ -60,26 +78,27 @@ interface MapInterface
      * Will return the entry specified by it's identifier.
      * If none is found, false will be returned.
      *
-     * @param $identifier
+     * @param string $identifier The identifier of the entry we try to find
      *
-     * @return bool|Structure
+     * @return boolean|\TechDivision\PBC\Entities\Definitions\Structure
      */
     public function getEntry($identifier);
 
     /**
-     * Checks if the entry for a certain structure is current if one was specified.
-     * If not it will check if the whole map is current.
+     * Checks if the entry for a certain structure is recent if one was specified.
+     * If not it will check if the whole map is recent.
      *
-     * @param null|string $identifier
+     * @param null|string $identifier The identifier of the entry we try to find
      *
-     * @return  bool
+     * @return  boolean
      */
     public function isRecent($identifier = null);
 
     /**
-     * Will return an array of all classes which are stored in this map.
+     * Will return an array of all entry identifiers which are stored in this map.
+     * We might filter by entry type
      *
-     * @param string $type
+     * @param string|null $type The type to filter by
      *
      * @return array
      */
@@ -89,7 +108,7 @@ interface MapInterface
      * Will return an array of all files which are stored in this map.
      * Will include the full path if $fullPath is true.
      *
-     * @param   $fullPath
+     * @param boolean $fullPath Do we need the full path?
      *
      * @return  array
      */
@@ -98,9 +117,9 @@ interface MapInterface
     /**
      * Removes an entry from the map of structures.
      *
-     * @param $identifier
+     * @param null|string $identifier The identifier of the entry we try to find
      *
-     * @return bool
+     * @return boolean
      */
     public function remove($identifier);
 }

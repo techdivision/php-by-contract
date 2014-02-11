@@ -1,10 +1,17 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 19.06.13
- * Time: 15:15
- * To change this template use File | Settings | File Templates.
+ * File containing the AnnotationParser class
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Parser
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Parser;
@@ -17,20 +24,31 @@ use TechDivision\PBC\Config;
 use TechDivision\PBC\Exceptions\ParserException;
 
 /**
- * Class AnnotationParser
+ * TechDivision\PBC\Parser\AnnotationParser
+ *
+ * The AnnotationParser class which is used to get all usable parts from within DocBlock annotation
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Parser
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class AnnotationParser extends AbstractParser
 {
     /**
-     * @var
+     * @var array $config The configuration aspect we need here
      */
-    private $config;
+    protected $config;
 
     /**
      * All simple data types which are supported by PHP
      * and have a is_... function.
      *
-     * @var array
+     * @var array $validSimpleTypes
      */
     private $validSimpleTypes = array(
         'array',
@@ -53,13 +71,16 @@ class AnnotationParser extends AbstractParser
     /**
      * All simple data types which are known but are aliased without an is_... function.
      *
-     * @var array
+     * @var array $simpleTypeMappings
      */
     private $simpleTypeMappings = array(
         'boolean' => 'bool',
         'void' => 'null'
     );
 
+    /**
+     * Default constructor
+     */
     public function __construct()
     {
         $config = Config::getInstance();
@@ -67,10 +88,12 @@ class AnnotationParser extends AbstractParser
     }
 
     /**
-     * @param $docBlock
-     * @param $conditionKeyword
+     * Will get the conditions for a certain assertion indicating keyword like @requires or, if configured, @param
      *
-     * @return bool|AssertionList
+     * @param string $docBlock         The DocBlock to search in
+     * @param string $conditionKeyword The keyword we are searching for, use assertion defining tags here!
+     *
+     * @return boolean|\TechDivision\PBC\Entities\Lists\AssertionList
      */
     public function getConditions($docBlock, $conditionKeyword)
     {
@@ -134,6 +157,8 @@ class AnnotationParser extends AbstractParser
     }
 
     /**
+     * 
+     *
      * @param      $docString
      * @param null $usedAnnotation
      *

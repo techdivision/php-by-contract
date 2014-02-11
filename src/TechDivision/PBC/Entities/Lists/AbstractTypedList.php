@@ -1,12 +1,17 @@
 <?php
 /**
- * TechDivision\PBC\Entities\Lists\AbstractTypedList
+ * File containing the AbstractTypedList class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Entities\Lists;
@@ -14,27 +19,33 @@ namespace TechDivision\PBC\Entities\Lists;
 use TechDivision\PBC\Interfaces\TypedListInterface;
 
 /**
- * @package     TechDivision\PBC
- * @subpackage  Entities
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\Entities\Lists\AbstractTypedList
+ *
+ * Abstract parent class for type safe list structures
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Entities
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 abstract class AbstractTypedList implements TypedListInterface
 {
     /**
-     * @var string
+     * @var string $itemType Type of the contained elements
      */
     protected $itemType;
 
     /**
-     * @var array
+     * @var array $container The actual container holding the entries
      */
     protected $container = array();
 
     /**
-     * @var string
+     * @var string $defaultOffset Default member of an entity which will be used as offset e.g. "name"
      */
     protected $defaultOffset = '';
 
@@ -49,9 +60,11 @@ abstract class AbstractTypedList implements TypedListInterface
     }
 
     /**
-     * @param $value
+     * Will return an entry for a certain offset
      *
-     * @return bool|mixed
+     * @param mixed $value The offset of the entry
+     *
+     * @return mixed
      */
     public function getOffset($value)
     {
@@ -74,7 +87,7 @@ abstract class AbstractTypedList implements TypedListInterface
     /**
      * Checks if an offset exists.
      *
-     * @param mixed $offset
+     * @param mixed $offset The offset to check for
      *
      * @return bool
      */
@@ -84,9 +97,11 @@ abstract class AbstractTypedList implements TypedListInterface
     }
 
     /**
-     * @param $offset
+     * Will delete an entry at a certain offset
      *
-     * @return mixed|void
+     * @param mixed $offset The offset to delete at
+     *
+     * @return void
      */
     public function delete($offset)
     {
@@ -94,7 +109,9 @@ abstract class AbstractTypedList implements TypedListInterface
     }
 
     /**
-     * @param $offset
+     * Will return a certain entry
+     *
+     * @param mixed $offset The offset to get
      *
      * @return mixed
      */
@@ -111,11 +128,14 @@ abstract class AbstractTypedList implements TypedListInterface
     }
 
     /**
-     * @param $offset
-     * @param $value
+     * Will set an entry at a certain offset. Existing entries will be overwritten
      *
-     * @return \TechDivision\PBC\Interfaces\UnexpectedValueException|void
+     * @param mixed $offset The offset on which we will set
+     * @param mixed $value  The value to set
+     *
      * @throws \UnexpectedValueException
+     *
+     * @return void
      */
     public function set($offset, $value)
     {
@@ -130,10 +150,13 @@ abstract class AbstractTypedList implements TypedListInterface
     }
 
     /**
-     * @param $value
+     * Will add an entry to the container. The offset will be set automatically
      *
-     * @return mixed|void
+     * @param mixed $value The value to add
+     *
      * @throws \UnexpectedValueException
+     *
+     * @return void
      */
     public function add($value)
     {
@@ -156,12 +179,15 @@ abstract class AbstractTypedList implements TypedListInterface
     }
 
     /**
-     * @param TypedList $foreignList
+     * Will attach another typed list to this list
      *
-     * @throws \Exception
+     * @param \TechDivision\PBC\Interfaces\TypedListInterface $foreignList The list to attach to this list
+     *
      * @throws \UnexpectedValueException
+     *
+     * @return void
      */
-    public function attach(TypedList $foreignList)
+    public function attach(TypedListInterface $foreignList)
     {
         $iterator = $foreignList->getIterator();
         for ($i = 0; $i < $iterator->count(); $i++) {
@@ -180,7 +206,9 @@ abstract class AbstractTypedList implements TypedListInterface
     }
 
     /**
-     * @return ArrayIterator
+     * Will return an ArrayIterator object for this list
+     *
+     * @return \ArrayIterator
      */
     public function getIterator()
     {
@@ -188,6 +216,8 @@ abstract class AbstractTypedList implements TypedListInterface
     }
 
     /**
+     * Will return the entry count
+     *
      * @return int
      */
     public function count()

@@ -1,13 +1,19 @@
 <?php
 /**
- * TechDivision\PBC\Parser\AbstractStructureParser
+ * File containing the AbstractStructureParser class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Parser
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
+
 namespace TechDivision\PBC\Parser;
 
 use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
@@ -17,35 +23,55 @@ use TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy;
 use TechDivision\PBC\StructureMap;
 
 /**
- * @package     TechDivision\PBC
- * @subpackage  Parser
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\Parser\AbstractStructureParser
+ *
+ * The abstract class AbstractStructureParser which provides a basic implementation other stucture parsers
+ * can inherit from
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Parser
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 abstract class AbstractStructureParser extends AbstractParser implements StructureParserInterface
 {
     /**
-     * @var StructureMap
+     * @var \TechDivision\PBC\StructureMap $structureMap Our structure map instance
      */
     protected $structureMap;
 
     /**
-     * @var StructureDefinitionHierarchy
+     * @var \TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy $structureDefinitionHierarchy The list
+     *                                                                                                        structures
+     *                                                                                                        we did
      */
     protected $structureDefinitionHierarchy;
 
+    /**
+     * @var string $file The path of the file we want to parse
+     */
     protected $file;
 
+    /**
+     * @var array $tokens The token array representing the whole file
+     */
     protected $tokens = array();
 
+    /**
+     * @var integer $tokenCount The count of our main token array, so we do not have to calculate it over and over again
+     */
     protected $tokenCount;
 
     /**
-     * @param                              $file
-     * @param StructureMap                 $structureMap
-     * @param StructureDefinitionHierarchy $structureDefinitionHierarchy
+     * Default constructor
+     *
+     * @param string                         $file                          The path of the file we want to parse
+     * @param \TechDivision\PBC\StructureMap $structureMap                  Our structure map instance
+     * @param StructureDefinitionHierarchy   &$structureDefinitionHierarchy The list structures we did
      *
      * @throws ParserException
      */
@@ -72,9 +98,9 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
     }
 
     /**
-     * Will check a token array for the occurrence of a certain on (class, interface or trait)
+     * Will check the main token array for the occurrence of a certain on (class, interface or trait)
      *
-     * @return bool|string
+     * @return string|boolean
      */
     protected function getStructureToken()
     {
@@ -111,9 +137,9 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
     /**
      * Will check if a certain structure was mentioned in one(!) use statement.
      *
-     * @param StructureDefinitionInterface $structureDefinition The structure $structureName is compared against
-     * @param string                       $structureName       The name of the structure we have to check against the
-     *                                                          use statements of the definition
+     * @param StructureDefinitionInterface &$structureDefinition The structure $structureName is compared against
+     * @param string                       $structureName        The name of the structure we have to check against the
+     *                                                           use statements of the definition
      *
      * @return bool|string
      */
@@ -149,6 +175,8 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
     }
 
     /**
+     * Will return the constants within the main token array
+     *
      * @return array
      */
     protected function getConstants()
@@ -194,9 +222,12 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
     }
 
     /**
-     * @param $structureToken
+     * Will return a subset of our main token array. This subset includes all tokens belonging to a certain structure.
+     * Might return false on failure
      *
-     * @return array|bool
+     * @param integer $structureToken The structure we are after e.g. T_CLASS, use PHP tokens here
+     *
+     * @return array|boolean
      */
     protected function getStructureTokens($structureToken)
     {
@@ -269,6 +300,8 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
     }
 
     /**
+     * Will return the structure's namespace if found
+     *
      * @return string
      */
     protected function getNamespace()
@@ -302,7 +335,11 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
     }
 
     /**
+     * Will return an array of structures which this structure references by use statements
+     *
      * @return array
+     *
+     * TODO namespaces does not make any sense here, as we are referencing structures!
      */
     protected function getUsedNamespaces()
     {
