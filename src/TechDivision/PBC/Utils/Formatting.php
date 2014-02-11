@@ -1,22 +1,34 @@
 <?php
 /**
- * TechDivision\PBC\Utils\Formatting
+ * File containing the Formatting class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Utils
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
+
 namespace TechDivision\PBC\Utils;
 
 /**
- * @package     TechDivisionPBCUtils
- * @subpackage
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\Utils\Formatting
+ *
+ * Will provide basic formatting for same needed conversions of strings in special ways
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Utils
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class Formatting
 {
@@ -24,7 +36,7 @@ class Formatting
     /**
      * Will break up any path into a canonical form like realpath(), but does not require the file to exist.
      *
-     * @param $path
+     * @param string $path The path to normalize
      *
      * @return mixed
      */
@@ -57,7 +69,7 @@ class Formatting
     /**
      * Converts a string by escaping all regex relevant characters in it.
      *
-     * @param $string
+     * @param string $string The string to convert
      *
      * @return string|array
      */

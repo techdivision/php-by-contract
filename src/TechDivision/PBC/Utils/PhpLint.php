@@ -1,22 +1,34 @@
 <?php
 /**
- * TechDivision\PBC\Utils\PhpLint
+ * File containing the PhpLint class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Utils
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
+
 namespace TechDivision\PBC\Utils;
 
 /**
- * @package     TechDivision\PBC
- * @subpackage  Utils
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\Utils\PhpLint
+ *
+ * Will provide a basic linting function for php code
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Utils
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class PhpLint
 {
@@ -24,7 +36,7 @@ class PhpLint
     /**
      * Will remove any PHP start or end tags from the code.
      *
-     * @param $code
+     * @param string $code The to strip from the tags
      *
      * @return mixed
      */
@@ -36,10 +48,11 @@ class PhpLint
     /**
      * Will check if code is PHP syntax conform.
      *
-     * @param $code
+     * @param string $code The code to check for syntax errors
+     *
+     * @throws \Exception
      *
      * @return boolean
-     * @throws \Exception
      */
     public function check($code)
     {

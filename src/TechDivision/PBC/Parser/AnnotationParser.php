@@ -158,7 +158,7 @@ class AnnotationParser extends AbstractParser
 
     /**
      *
-     * 
+     *
      *
      * @param      $docString
      * @param null $usedAnnotation

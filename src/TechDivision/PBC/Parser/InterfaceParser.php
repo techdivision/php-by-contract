@@ -1,4 +1,18 @@
 <?php
+/**
+ * File containing the InterfaceParser class
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Parser
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
+ */
 
 namespace TechDivision\PBC\Parser;
 
@@ -6,14 +20,31 @@ use TechDivision\PBC\Entities\Definitions\InterfaceDefinition;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 
+/**
+ * TechDivision\PBC\Parser\InterfaceParser
+ *
+ * The InterfaceParser class which is used to get an \TechDivision\PBC\Entities\Definitions\InterfaceDefinition
+ * instance (or several) from a fail containing those definition(s)
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Parser
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
+ */
 class InterfaceParser extends AbstractStructureParser
 {
 
     /**
-     * @param null $interfaceName
-     * @param bool $getRecursive
+     * Will return a structure definition. If a name is gives method will search for this particular structure.
      *
-     * @return bool|mixed|FileDefinition
+     * @param null|string $interfaceName Name of a certain structure we are searching for
+     * @param boolean     $getRecursive  Will recursively load all conditions of ancestral structures
+     *
+     * @return \TechDivision\PBC\Entities\Definitions\InterfaceDefinition The definition of a the searched interface
      */
     public function getDefinition($interfaceName = null, $getRecursive = false)
     {
@@ -55,11 +86,13 @@ class InterfaceParser extends AbstractStructureParser
     }
 
     /**
-     * @param                $file
-     * @param FileDefinition $fileDefinition
-     * @param bool           $getRecursive
+     * Will return a list of structures found in a certain file
      *
-     * @return bool|StructureDefinitionList
+     * @param string         $file           The path of the file to search in
+     * @param FileDefinition $fileDefinition Definition of the file to pick details from
+     * @param bool           $getRecursive   Do we need our ancestral information?
+     *
+     * @return StructureDefinitionList
      */
     public function getDefinitionListFromFile($file, FileDefinition $fileDefinition, $getRecursive = false)
     {
@@ -90,9 +123,13 @@ class InterfaceParser extends AbstractStructureParser
     }
 
     /**
-     * @param $tokens
+     * Get the name of the interface
+     *
+     * @param array $tokens The token array
      *
      * @return string
+     *
+     * TODO move this to the abstract parent parser
      */
     private function getName($tokens)
     {
@@ -118,9 +155,12 @@ class InterfaceParser extends AbstractStructureParser
     }
 
     /**
-     * @param $tokens
+     * Will get all parent interfaces (is any).
+     * Might return false on error
      *
-     * @return string
+     * @param array $tokens The token array
+     *
+     * @return string|boolean
      */
     private function getParents($tokens)
     {
@@ -177,11 +217,10 @@ class InterfaceParser extends AbstractStructureParser
      * This method will use a set of other methods to parse a token array and retrieve any
      * possible information from it. This information will be entered into a ClassDefinition object.
      *
-     * @access private
+     * @param array   $tokens       The token array
+     * @param boolean $getRecursive Do we have to load the inherited contracts as well?
      *
-     * @param $tokens
-     *
-     * @return FileDefinition
+     * @return \TechDivision\PBC\Entities\Definitions\InterfaceDefinition
      */
     private function getDefinitionFromTokens($tokens, $getRecursive = true)
     {
