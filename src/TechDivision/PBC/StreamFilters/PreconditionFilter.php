@@ -1,12 +1,17 @@
 <?php
 /**
- * TechDivision\PBC\StreamFilters\PreconditionFilter
+ * File containing the PreconditionFilter class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage StreamFilters
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\StreamFilters;
@@ -16,32 +21,42 @@ use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 
 /**
- * @package     TechDivision\PBC
- * @subpackage  StreamFilters
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\StreamFilters\PreconditionFilter
+ *
+ * This filter will buffer the input stream and add all precondition related information at prepared locations
+ * (see $dependencies)
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage StreamFilters
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class PreconditionFilter extends AbstractFilter
 {
 
     /**
-     * @const   int
+     * @const integer FILTER_ORDER Order number if filters are used as a stack, higher means below others
      */
     const FILTER_ORDER = 1;
 
     /**
-     * @var array
+     * @var array $dependencies Other filters on which we depend
      */
     private $dependencies = array('SkeletonFilter');
 
     /**
-     * @var FunctionDefinitionList
+     * @var mixed $params The parameter(s) we get passed when appending the filter to a stream
+     * @link http://www.php.net/manual/en/class.php-user-filter.php
      */
     public $params;
 
     /**
+     * Will return the dependency array
+     *
      * @return array
      */
     public function getDependencies()
@@ -50,7 +65,9 @@ class PreconditionFilter extends AbstractFilter
     }
 
     /**
-     * @return int
+     * Will return the order number the concrete filter has been constantly assigned
+     *
+     * @return integer
      */
     public function getFilterOrder()
     {
@@ -58,20 +75,32 @@ class PreconditionFilter extends AbstractFilter
     }
 
     /**
+     * Not implemented yet
+     *
      * @throws \Exception
+     *
+     * @return void
      */
     public function dependenciesMet()
     {
-
+        throw new \Exception();
     }
 
     /**
-     * @param $in
-     * @param $out
-     * @param $consumed
-     * @param $closing
+     * The main filter method.
+     * Implemented according to \php_user_filter class. Will loop over all stream buckets, buffer them and perform
+     * the needed actions.
      *
-     * @return int|void
+     * @param resource $in        Incoming bucket brigade we need to filter
+     * @param resource $out       Outgoing bucket brigade with already filtered content
+     * @param integer  &$consumed The count of altered characters as buckets pass the filter
+     * @param boolean  $closing   Is the stream about to close?
+     *
+     * @throws \TechDivision\PBC\Exceptions\GeneratorException
+     *
+     * @return integer
+     *
+     * @link http://www.php.net/manual/en/php-user-filter.filter.php
      */
     public function filter($in, $out, &$consumed, $closing)
     {
@@ -127,7 +156,9 @@ class PreconditionFilter extends AbstractFilter
     }
 
     /**
-     * @param TypedListList $assertionLists
+     * Will generate the code needed to enforce made precondition assertions
+     *
+     * @param \TechDivision\PBC\Entities\Lists\TypedListList $assertionLists List of assertion lists
      *
      * @return string
      */

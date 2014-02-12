@@ -1,10 +1,16 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 05.09.13
- * Time: 11:57
- * To change this template use File | Settings | File Templates.
+ * File containing the Exporter class
+ *
+ * PHP version 5
+ *
+ * @category  Php-by-contract
+ * @package   TechDivision\PBC
+ * @author    Bernhard Wick <b.wick@techdivision.com>
+ * @copyright 2014 TechDivision GmbH - <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php
+ *            Open Software License (OSL 3.0)
+ * @link      http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC;
@@ -12,9 +18,18 @@ namespace TechDivision\PBC;
 require_once __DIR__ . '/Bootstrap.php';
 
 /**
- * Class Exporter
+ * TechDivision\PBC\Exporter
  *
- * @package TechDivision\PBC
+ * This class provides tools to export already contracted structure definitions.
+ * This is useful if one does not want to use the autoloading functionality or does want to include the lib at all
+ *
+ * @category  Php-by-contract
+ * @package   TechDivision\PBC
+ * @author    Bernhard Wick <b.wick@techdivision.com>
+ * @copyright 2014 TechDivision GmbH - <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php
+ *            Open Software License (OSL 3.0)
+ * @link      http://www.techdivision.com/
  */
 class Exporter
 {
@@ -29,12 +44,15 @@ class Exporter
     private $structureMap;
 
     /**
-     * @param $source
-     * @param $target
+     * Will export all structures found in the specified source path and will export it to the target dir
      *
-     * @return bool
+     * @param string $source The source directory
+     * @param string $target The target directory
+     *
      * @throws \InvalidArgumentException
      * @throws \Exception
+     *
+     * @return boolean
      */
     public function export($source, $target)
     {
@@ -114,7 +132,9 @@ class Exporter
     }
 
     /**
-     * @param array $fileList
+     * Will check which of the targeted files are already cached
+     *
+     * @param array $fileList List of files to export
      *
      * @return array
      */
@@ -137,7 +157,9 @@ class Exporter
     }
 
     /**
-     * @param array $fileList
+     * Will generate the altered structure definitions
+     *
+     * @param array $fileList List of files to export
      *
      * @return array
      */

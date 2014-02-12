@@ -157,13 +157,16 @@ class AnnotationParser extends AbstractParser
     }
 
     /**
+     * Will parse assertions from a DocBlock comment piece. If $usedAnnotation is given we will concentrate on that
+     * type of assertion only.
+     * We might return false on error
      *
-     *
-     *
-     * @param      $docString
-     * @param null $usedAnnotation
+     * @param string      $docString      The DocBlock piece to search in
+     * @param null|string $usedAnnotation The annotation we want to specifically search for
      *
      * @return bool
+     *
+     * TODO we need an assertion factory badly! This is way to long
      */
     private function parseAssertion($docString, $usedAnnotation = null)
     {
@@ -306,8 +309,14 @@ class AnnotationParser extends AbstractParser
     }
 
     /**
-     * @param $combinator
-     * @param $docString
+     * Parse assertions which are a collection of others
+     *
+     * @param string $combinator How are they combinded? E.g. "||"
+     * @param string $docString  The DocBlock piece to search in
+     *
+     * @throws \TechDivision\PBC\Exceptions\ParserException
+     *
+     * @return \TechDivision\PBC\Entities\Assertions\ChainedAssertion
      */
     private function parseChainedAssertion($combinator, $docString)
     {
@@ -359,9 +368,11 @@ class AnnotationParser extends AbstractParser
     }
 
     /**
-     * @param $docString
+     * Will filter the variable used within a DocBlock piece
      *
-     * @return bool
+     * @param string $docString The DocBlock piece to search in
+     *
+     * @return boolean|string
      */
     private function filterVariable($docString)
     {
@@ -390,9 +401,11 @@ class AnnotationParser extends AbstractParser
     }
 
     /**
-     * @param $docString
+     * Will filter any combinator defining a logical or-relation
      *
-     * @return bool
+     * @param string $docString The DocBlock piece to search in
+     *
+     * @return boolean
      */
     private function filterOrCombinator($docString)
     {
@@ -406,9 +419,11 @@ class AnnotationParser extends AbstractParser
     }
 
     /**
-     * @param $docString
+     * Will filter for Java Generics like type safe collections of the form array<Type>
      *
-     * @return bool
+     * @param string $docString The DocBlock piece to search in
+     *
+     * @return boolean|string
      */
     private function filterTypedCollection($docString)
     {
@@ -426,10 +441,13 @@ class AnnotationParser extends AbstractParser
     }
 
     /**
-     * @param $docString
+     * Will filter for any simple type that may be used to indicate type hinting
      *
-     * @return bool|string
+     * @param string $docString The DocBlock piece to search in
+     *
      * @throws \InvalidArgumentException
+     *
+     * @return boolean|string
      */
     private function filterType($docString)
     {
@@ -467,9 +485,13 @@ class AnnotationParser extends AbstractParser
     }
 
     /**
-     * @param $docString
+     * Will filter for any referenced structure as a indicated type hinting of complex types
      *
-     * @return bool
+     * @param string $docString The DocBlock piece to search in
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return boolean
      */
     private function filterClass($docString)
     {

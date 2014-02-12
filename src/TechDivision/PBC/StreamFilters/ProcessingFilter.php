@@ -1,12 +1,17 @@
 <?php
 /**
- * TechDivision\PBC\StreamFilters\ProcessingFilter
+ * File containing the ProcessingFilter class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage StreamFilters
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\StreamFilters;
@@ -15,32 +20,42 @@ use TechDivision\PBC\Exceptions\ExceptionFactory;
 use TechDivision\PBC\Exceptions\GeneratorException;
 
 /**
- * @package     TechDivision\PBC
- * @subpackage  StreamFilters
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\StreamFilters\ProcessingFilter
+ *
+ * This filter will buffer the input stream and add the processing information into the prepared assertion checks
+ * (see $dependencies)
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage StreamFilters
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class ProcessingFilter extends AbstractFilter
 {
 
     /**
-     * @const   int
+     * @const integer FILTER_ORDER Order number if filters are used as a stack, higher means below others
      */
     const FILTER_ORDER = 4;
 
     /**
-     * @var array
+     * @var array $dependencies Other filters on which we depend
      */
     private $dependencies = array(array('PreconditionFilter', 'PostconditionFilter', 'InvariantFilter'));
 
     /**
-     * @var array
+     * @var mixed $params The parameter(s) we get passed when appending the filter to a stream
+     * @link http://www.php.net/manual/en/class.php-user-filter.php
      */
     public $params;
 
     /**
+     * Will return the dependency array
+     *
      * @return array
      */
     public function getDependencies()
@@ -49,7 +64,9 @@ class ProcessingFilter extends AbstractFilter
     }
 
     /**
-     * @return int
+     * Will return the order number the concrete filter has been constantly assigned
+     *
+     * @return integer
      */
     public function getFilterOrder()
     {
@@ -57,9 +74,9 @@ class ProcessingFilter extends AbstractFilter
     }
 
     /**
-     * We got no dependencies here.
+     * Not implemented yet
      *
-     * @return bool
+     * @return boolean
      */
     public function dependenciesMet()
     {
@@ -67,13 +84,20 @@ class ProcessingFilter extends AbstractFilter
     }
 
     /**
-     * @param $in
-     * @param $out
-     * @param $consumed
-     * @param $closing
+     * The main filter method.
+     * Implemented according to \php_user_filter class. Will loop over all stream buckets, buffer them and perform
+     * the needed actions.
      *
-     * @return int
+     * @param resource $in        Incoming bucket brigade we need to filter
+     * @param resource $out       Outgoing bucket brigade with already filtered content
+     * @param integer  &$consumed The count of altered characters as buckets pass the filter
+     * @param boolean  $closing   Is the stream about to close?
+     *
      * @throws \TechDivision\PBC\Exceptions\GeneratorException
+     *
+     * @return integer
+     *
+     * @link http://www.php.net/manual/en/php-user-filter.filter.php
      */
     public function filter($in, $out, &$consumed, $closing)
     {
@@ -113,8 +137,11 @@ class ProcessingFilter extends AbstractFilter
     }
 
     /**
-     * @param $config
-     * @param $for
+     * /**
+     * Will generate the code needed to enforce any broken assertion checks
+     *
+     * @param array  $config The configuration aspect which holds needed information for us
+     * @param string $for    For which kind of assertion do wee need the processing
      *
      * @return string
      */

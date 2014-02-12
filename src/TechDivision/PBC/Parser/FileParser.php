@@ -33,14 +33,18 @@ use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
  * @license    http://opensource.org/licenses/osl-3.0.php
  *             Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
+ *
+ * TODO Do we even need this class anymore? If yes, refactor token array usage
  */
 class FileParser extends AbstractParser
 {
     /**
-     * @param      $file
-     * @param bool $getRecursive
+     * Will return the definition of a specified file
      *
-     * @return bool|FileDefinition
+     * @param null|string $file         The path of the file we are searching for
+     * @param boolean     $getRecursive Do we have to get the ancestral contents as well?
+     *
+     * @return boolean|\TechDivision\PBC\Entities\Definitions\FileDefinition
      */
     public function getDefinitionFromFile($file, $getRecursive = null)
     {
@@ -91,7 +95,9 @@ class FileParser extends AbstractParser
     }
 
     /**
-     * @param $tokens
+     * Will return the files's namespace if found
+     *
+     * @param array $tokens The token array
      *
      * @return string
      */
@@ -123,9 +129,13 @@ class FileParser extends AbstractParser
     }
 
     /**
-     * @param $tokens
+     * Will return an array of structures which this structure references by use statements
+     *
+     * @param array $tokens The token array
      *
      * @return array
+     *
+     * TODO namespaces does not make any sense here, as we are referencing structures!
      */
     private function getUsedNamespaces($tokens)
     {
@@ -154,62 +164,5 @@ class FileParser extends AbstractParser
 
         // Return what we did or did not found
         return $namespaces;
-    }
-
-
-    /**
-     * @param $file
-     *
-     * @return bool
-     */
-    private function containsValidClass($file)
-    {
-        // Get the tokens
-        $tokens = token_get_all(file_get_contents($file));
-
-        // If we do not get valid PHP $tokens will only have one element
-        if (count($tokens) === 1) {
-
-            return false;
-        }
-
-        // Lets iterate over all tokens and check for any class declarations
-        $bracketCounter = null;
-        for ($i = 0; $i < count($tokens); $i++) {
-
-            // If we found a class keyword we have to count the opening and closing curly brackets after it.
-            // If the number is even we should have a valid class.
-            if (is_array($tokens[$i]) && $tokens[$i][0] === T_CLASS) {
-
-                // Reset our counter
-                $bracketCounter = 0;
-
-                // We got something, lets count the brackets between it and our variable's position
-                for ($j = $i + 1; $j < count($tokens); $j++) {
-
-                    if ($tokens[$j] === '{' || $tokens[$j][0] === T_CURLY_OPEN) {
-
-                        $bracketCounter++;
-
-                    } elseif ($tokens[$j] === '}') {
-
-                        $bracketCounter--;
-                    }
-                }
-
-                // We do not need to continue the outer for
-                break;
-            }
-        }
-
-        // Even number of brackets?
-        if (isset($bracketCounter) && $bracketCounter === 0) {
-
-            return true;
-
-        } else {
-
-            return false;
-        }
     }
 }

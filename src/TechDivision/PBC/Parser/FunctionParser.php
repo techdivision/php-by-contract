@@ -1,10 +1,17 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: wickb
- * Date: 16.07.13
- * Time: 11:34
- * To change this template use File | Settings | File Templates.
+ * File containing the FunctionParser class
+ *
+ * PHP version 5
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Parser
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Parser;
@@ -15,14 +22,28 @@ use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
 use TechDivision\PBC\Entities\Lists\ParameterDefinitionList;
 
 /**
- * Function FunctionParser
+ * TechDivision\PBC\Parser\FunctionParser
+ *
+ * This class implements a parser to find all useful information in function definitions
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage Parser
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class FunctionParser extends AbstractParser
 {
     /**
-     * @param $tokens
+     * Will return a list of function definition objects extracted from a given token array
      *
-     * @return bool|FunctionDefinitionList
+     * @param array   $tokens       The token array
+     * @param boolean $getRecursive Do we have to get the ancestral contents as well?
+     *
+     * @return boolean|\TechDivision\PBC\Entities\Lists\FunctionDefinitionList
      */
     public function getDefinitionListFromTokens(array $tokens, $getRecursive = true)
     {
@@ -71,11 +92,9 @@ class FunctionParser extends AbstractParser
      * This method will use a set of other methods to parse a token array and retrieve any
      * possible information from it. This information will be entered into a FunctionDefinition object.
      *
-     * @access private
+     * @param array $tokens The token array
      *
-     * @param $tokens
-     *
-     * @return FunctionDefinition
+     * @return \TechDivision\PBC\Entities\Definitions\FunctionDefinition
      */
     private function getDefinitionFromTokens(array $tokens)
     {
@@ -118,9 +137,13 @@ class FunctionParser extends AbstractParser
     }
 
     /**
-     * @param array $tokens
+     * Will return a list of parameter definition objects extracted from a given token array
      *
-     * @return ParameterDefinitionList
+     * @param array $tokens The token array
+     *
+     * @return \TechDivision\PBC\Entities\Lists\ParameterDefinitionList
+     *
+     * TODO Does this have to be this long?
      */
     private function getParameterDefinitionList(array $tokens)
     {
@@ -220,7 +243,9 @@ class FunctionParser extends AbstractParser
     }
 
     /**
-     * @param $tokens
+     * Will return the name of the function passed as a token array
+     *
+     * @param array $tokens The token array
      *
      * @return string
      */
@@ -242,7 +267,9 @@ class FunctionParser extends AbstractParser
     }
 
     /**
-     * @param $tokens
+     * Will return the body of the function passed as a token array
+     *
+     * @param array $tokens The token array
      *
      * @return string
      */
@@ -300,9 +327,11 @@ class FunctionParser extends AbstractParser
     }
 
     /**
-     * @param $tokens
+     * Will extract tokens belonging to one function (and one function only)
      *
-     * @return array|bool
+     * @param array $tokens The token array
+     *
+     * @return array|boolean
      *s
      */
     private function getFunctionTokens(array $tokens)
@@ -384,9 +413,13 @@ class FunctionParser extends AbstractParser
     }
 
     /**
-     * @param array $tokens
+     * Will return the visibility of the function passed as a token array
+     *
+     * @param array $tokens The token array
      *
      * @return string
+     *
+     * TODO I am sure this can be done more generally usable
      */
     private function getFunctionVisibility(array $tokens)
     {

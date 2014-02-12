@@ -1,39 +1,54 @@
 <?php
 /**
- * TechDivision\PBC\StreamFilters\BeautifyFilter
+ * File containing the BeautifyFilter class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage StreamFilters
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\StreamFilters;
 
 /**
- * @package     TechDivision\PBC
- * @subpackage  StreamFilters
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\StreamFilters\BeautifyFilter
+ *
+ * This filter will buffer the input stream, check it for php syntax errors and beautify it using
+ * the nikic/php-parser lib
+ *
+ * @category   Php-by-contract
+ * @package    TechDivision\PBC
+ * @subpackage StreamFilters
+ * @author     Bernhard Wick <b.wick@techdivision.com>
+ * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
+ * @license    http://opensource.org/licenses/osl-3.0.php
+ *             Open Software License (OSL 3.0)
+ * @link       http://www.techdivision.com/
  */
 class BeautifyFilter extends AbstractFilter
 {
 
     /**
-     * @const   int
+     * @const   integer FILTER_ORDER Order number if filters are used as a stack, higher means below others
      */
     const FILTER_ORDER = 99;
 
     /**
-     * @var mixed
+     * @var mixed $params The parameter(s) we get passed when appending the filter to a stream
+     * @link http://www.php.net/manual/en/class.php-user-filter.php
      */
     public $params;
 
     /**
-     * @return int
+     * Will return the oder number for this filer
+     *
+     * @return integer
      */
     public function getFilterOrder()
     {
@@ -43,7 +58,7 @@ class BeautifyFilter extends AbstractFilter
     /**
      * We got no dependencies here.
      *
-     * @return bool
+     * @return boolean
      */
     public function dependenciesMet()
     {
@@ -51,14 +66,23 @@ class BeautifyFilter extends AbstractFilter
     }
 
     /**
-     * @param $in
-     * @param $out
-     * @param $consumed
-     * @param $closing
+     * The main filter method.
+     * Implemented according to \php_user_filter class. Will loop over all stream buckets, buffer them and perform
+     * the needed actions.
      *
-     * @return int|void
+     * @param resource $in        Incoming bucket brigade we need to filter
+     * @param resource $out       Outgoing bucket brigade with already filtered content
+     * @param integer  &$consumed The count of altered characters as buckets pass the filter
+     * @param boolean  $closing   Is the stream about to close?
+     *
      * @throws \Exception
-     * @throws PHPParser_Error
+     * @throws \PHPParser_Error
+     *
+     * @return integer
+     *
+     * @link http://www.php.net/manual/en/php-user-filter.filter.php
+     *
+     * TODO The buffering does not work that well, maybe we should implement universal buffering within parent class!
      */
     public function filter($in, $out, &$consumed, $closing)
     {

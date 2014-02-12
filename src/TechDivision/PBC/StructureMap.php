@@ -1,13 +1,18 @@
 <?php
 /**
- * TechDivision\PBC\StructureMap
+ * File containing the StructureMap class
  *
- * NOTICE OF LICENSE
+ * PHP version 5
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * @category  Php-by-contract
+ * @package   TechDivision\PBC
+ * @author    Bernhard Wick <b.wick@techdivision.com>
+ * @copyright 2014 TechDivision GmbH - <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php
+ *            Open Software License (OSL 3.0)
+ * @link      http://www.techdivision.com/
  */
+
 namespace TechDivision\PBC;
 
 use TechDivision\PBC\Entities\Definitions\Structure;
@@ -23,36 +28,43 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'Entities' . DIRECTORY_SEPARATOR .
     'Definitions' . DIRECTORY_SEPARATOR . 'Structure.php';
 
 /**
- * @package     TechDivision\PBC
- * @copyright   Copyright (c) 2013 <info@techdivision.com> - TechDivision GmbH
- * @license     http://opensource.org/licenses/osl-3.0.php
- *              Open Software License (OSL 3.0)
- * @author      Bernhard Wick <b.wick@techdivision.com>
+ * TechDivision\PBC\StructureMap
+ *
+ * This class provides the possibility to hold a map of structure entries, which are used to relate a structure
+ * definition to it's physical path and other meta information
+ *
+ * @category  Php-by-contract
+ * @package   TechDivision\PBC
+ * @author    Bernhard Wick <b.wick@techdivision.com>
+ * @copyright 2014 TechDivision GmbH - <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php
+ *            Open Software License (OSL 3.0)
+ * @link      http://www.techdivision.com/
  */
 class StructureMap implements MapInterface
 {
     /**
-     * @var array $map
+     * @var array $map The actual container for the map
      */
     protected $map = array();
 
     /**
-     * @var array $rootPathes
+     * @var array $rootPathes Which paths do we like to include in our map?
      */
     protected $rootPathes;
 
     /**
-     * @var string $mapPath
+     * @var string $mapPath Where will the map be stored?
      */
     protected $mapPath;
 
     /**
-     * @var array $omittedPathes
+     * @var array $omittedPathes Paths that will not be included in our map
      */
     protected $omittedPathes;
 
     /**
-     * @var Config $config
+     * @var \TechDivision\PBC\Config $config Configuration
      */
     protected $config;
 
@@ -69,9 +81,9 @@ class StructureMap implements MapInterface
     /**
      * Default constructor
      *
-     * @param array  $rootPathes
-     * @param Config $config
-     * @param array  $omittedPathes
+     * @param array                    $rootPathes    Which paths do we like to include in our map?
+     * @param \TechDivision\PBC\Config $config        Configuration
+     * @param array                    $omittedPathes Paths that will not be included in our map
      */
     public function __construct($rootPathes, Config $config = null, $omittedPathes = array())
     {
@@ -190,7 +202,7 @@ class StructureMap implements MapInterface
      * Will update a given structure.
      * If the entry does not exist we will create it
      *
-     * @param \TechDivision\PBC\Entities\Definitions\Structure $structure The structure to update
+     * @param \TechDivision\PBC\Entities\Definitions\Structure|null $structure The structure to update
      *
      * @return void
      *
@@ -517,7 +529,9 @@ class StructureMap implements MapInterface
     }
 
     /**
-     * @param $file
+     * Will return true if the specified file has specified contracts, false if not.
+     *
+     * @param string $file File to check for contracts
      *
      * @return bool
      */
@@ -563,9 +577,13 @@ class StructureMap implements MapInterface
     }
 
     /**
-     * @param $file
+     * Will get the identifier of a structure within a name.
+     * Identifier will be most likely the qualified name including namespace and structure name.
+     * May return false on error.
      *
-     * @return array|bool
+     * @param string $file The file to check
+     *
+     * @return array|boolean
      * @throws Exceptions\CacheException
      */
     protected function findIdentifier($file)

@@ -183,7 +183,10 @@ abstract class AbstractStructureDefinition extends AbstractLockableEntity implem
     }
 
     /**
-     * @return bool
+     * Does this structure have parent structures.
+     * We are talking parents here, not implemented interfaces or used traits
+     *
+     * @return boolean
      */
     public function hasParents()
     {
