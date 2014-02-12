@@ -55,7 +55,7 @@
     <!-- ==================================================================== -->
     <target name="phpcs" description="Runs the code sniffer and generates a report.">
         <exec executable="phpcs" failonerror="true">
-            <arg line="-n --extensions=php --standard=PSR2 ${php-src.dir}"/>
+            <arg line="-n --extensions=php --standard=phpcs.xml ."/>
         </exec>
     </target>
 
