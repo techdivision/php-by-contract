@@ -91,13 +91,25 @@ class ExceptionFactory
 
             default:
 
-                $name = '\Exception';
+                $name = $type;
                 break;
         }
 
+        // If we got an exception from this namespace, return it's full name
         if (class_exists(__NAMESPACE__ . '\\' . $name)) {
 
             return __NAMESPACE__ . '\\' . $name;
+
+        } elseif (class_exists('\\' . $name)) {
+            // If we got an exception class from another namespace we will return this one
+
+            return $name;
+
+        } else {
+            // Otherwise we will return the most basic thing
+
+            return '\Exception';
         }
+
     }
 }

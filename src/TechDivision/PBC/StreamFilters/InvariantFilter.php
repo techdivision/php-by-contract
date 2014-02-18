@@ -279,7 +279,7 @@ class InvariantFilter extends AbstractFilter
             $code = '/**
              * Magic function to forward writing property access calls if within visibility boundaries.
              *
-             * @throws InvalidArgumentException
+             * @throws \Exception
              */
             public function __set($name, $value)
             {';
@@ -297,14 +297,19 @@ class InvariantFilter extends AbstractFilter
             $code .= 'return parent::__set($name, $value);';
         } else {
 
-            $code .= 'if (property_exists($this, $name)) {
-\TechDivision\PBC\ContractContext::close();
-                throw new \InvalidArgumentException;
-            } else {
-\TechDivision\PBC\ContractContext::close();
-                throw new \TechDivision\PBC\Exceptions\MissingPropertyException("Property $name does not exist in " .
-                    __CLASS__);
-            }';
+            $code .= 'if (property_exists($this, $name)) {' .
+
+                PBC_FAILURE_VARIABLE . ' = "accessing $name in an invalid way";' .
+                PBC_PROCESSING_PLACEHOLDER . 'InvalidArgumentException' . PBC_PLACEHOLDER_CLOSE .
+                '\TechDivision\PBC\ContractContext::close();
+                return false;
+                } else {' .
+
+                PBC_FAILURE_VARIABLE . ' = "accessing $name as it does not exist";' .
+                PBC_PROCESSING_PLACEHOLDER . 'MissingPropertyException' . PBC_PLACEHOLDER_CLOSE .
+                '\TechDivision\PBC\ContractContext::close();
+                return false;
+                }';
         }
 
         $code .= '}
@@ -320,11 +325,13 @@ class InvariantFilter extends AbstractFilter
 
                         $this->$name = $value;
 
-                    } else {
+                    } else {' .
 
-                        \TechDivision\PBC\ContractContext::close();
-                        throw new \InvalidArgumentException;
-                    }
+            PBC_FAILURE_VARIABLE . ' = "accessing $name in an invalid way";' .
+            PBC_PROCESSING_PLACEHOLDER . 'InvalidArgumentException' . PBC_PLACEHOLDER_CLOSE .
+            '\TechDivision\PBC\ContractContext::close();
+            return false;
+            }
                     break;
 
                 case "public" :
@@ -332,11 +339,13 @@ class InvariantFilter extends AbstractFilter
                     $this->$name = $value;
                     break;
 
-                default :
+                default :' .
 
-                    \TechDivision\PBC\ContractContext::close();
-                    throw new \InvalidArgumentException;
-                    break;
+            PBC_FAILURE_VARIABLE . ' = "accessing $name in an invalid way";' .
+            PBC_PROCESSING_PLACEHOLDER . 'InvalidArgumentException' . PBC_PLACEHOLDER_CLOSE .
+            '\TechDivision\PBC\ContractContext::close();
+            return false;
+            break;
             }
 
             // Check if the invariant holds
@@ -370,7 +379,7 @@ class InvariantFilter extends AbstractFilter
             $code = '/**
          * Magic function to forward reading property access calls if within visibility boundaries.
          *
-         * @throws InvalidArgumentException
+         * @throws \Exception
          */
         public function __get($name)
         {';
@@ -387,14 +396,19 @@ class InvariantFilter extends AbstractFilter
             $code .= 'return parent::__get($name);';
         } else {
 
-            $code .= 'if (property_exists($this, $name)) {
+            $code .= 'if (property_exists($this, $name)) {' .
 
-                throw new \InvalidArgumentException;
-            } else {
+                PBC_FAILURE_VARIABLE . ' = "accessing $name in an invalid way";' .
+                PBC_PROCESSING_PLACEHOLDER . 'InvalidArgumentException' . PBC_PLACEHOLDER_CLOSE .
+                '\TechDivision\PBC\ContractContext::close();
+                return false;
+                } else {' .
 
-                throw new \TechDivision\PBC\Exceptions\MissingPropertyException("Property $name does not exist in " .
-                    __CLASS__);
-            }';
+                PBC_FAILURE_VARIABLE . ' = "accessing $name as it does not exist";' .
+                PBC_PROCESSING_PLACEHOLDER . 'MissingPropertyException' . PBC_PLACEHOLDER_CLOSE .
+                '\TechDivision\PBC\ContractContext::close();
+                return false;
+                }';
         }
 
         $code .= '}
@@ -409,10 +423,12 @@ class InvariantFilter extends AbstractFilter
 
                     return $this->$name;
 
-                } else {
+                } else {' .
 
-                    throw new \InvalidArgumentException;
-                }
+            PBC_FAILURE_VARIABLE . ' = "accessing $name in an invalid way";' .
+            PBC_PROCESSING_PLACEHOLDER . 'InvalidArgumentException' . PBC_PLACEHOLDER_CLOSE .
+            '\TechDivision\PBC\ContractContext::close();
+            return false;}
                 break;
 
             case "public" :
@@ -420,10 +436,13 @@ class InvariantFilter extends AbstractFilter
                 return $this->$name;
                 break;
 
-            default :
+            default :' .
 
-                throw new \InvalidArgumentException;
-                break;
+            PBC_FAILURE_VARIABLE . ' = "accessing $name in an invalid way";' .
+            PBC_PROCESSING_PLACEHOLDER . 'InvalidArgumentException' . PBC_PLACEHOLDER_CLOSE .
+            '\TechDivision\PBC\ContractContext::close();
+            return false;
+            break;
         }';
 
         // We do not need the method encasing brackets if we inject

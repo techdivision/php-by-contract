@@ -113,18 +113,22 @@ class ProcessingFilter extends AbstractFilter
         $preconditionCode = $this->generateCode($config, 'precondition');
         $postconditionCode = $this->generateCode($config, 'postcondition');
         $invariantCode = $this->generateCode($config, 'invariant');
+        $invalidCode = $this->generateCode($config, 'InvalidArgumentException');
+        $missingCode = $this->generateCode($config, 'MissingPropertyException');
 
         // Get our buckets from the stream
         while ($bucket = stream_bucket_make_writeable($in)) {
 
-            // Insert the code
+            // Insert the code for the static processing placeholders
             $bucket->data = str_replace(
                 array(
                     PBC_PROCESSING_PLACEHOLDER . 'precondition' . PBC_PLACEHOLDER_CLOSE,
                     PBC_PROCESSING_PLACEHOLDER . 'postcondition' . PBC_PLACEHOLDER_CLOSE,
-                    PBC_PROCESSING_PLACEHOLDER . 'invariant' . PBC_PLACEHOLDER_CLOSE
+                    PBC_PROCESSING_PLACEHOLDER . 'invariant' . PBC_PLACEHOLDER_CLOSE,
+                    PBC_PROCESSING_PLACEHOLDER . 'InvalidArgumentException' . PBC_PLACEHOLDER_CLOSE,
+                    PBC_PROCESSING_PLACEHOLDER . 'MissingPropertyException' . PBC_PLACEHOLDER_CLOSE
                 ),
-                array($preconditionCode, $postconditionCode, $invariantCode),
+                array($preconditionCode, $postconditionCode, $invariantCode, $invalidCode, $missingCode),
                 $bucket->data
             );
 
@@ -150,7 +154,7 @@ class ProcessingFilter extends AbstractFilter
         $code = '';
 
         // Code defining the place the error happened
-        $place = '" . __METHOD__ . "';
+        $place = '__METHOD__';
 
         // If we are in an invariant we should tell them about the method we got called from
         if ($for === 'invariant') {
@@ -168,7 +172,7 @@ class ProcessingFilter extends AbstractFilter
 
                 // Create the code
                 $code .= '\TechDivision\PBC\ContractContext::close();
-                throw new \\' . $exception . '("Failed ' . PBC_FAILURE_VARIABLE . ' in ' . $place . '");';
+                throw new \\' . $exception . '("Failed ' . PBC_FAILURE_VARIABLE . ' in " . ' . $place . ');';
 
                 break;
 
@@ -176,7 +180,8 @@ class ProcessingFilter extends AbstractFilter
 
                 // Create the code
                 $code .= '$logger = new \\' . $config['logger'] . '();
-                $logger->error("Broken ' . $for . ' with message: ' . PBC_FAILURE_VARIABLE . ' in ' . $place . '");';
+                $logger->error("Encountered Problem with ' . $for . ' with message: ' .
+                    PBC_FAILURE_VARIABLE . ' in ' . $place . '");';
                 break;
 
             default:
