@@ -260,22 +260,7 @@ class SkeletonFilter extends AbstractFilter
         // Get the code used before the original body
         $beforeCode = $this->generateBeforeCode($injectNeeded, $functionDefinition);
 
-        // Get the code used after the original body
-        $afterCode = $this->generateAfterCode($injectNeeded, $functionDefinition);
-
-        // The index where we will inject the $afterCode code parts
-        $afterIndex = $beforeIndex + strlen($functionDefinition->body);
-
-        // Do our indeces make sense? $beforeIndex has to be before (smaller) than $afterIndex (suprise!)
-        if ($afterIndex < $beforeIndex) {
-
-            return false;
-        }
-
-        // As the injection of the $afterCode code parts occur AFTER $beforeIndex, we can save some work by doing it in
-        // the reverse order.
-        // If one of them fails we are screwed anyway
-        $bucketData = substr_replace($bucketData, $afterCode, $afterIndex, 0);
+        // Inject the new code in front of the original body
         $bucketData = substr_replace($bucketData, $beforeCode, $beforeIndex, 0);
 
         // If we are still here we seem to have succeeded
@@ -292,6 +277,8 @@ class SkeletonFilter extends AbstractFilter
      */
     protected function generateBeforeCode($injectNeeded, FunctionDefinition $functionDefinition)
     {
+        $suffix = PBC_ORIGINAL_FUNCTION_SUFFIX . str_replace('.', '', microtime(true));
+
         $code = PBC_CONTRACT_CONTEXT . ' = \TechDivision\PBC\ContractContext::open();';
 
         // Invariant is not needed in private or static functions.
@@ -306,24 +293,6 @@ class SkeletonFilter extends AbstractFilter
         $code .= PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
             PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
 
-        // Build up the original function as a closure
-        $code .= PBC_CLOSURE_VARIABLE . ' = ' . $functionDefinition->getHeader('closure') . '{';
-
-        return $code;
-    }
-
-    /**
-     * Will generate the code used after the original function body
-     *
-     * @param bool               $injectNeeded       Determine if we have to use a try...catch block
-     * @param FunctionDefinition $functionDefinition The function definition object
-     *
-     * @return null
-     */
-    protected function generateAfterCode($injectNeeded, FunctionDefinition $functionDefinition)
-    {
-        $code = '};';
-
         // If we inject something we might need a try ... catch around the original call.
         if ($injectNeeded === true) {
 
@@ -331,7 +300,7 @@ class SkeletonFilter extends AbstractFilter
         }
 
         // Build up the call to the original function.
-        $code .= PBC_KEYWORD_RESULT . ' = ' . PBC_CLOSURE_VARIABLE . '();';
+        $code .= PBC_KEYWORD_RESULT . ' = ' . $functionDefinition->getHeader('call', $suffix) . ';';
 
         // Finish the try ... catch and place the inject marker
         if ($injectNeeded === true) {
@@ -350,7 +319,9 @@ class SkeletonFilter extends AbstractFilter
         }
 
         $code .= 'if (' . PBC_CONTRACT_CONTEXT . ') {\TechDivision\PBC\ContractContext::close();}
-            return ' . PBC_KEYWORD_RESULT . ';';
+            return ' . PBC_KEYWORD_RESULT . ';}';
+
+        $code .= $functionDefinition->getHeader('definition', $suffix, true) . '{';
 
         return $code;
     }

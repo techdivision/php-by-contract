@@ -61,7 +61,7 @@ class ParameterDefinition
      * Will return a string representation of the defined parameter
      *
      * @param string $mode We can switch how the string should be structured.
-     *                     Choose from "definition", "call" or "closure"
+     *                     Choose from "definition", "call"
      *
      * @return string
      */
@@ -70,12 +70,7 @@ class ParameterDefinition
         // Prepare the parts
         $stringParts = array();
 
-        if ($mode === 'closure') {
-
-            // Get the name
-            $stringParts[] = '& ' . $this->name;
-
-        } elseif ($mode === 'call') {
+        if ($mode === 'call') {
 
             // Get the name
             $stringParts[] = $this->name;

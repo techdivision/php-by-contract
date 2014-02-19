@@ -153,12 +153,13 @@ class FunctionDefinition
      * Will return the header of this function either in calling or in defining manner.
      * String will stop after the closing ")" bracket, so the string can be used for interfaces as well.
      *
-     * @param string $type           Can be either "call" or "definition"
-     * @param bool   $markAsOriginal Will mark a method as original by extending it with a suffix
+     * @param string $type   Can be either "call" or "definition"
+     * @param string $suffix Suffix for the function name
+     * @param bool   $hideMe Will mark a method as original by extending it with a suffix
      *
      * @return  string
      */
-    public function getHeader($type, $markAsOriginal = false)
+    public function getHeader($type, $suffix = '', $hideMe = false)
     {
         $header = '';
 
@@ -174,8 +175,16 @@ class FunctionDefinition
                 $header .= ' abstract ';
             }
 
-            // Prepend visibility
-            $header .= $this->visibility;
+            // Do we need to hide this function? If so we will make it protected
+            if ($hideMe === false) {
+
+                // Prepend visibility
+                $header .= $this->visibility;
+
+            } else {
+
+                $header .= 'protected';
+            }
 
             // Are we static?
             if ($this->isStatic) {
@@ -198,21 +207,9 @@ class FunctionDefinition
             }
         }
 
-        if ($type === 'closure') {
+        // Function name + the suffix we might have gotten
+            $header .= $this->name . $suffix;
 
-            $header .= 'function()';
-
-        } else {
-
-            // Function name
-            $header .= $this->name;
-
-            // Do we need to append the keyword which marks the function as original implementation
-            if ($markAsOriginal === true) {
-
-                $header .= PBC_ORIGINAL_FUNCTION_SUFFIX;
-            }
-        }
         // Iterate over all parameters and create the parameter string.
         // We will create the string we need, either for calling the function or for defining it.
         $parameterString = array();
@@ -229,19 +226,17 @@ class FunctionDefinition
             $parameterIterator->next();
         }
 
-        if ($type === 'closure' && !empty($parameterString)) {
-
-            $header .= ' use ';
-
-        }
-
         // Check if we even got something. If not a closure header would be malformed.
-        if ($type !== 'closure' || !empty($parameterString)) {
+        if (!empty($parameterString)) {
             // Explode to insert commas
             $parameterString = implode(', ', $parameterString);
 
             // Append the parameters to the header
             $header .= '(' . $parameterString . ')';
+
+        } else {
+
+            $header .= '()';
         }
 
         return $header;
