@@ -34,74 +34,74 @@ use TechDivision\PBC\Entities\Lists\TypedListList;
  *             Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
  */
-class FunctionDefinition
+class FunctionDefinition extends AbstractDefinition
 {
 
     /**
      * @var string $docBlock DocBlock comment of the function
      */
-    public $docBlock;
+    protected $docBlock;
 
     /**
      * @var boolean $isFinal Is the function final?
      */
-    public $isFinal;
+    protected $isFinal;
 
     /**
      * @var boolean $isAbstract Is the function abstract?
      */
-    public $isAbstract;
+    protected $isAbstract;
 
     /**
      * @var string $visibility Visibility of the method
      */
-    public $visibility;
+    protected $visibility;
 
     /**
      * @var boolean $isStatic Is the method static?
      */
-    public $isStatic;
+    protected $isStatic;
 
     /**
      * @var string $name Name of the function
      */
-    public $name;
+    protected $name;
 
     /**
      * @var \TechDivision\PBC\Entities\Lists\ParameterDefinitionList $parameterDefinitions List of parameter definitions
      */
-    public $parameterDefinitions;
+    protected $parameterDefinitions;
 
     /**
      * @var \TechDivision\PBC\Entities\Lists\AssertionList $preconditions Preconditions of this function
      */
-    public $preconditions;
+    protected $preconditions;
 
     /**
      * @var \TechDivision\PBC\Entities\Lists\TypedListList $ancestralPreconditions Preconditions of any parent functions
      */
-    public $ancestralPreconditions;
+    protected $ancestralPreconditions;
 
     /**
      * @var boolean $usesOld Does this function use the pbcOld keyword?
      */
-    public $usesOld;
+    protected $usesOld;
 
     /**
      * @var string $body Body of the function
      */
-    public $body;
+    protected $body;
 
     /**
      * @var \TechDivision\PBC\Entities\Lists\AssertionList $postconditions Postconditions of this function
      */
-    public $postconditions;
+    protected $postconditions;
 
     /**
      * @var \TechDivision\PBC\Entities\Lists\TypedListList $ancestralPostconditions
      *          Postconditions of any parent functions
      */
-    public $ancestralPostconditions;
+    protected $ancestralPostconditions;
 
     /**
      * Default constructor
@@ -124,13 +124,143 @@ class FunctionDefinition
     }
 
     /**
+     * Getter method for attribute $docBlock
+     *
+     * @return string
+     */
+    public function getDocBlock()
+    {
+        return $this->docBlock;
+    }
+
+    /**
+     * Getter method for attribute $isFinal
+     *
+     * @return boolean
+     */
+    public function getIsFinal()
+    {
+        return $this->isFinal;
+    }
+
+    /**
+     * Getter method for attribute $isAbstract
+     *
+     * @return boolean
+     */
+    public function getIsAbstract()
+    {
+        return $this->isAbstract;
+    }
+
+    /**
+     * Getter method for attribute $visibility
+     *
+     * @return string
+     */
+    public function getVisibility()
+    {
+        return $this->visibility;
+    }
+
+    /**
+     * Getter method for attribute $isStatic
+     *
+     * @return boolean
+     */
+    public function getIsStatic()
+    {
+        return $this->isStatic;
+    }
+
+    /**
+     * Getter method for attribute $name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Getter method for attribute $parameterDefinitions
+     *
+     * @return ParameterDefinitionList
+     */
+    public function getParameterDefinitions()
+    {
+        return $this->parameterDefinitions;
+    }
+
+    /**
+     * Getter method for attribute $preconditions
+     *
+     * @return AssertionList
+     */
+    public function getPreconditions()
+    {
+        return $this->preconditions;
+    }
+
+    /**
+     * Getter method for attribute $ancestralPreconditions
+     *
+     * @return null|TypedListList
+     */
+    public function getAncestralPreconditions()
+    {
+        return $this->ancestralPreconditions;
+    }
+
+    /**
+     * Getter method for attribute $usesOld
+     *
+     * @return boolean
+     */
+    public function getUsesOld()
+    {
+        return $this->usesOld;
+    }
+
+    /**
+     * Getter method for attribute $body
+     *
+     * @return string
+     */
+    public function getBody()
+    {
+        return $this->body;
+    }
+
+    /**
+     * Getter method for attribute $postconditions
+     *
+     * @return AssertionList
+     */
+    public function getPostconditions()
+    {
+        return $this->postconditions;
+    }
+
+    /**
+     * Getter method for attribute $ancestralPostconditions
+     *
+     * @return null|TypedListList
+     */
+    public function getAncestralPostconditions()
+    {
+        return $this->ancestralPreconditions;
+    }
+
+    /**
      * Will return all preconditions. Direct as well as ancestral.
      *
      * @param boolean $nonPrivateOnly Make this true if you only want conditions which do not have a private context
      *
      * @return \TechDivision\PBC\Entities\Lists\TypedListList
      */
-    public function getPreconditions($nonPrivateOnly = false)
+    public function getAllPreconditions($nonPrivateOnly = false)
     {
         $preconditions = clone $this->ancestralPreconditions;
         $preconditions->add($this->preconditions);
@@ -163,7 +293,7 @@ class FunctionDefinition
      *
      * @return \TechDivision\PBC\Entities\Lists\TypedListList
      */
-    public function getPostconditions($nonPrivateOnly = false)
+    public function getAllPostconditions($nonPrivateOnly = false)
     {
         $postconditions = clone $this->ancestralPostconditions;
         $postconditions->add($this->postconditions);

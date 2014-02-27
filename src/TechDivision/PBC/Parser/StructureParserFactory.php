@@ -70,7 +70,7 @@ class StructureParserFactory
     ) {
         $name = $this->getName($type);
 
-        return new $name($file, $structureMap, $structureDefinitionHierarchy);
+        return new $name($file, $structureDefinitionHierarchy, $structureMap);
     }
 
     /**

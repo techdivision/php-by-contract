@@ -99,7 +99,7 @@ class AnnotationParser extends AbstractParser
         $config = Config::getInstance();
         $this->config = $config->getConfig('enforcement');
 
-        parent::__construct($file, $tokens, $currentDefinition);
+        parent::__construct($file, null, null, $currentDefinition, $tokens);
     }
 
     /**

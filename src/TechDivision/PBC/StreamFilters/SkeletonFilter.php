@@ -169,7 +169,7 @@ class SkeletonFilter extends AbstractFilter
                     // Check if we got the function in our list, if not continue
                     $functionDefinition = $structureDefinition->getFunctionDefinitions()->get($functionName);
                     if (!$functionDefinition instanceof FunctionDefinition ||
-                        $functionDefinition->isAbstract === true
+                        $functionDefinition->getIsAbstract() === true
                     ) {
 
                         continue;
@@ -252,7 +252,7 @@ class SkeletonFilter extends AbstractFilter
 
         // __get and __set need some special steps so we can inject our own logic into them
         $injectNeeded = false;
-        if ($functionDefinition->name === '__get' || $functionDefinition->name === '__set') {
+        if ($functionDefinition->getName() === '__get' || $functionDefinition->getName() === '__set') {
 
             $injectNeeded = true;
         }
@@ -283,15 +283,15 @@ class SkeletonFilter extends AbstractFilter
 
         // Invariant is not needed in private or static functions.
         // Also make sure that there is none in front of the constructor check
-        if ($functionDefinition->visibility !== 'private' &&
-            !$functionDefinition->isStatic && $functionDefinition->name !== '__construct'
+        if ($functionDefinition->getVisibility() !== 'private' &&
+            !$functionDefinition->getIsStatic() && $functionDefinition->getName() !== '__construct'
         ) {
 
             $code .= PBC_INVARIANT_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE;
         }
 
-        $code .= PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE .
-            PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
+        $code .= PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->getName() . PBC_PLACEHOLDER_CLOSE .
+            PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->getName() . PBC_PLACEHOLDER_CLOSE;
 
         // If we inject something we might need a try ... catch around the original call.
         if ($injectNeeded === true) {
@@ -306,14 +306,14 @@ class SkeletonFilter extends AbstractFilter
         if ($injectNeeded === true) {
 
             $code .= '} catch (\Exception $e) {}' . PBC_METHOD_INJECT_PLACEHOLDER .
-                $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
+                $functionDefinition->getName() . PBC_PLACEHOLDER_CLOSE;
         }
 
         // No just place all the other placeholder for other filters to come
-        $code .= PBC_POSTCONDITION_PLACEHOLDER . $functionDefinition->name . PBC_PLACEHOLDER_CLOSE;
+        $code .= PBC_POSTCONDITION_PLACEHOLDER . $functionDefinition->getName() . PBC_PLACEHOLDER_CLOSE;
 
         // Invariant is not needed in private or static functions
-        if ($functionDefinition->visibility !== 'private' && !$functionDefinition->isStatic) {
+        if ($functionDefinition->getVisibility() !== 'private' && !$functionDefinition->getIsStatic()) {
 
             $code .= PBC_INVARIANT_PLACEHOLDER . PBC_PLACEHOLDER_CLOSE;
         }

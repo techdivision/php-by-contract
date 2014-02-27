@@ -17,9 +17,11 @@
 namespace TechDivision\PBC\Parser;
 
 use TechDivision\PBC\Entities\Definitions\ParameterDefinition;
+use TechDivision\PBC\Entities\Definitions\Structure;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
 use TechDivision\PBC\Entities\Lists\ParameterDefinitionList;
+use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
 
 /**
  * TechDivision\PBC\Parser\FunctionParser
@@ -61,7 +63,7 @@ class FunctionParser extends AbstractParser
 
             if (isset($tokens[0])) {
 
-                $functionDefinitionList->add($this->getDefinitionFromTokens($tokens[0]));
+                $functionDefinitionList->add($this->getDefinitionFromTokens($tokens[0], $getRecursive));
             }
 
             return $functionDefinitionList;
@@ -73,7 +75,7 @@ class FunctionParser extends AbstractParser
 
                 try {
 
-                    $functionDefinitionList->add($this->getDefinitionFromTokens($token));
+                    $functionDefinitionList->add($this->getDefinitionFromTokens($token, $getRecursive));
 
                 } catch (\UnexpectedValueException $e) {
                     // Just try the next one
@@ -109,7 +111,7 @@ class FunctionParser extends AbstractParser
 
             if (isset($tokens[0])) {
 
-                return $this->getDefinitionFromTokens($tokens[0]);
+                return $this->getDefinitionFromTokens($tokens[0], $getRecursive);
             }
 
         } elseif (count($tokens) > 1) {
@@ -138,11 +140,12 @@ class FunctionParser extends AbstractParser
      * This method will use a set of other methods to parse a token array and retrieve any
      * possible information from it. This information will be entered into a FunctionDefinition object.
      *
-     * @param array $tokens The token array
+     * @param array   $tokens       The token array
+     * @param boolean $getRecursive Do we have to get the ancestral conditions as well?
      *
      * @return \TechDivision\PBC\Entities\Definitions\FunctionDefinition
      */
-    protected function getDefinitionFromTokens(array $tokens)
+    protected function getDefinitionFromTokens(array $tokens, $getRecursive)
     {
         // First of all we need a new FunctionDefinition to fill
         $functionDefinition = new FunctionDefinition();
@@ -162,7 +165,7 @@ class FunctionParser extends AbstractParser
 
         // Do we have a private context here? If so we have to tell the annotation parser
         $privateContext = false;
-        if ($functionDefinition->visibility === 'private') {
+        if ($functionDefinition->getVisibility() === 'private') {
 
             $privateContext = true;
         }
@@ -170,25 +173,97 @@ class FunctionParser extends AbstractParser
         // So we got our docBlock, now we can parse the precondition annotations from it
         $annotationParser = new AnnotationParser($this->file, $this->tokens, $this->currentDefinition);
         $functionDefinition->preconditions = $annotationParser->getConditions(
-            $functionDefinition->docBlock,
+            $functionDefinition->getDocBlock(),
             PBC_KEYWORD_PRE,
             $privateContext
         );
 
         // Does this method require the use of our "old" mechanism?
-        $functionDefinition->usesOld = $this->usesKeyword($functionDefinition->docBlock, PBC_KEYWORD_OLD);
+        $functionDefinition->usesOld = $this->usesKeyword($functionDefinition->getDocBlock(), PBC_KEYWORD_OLD);
 
         // We have to get the body of the function, so we can recreate it
         $functionDefinition->body = $this->getFunctionBody($tokens);
 
         // So we got our docBlock, now we can parse the postcondition annotations from it
         $functionDefinition->postconditions = $annotationParser->getConditions(
-            $functionDefinition->docBlock,
+            $functionDefinition->getDocBlock(),
             PBC_KEYWORD_POST,
             $privateContext
         );
 
+        // If we have to parse the definition in a recursive manner, we have to get the parent invariants
+        if ($getRecursive === true) {
+
+            // Add all the assertions we might get from ancestral dependencies
+            $this->addAncestralAssertions($functionDefinition);
+        }
+
+        // All done? Then lock the definition to make it a DTO
+        $functionDefinition->lock();
+
         return $functionDefinition;
+    }
+
+    /**
+     * This method will add all assertions any ancestral structures (parent classes, implemented interfaces) might have
+     * to the passed class definition.
+     *
+     * @param \TechDivision\PBC\Entities\Definitions\FunctionDefinition $functionDefinition The function definition
+     *                                                                                      we are working on
+     *
+     * @return void
+     */
+    protected function addAncestralAssertions(FunctionDefinition $functionDefinition)
+    {
+        $dependencies = $this->currentDefinition->getDependencies();
+        foreach ($dependencies as $dependency) {
+
+            // freshly set the dependency definition to avoid side effects
+            $dependencyDefinition = null;
+
+            $fileEntry = $this->structureMap->getEntry($dependency);
+            if (!$fileEntry instanceof Structure) {
+
+                // Continue, don't fail as we might have dependencies which are not under PBC surveillance
+                continue;
+            }
+
+            // Get the needed parser
+            $structureParserFactory = new StructureParserFactory();
+            $parser = $structureParserFactory->getInstance(
+                $fileEntry->getType(),
+                $fileEntry->getPath(),
+                $this->structureMap,
+                $this->structureDefinitionHierarchy
+            );
+
+            // Get the definition
+            $dependencyDefinition = $parser->getDefinition(
+                $dependency,
+                true
+            );
+
+            // Get the function definitions of the dependency structure
+            $dependencyFunctionDefinitions = $dependencyDefinition->getFunctionDefinitions();
+
+            // If we have a method with the name of the current one we have to get the conditions as ancestrals
+            if ($dependencyFunctionDefinitions->entryExists($functionDefinition->getName())) {
+
+                // Get the definition
+                $dependencyFunctionDefinition = $dependencyFunctionDefinitions->get($functionDefinition->getName());
+
+                // If the ancestral function uses the old keyword we have to do too
+                if ($dependencyFunctionDefinition->getUsesOld() !== false) {
+
+                    $functionDefinition->usesOld = true;
+                }
+
+                // Get the conditions
+                $functionDefinition->ancestralPreconditions = $dependencyFunctionDefinition->getAllPreconditions(true);
+                $functionDefinition->ancestralPostconditions =
+                    $dependencyFunctionDefinition->getAllPostconditions(true);
+            }
+        }
     }
 
     /**
@@ -200,8 +275,9 @@ class FunctionParser extends AbstractParser
      *
      * TODO Does this have to be this long?
      */
-    protected function getParameterDefinitionList(array $tokens)
-    {
+    protected function getParameterDefinitionList(
+        array $tokens
+    ) {
         // Check the tokens
         $parameterString = '';
         $parameterDefinitionList = new ParameterDefinitionList();
@@ -304,8 +380,9 @@ class FunctionParser extends AbstractParser
      *
      * @return string
      */
-    protected function getFunctionName(array $tokens)
-    {
+    protected function getFunctionName(
+        array $tokens
+    ) {
         // Check the tokens
         $functionName = '';
         for ($i = 0; $i < count($tokens); $i++) {
@@ -328,8 +405,9 @@ class FunctionParser extends AbstractParser
      *
      * @return string
      */
-    protected function getFunctionBody(array $tokens)
-    {
+    protected function getFunctionBody(
+        array $tokens
+    ) {
         // We will iterate over the token array and collect everything
         // from the first opening curly bracket until the last
         $functionBody = '';
@@ -388,8 +466,9 @@ class FunctionParser extends AbstractParser
      *
      * @return array|boolean
      */
-    protected function getFunctionTokens(array $tokens)
-    {
+    protected function getFunctionTokens(
+        array $tokens
+    ) {
         // Iterate over all the tokens and filter the different function portions out
         $result = array();
         for ($i = 0; $i < count($tokens); $i++) {
@@ -475,8 +554,9 @@ class FunctionParser extends AbstractParser
      *
      * TODO I am sure this can be done more generally usable
      */
-    protected function getFunctionVisibility(array $tokens)
-    {
+    protected function getFunctionVisibility(
+        array $tokens
+    ) {
         // Check out all the tokens and look if we find the right thing. We can do that as these keywords are not valid
         // within a function definition. Public is default.
         $visibility = 'public';

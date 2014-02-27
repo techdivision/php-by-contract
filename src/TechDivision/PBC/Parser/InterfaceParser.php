@@ -160,7 +160,7 @@ class InterfaceParser extends AbstractStructureParser
      *
      * @param array $tokens The token array
      *
-     * @return string|boolean
+     * @return array|boolean
      */
     protected function getParents($tokens)
     {
@@ -225,67 +225,74 @@ class InterfaceParser extends AbstractStructureParser
     protected function getDefinitionFromTokens($tokens, $getRecursive = true)
     {
         // First of all we need a new ClassDefinition to fill
-        $interfaceDefinition = new InterfaceDefinition();
+        $this->currentDefinition = new InterfaceDefinition();
 
         // Save the path of the original definition for later use
-        $interfaceDefinition->path = $this->file;
+        $this->currentDefinition->path = $this->file;
 
         // Get the interfaces own namespace and the namespace which are included via use
-        $interfaceDefinition->namespace = $this->getNamespace();
-        $interfaceDefinition->usedNamespaces = $this->getUsedNamespaces();
+        $this->currentDefinition->namespace = $this->getNamespace();
+        $this->currentDefinition->usedNamespaces = $this->getUsedNamespaces();
 
         // For our next step we would like to get the doc comment (if any)
-        $interfaceDefinition->docBlock = $this->getDocBlock($tokens, T_INTERFACE);
+        $this->currentDefinition->docBlock = $this->getDocBlock($tokens, T_INTERFACE);
 
         // Get the interface identity
-        $interfaceDefinition->name = $this->getName($tokens);
+        $this->currentDefinition->name = $this->getName($tokens);
 
         // So we got our docBlock, now we can parse the invariant annotations from it
         $annotationParser = new AnnotationParser($this->file, $this->tokens);
-        $interfaceDefinition->invariantConditions = $annotationParser->getConditions(
-            $interfaceDefinition->docBlock,
+        $this->currentDefinition->invariantConditions = $annotationParser->getConditions(
+            $this->currentDefinition->docBlock,
             PBC_KEYWORD_INVARIANT
         );
 
         // Lets check if there is any inheritance, or if we implement any interfaces
         $parentNames = $this->getParents($tokens);
-        if (count($interfaceDefinition->usedNamespaces) === 0) {
+        if (count($this->currentDefinition->usedNamespaces) === 0) {
 
             foreach ($parentNames as $parentName) {
 
                 if (strpos($parentName, '\\') !== false) {
 
-                    $interfaceDefinition->extends[] = $parentName;
+                    $this->currentDefinition->extends[] = $parentName;
 
                 } else {
 
-                    $interfaceDefinition->extends[] = '\\' . $interfaceDefinition->namespace . '\\' . $parentName;
+                    $this->currentDefinition->extends[] = '\\' . $this->currentDefinition->namespace . '\\' . $parentName;
                 }
             }
 
         } else {
 
-            foreach ($interfaceDefinition->usedNamespaces as $alias) {
+            foreach ($this->currentDefinition->usedNamespaces as $alias) {
 
                 foreach ($parentNames as $parentName) {
 
                     if (strpos($alias, $parentName) !== false) {
 
-                        $interfaceDefinition->extends = '\\' . $alias;
+                        $this->currentDefinition->extends = '\\' . $alias;
                     }
                 }
             }
         }
 
         // Clean possible double-\
-        $interfaceDefinition->extends = str_replace('\\\\', '\\', $interfaceDefinition->extends);
+        $this->currentDefinition->extends = str_replace('\\\\', '\\', $this->currentDefinition->extends);
 
-        $interfaceDefinition->constants = $this->getConstants($tokens);
+        $this->currentDefinition->constants = $this->getConstants($tokens);
 
         // Only thing still missing are the methods, so ramp up our FunctionParser
-        $functionParser = new FunctionParser($this->file, $this->tokens);
-        $interfaceDefinition->functionDefinitions = $functionParser->getDefinitionListFromTokens($tokens);
+        $functionParser = new FunctionParser(
+            $this->file,
+            $this->structureDefinitionHierarchy,
+            $this->structureMap,
+            $this->currentDefinition,
+            $this->tokens
+        );
 
-        return $interfaceDefinition;
+        $this->currentDefinition->functionDefinitions = $functionParser->getDefinitionListFromTokens($tokens);
+
+        return $this->currentDefinition;
     }
 }

@@ -330,7 +330,7 @@ class Generator
             $iterator = $structureDefinition->getFunctionDefinitions()->getIterator();
             foreach ($iterator as $functionDefinition) {
 
-                if ($functionDefinition->getPreconditions()->count() !== 0) {
+                if ($functionDefinition->getAllPreconditions()->count() !== 0) {
 
                     $filterNeeded = true;
                     break;
@@ -357,7 +357,7 @@ class Generator
             $iterator = $structureDefinition->getFunctionDefinitions()->getIterator();
             foreach ($iterator as $functionDefinition) {
 
-                if ($functionDefinition->getPostconditions()->count() !== 0) {
+                if ($functionDefinition->getAllPostconditions()->count() !== 0) {
 
                     $filterNeeded = true;
                     break;

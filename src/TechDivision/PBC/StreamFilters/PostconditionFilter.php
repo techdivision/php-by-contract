@@ -133,11 +133,11 @@ class PostconditionFilter extends AbstractFilter
                         $this->injectOldCode($bucket->data, $functionDefinition);
 
                         // Get the code for the assertions
-                        $code = $this->generateCode($functionDefinition->getPostconditions());
+                        $code = $this->generateCode($functionDefinition->getAllPostconditions());
 
                         // Insert the code
                         $bucket->data = str_replace(
-                            PBC_POSTCONDITION_PLACEHOLDER . $functionDefinition->name .
+                            PBC_POSTCONDITION_PLACEHOLDER . $functionDefinition->getName() .
                             PBC_PLACEHOLDER_CLOSE,
                             $code,
                             $bucket->data
@@ -172,19 +172,19 @@ class PostconditionFilter extends AbstractFilter
     private function injectOldCode(& $bucketData, FunctionDefinition & $functionDefinition)
     {
         // Do we even need to do anything?
-        if ($functionDefinition->usesOld !== true) {
+        if ($functionDefinition->getUsesOld() !== true) {
 
             return false;
         }
         // If the function is static it should not use the pbcOld keyword as there is no state to the class!
-        if ($functionDefinition->isStatic === true) {
+        if ($functionDefinition->getIsStatic() === true) {
 
-            throw new GeneratorException('Cannot clone class state in static method ' . $functionDefinition->name);
+            throw new GeneratorException('Cannot clone class state in static method ' . $functionDefinition->getName());
         }
 
         // Still here? Then inject the clone statement to preserve an instance of the object prior to our call.
         $bucketData = str_replace(
-            PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->name .
+            PBC_OLD_SETUP_PLACEHOLDER . $functionDefinition->getName() .
             PBC_PLACEHOLDER_CLOSE,
             PBC_KEYWORD_OLD . ' = clone $this;',
             $bucketData

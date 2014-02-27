@@ -167,9 +167,20 @@ abstract class AbstractTypedList implements TypedListInterface
         } else {
 
             $tmp = $this->defaultOffset;
-            if (property_exists($value, $tmp)) {
 
-                $this->container[$value->$tmp] = $value;
+            // Do we have a default offset?
+            if (!empty($tmp)) {
+
+                // Default offset is a member of the object to store, but how to access it? Try getter and direct access
+                $getter = 'get' . ucfirst($tmp);
+                if (method_exists($value, $getter)) {
+
+                    $this->container[$value->$getter()] = $value;
+
+                } elseif (property_exists($value, $tmp)) {
+
+                    $this->container[$value->$tmp] = $value;
+                }
 
             } else {
 

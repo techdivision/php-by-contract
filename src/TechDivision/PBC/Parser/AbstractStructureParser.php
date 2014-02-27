@@ -40,33 +40,6 @@ use TechDivision\PBC\StructureMap;
 abstract class AbstractStructureParser extends AbstractParser implements StructureParserInterface
 {
     /**
-     * @var \TechDivision\PBC\StructureMap $structureMap Our structure map instance
-     */
-    protected $structureMap;
-
-    /**
-     * Default constructor
-     *
-     * @param string                         $file                          The path of the file we want to parse
-     * @param \TechDivision\PBC\StructureMap $structureMap                  Our structure map instance
-     * @param StructureDefinitionHierarchy   &$structureDefinitionHierarchy The list structures we did
-     * @param array                          $tokens                        The array of tokens taken from the file
-     */
-    public function __construct(
-        $file,
-        StructureMap $structureMap,
-        StructureDefinitionHierarchy & $structureDefinitionHierarchy,
-        array $tokens = array()
-    ) {
-
-        $this->structureMap = $structureMap;
-        $this->structureDefinitionHierarchy = $structureDefinitionHierarchy;
-
-        // We need the parent __construct process
-        parent::__construct($file, $tokens);
-    }
-
-    /**
      * Will check the main token array for the occurrence of a certain on (class, interface or trait)
      *
      * @return string|boolean

@@ -130,11 +130,12 @@ class PreconditionFilter extends AbstractFilter
                     } else {
 
                         // Get the code for the assertions
-                        $code = $this->generateCode($functionDefinition->getPreconditions());
+                        $code = $this->generateCode($functionDefinition->getAllPreconditions());
+
 
                         // Insert the code
                         $bucket->data = str_replace(
-                            PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->name .
+                            PBC_PRECONDITION_PLACEHOLDER . $functionDefinition->getName() .
                             PBC_PLACEHOLDER_CLOSE,
                             $code,
                             $bucket->data

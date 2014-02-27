@@ -141,8 +141,8 @@ class ClassParser extends AbstractStructureParser
      * This method will use a set of other methods to parse a token array and retrieve any
      * possible information from it. This information will be entered into a ClassDefinition object.
      *
-     * @param array $tokens       The token array containing structure tokens
-     * @param bool  $getRecursive Do we have to get the ancestral conditions as well?
+     * @param array   $tokens       The token array containing structure tokens
+     * @param boolean $getRecursive Do we have to get the ancestral conditions as well?
      *
      * @return \TechDivision\PBC\Interfaces\StructureDefinitionInterface
      */
@@ -193,7 +193,14 @@ class ClassParser extends AbstractStructureParser
         $this->currentDefinition->constants = $this->getConstants($tokens);
 
         // Only thing still missing are the methods, so ramp up our FunctionParser
-        $functionParser = new FunctionParser($this->file, $this->tokens, $this->currentDefinition);
+        $functionParser = new FunctionParser(
+            $this->file,
+            $this->structureDefinitionHierarchy,
+            $this->structureMap,
+            $this->currentDefinition,
+            $this->tokens
+        );
+
         $this->currentDefinition->functionDefinitions = $functionParser->getDefinitionListFromTokens(
             $tokens,
             $getRecursive
@@ -225,12 +232,12 @@ class ClassParser extends AbstractStructureParser
      * This method will add all assertions any ancestral structures (parent classes, implemented interfaces) might have
      * to the passed class definition.
      *
-     * @param \TechDivision\PBC\Entities\Definitions\ClassDefinition &$classDefinition The class definition we have to
-     *                                                                                 add the assertions to
+     * @param \TechDivision\PBC\Entities\Definitions\ClassDefinition $classDefinition The class definition we have to
+     *                                                                                add the assertions to
      *
      * @return null
      */
-    protected function addAncestralAssertions(ClassDefinition &$classDefinition)
+    protected function addAncestralAssertions(ClassDefinition $classDefinition)
     {
         $dependencies = $classDefinition->getDependencies();
         foreach ($dependencies as $dependency) {
@@ -264,30 +271,6 @@ class ClassParser extends AbstractStructureParser
             if ($fileEntry->getType() === 'class') {
 
                 $classDefinition->ancestralInvariants = $dependencyDefinition->getInvariants(true);
-            }
-
-            // Iterate over all dependencies and combine method conditions if method match
-            $functionIterator = $classDefinition->getFunctionDefinitions()->getIterator();
-            foreach ($functionIterator as $function) {
-
-                // Get the ancestral function of the one we currently have a look at.
-                // If we got it we have to get their conditions but just if they have matching signatures!
-                $ancestralFunction = $dependencyDefinition->getFunctionDefinitions()->get($function->name);
-                if ($ancestralFunction instanceof FunctionDefinition) {
-
-                    // If the ancestral function uses the old keyword we have to do too
-                    if ($ancestralFunction->usesOld !== false) {
-
-                        $function->usesOld = true;
-                    }
-
-                    // Get the conditions
-                    $function->ancestralPreconditions = $ancestralFunction->getPreconditions(true);
-                    $function->ancestralPostconditions = $ancestralFunction->getPostconditions(true);
-
-                    // Save if back into the definition
-                    $classDefinition->getFunctionDefinitions()->set($function->name, $function);
-                }
             }
 
             // Finally add the dependency definition to our structure definition hierarchy to avoid

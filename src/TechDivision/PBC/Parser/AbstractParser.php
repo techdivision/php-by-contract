@@ -71,18 +71,27 @@ abstract class AbstractParser implements ParserInterface
     protected $structureDefinitionHierarchy;
 
     /**
+     * @var \TechDivision\PBC\StructureMap $structureMap Our structure map instance
+     */
+    protected $structureMap;
+
+    /**
      * Default constructor
      *
-     * @param string                            $file              The path of the file we want to parse
-     * @param array                             $tokens            The array of tokens taken from the file
-     * @param StructureDefinitionHierarchy|null $currentDefinition The current definition we are working on
+     * @param string                              $file                         The path of the file we want to parse
+     * @param StructureDefinitionHierarchy        $structureDefinitionHierarchy List of already parsed structures
+     * @param \TechDivision\PBC\StructureMap|null $structureMap                 Our structure map instance
+     * @param StructureDefinitionInterface|null   $currentDefinition            The current definition we are working on
+     * @param array                               $tokens                       The array of tokens taken from the file
      *
      * @throws \TechDivision\PBC\Exceptions\ParserException
      */
     public function __construct(
         $file,
-        array $tokens = array(),
-        StructureDefinitionInterface $currentDefinition = null
+        StructureDefinitionHierarchy $structureDefinitionHierarchy = null,
+        StructureMap $structureMap = null,
+        StructureDefinitionInterface $currentDefinition = null,
+        array $tokens = array()
     ) {
         if (empty($tokens)) {
 
@@ -107,6 +116,10 @@ abstract class AbstractParser implements ParserInterface
         $this->tokenCount = count($this->tokens);
 
         $this->currentDefinition = $currentDefinition;
+
+        $this->structureMap = $structureMap;
+
+        $this->structureDefinitionHierarchy = $structureDefinitionHierarchy;
     }
 
     /**
@@ -117,8 +130,10 @@ abstract class AbstractParser implements ParserInterface
      *
      * @return boolean
      */
-    protected function usesKeyword($docBlock, $keyword)
-    {
+    protected function usesKeyword(
+        $docBlock,
+        $keyword
+    ) {
         if (strpos($docBlock, $keyword) === false) {
 
             return false;
@@ -135,8 +150,9 @@ abstract class AbstractParser implements ParserInterface
      *
      * @return integer
      */
-    protected function getStringLength($tokens)
-    {
+    protected function getStringLength(
+        $tokens
+    ) {
         // Iterator over the tokens and get their lengt
         $result = 0;
         $tokenCount = count($tokens);
@@ -167,8 +183,11 @@ abstract class AbstractParser implements ParserInterface
      *
      * @return boolean
      */
-    protected function hasSignatureToken($tokens, $searchedToken, $parsedEntity)
-    {
+    protected function hasSignatureToken(
+        $tokens,
+        $searchedToken,
+        $parsedEntity
+    ) {
         // We have to check what kind of structure we will check. Class and function are the only valid ones.
         if ($parsedEntity !== T_FUNCTION && $parsedEntity !== T_CLASS && $parsedEntity !== T_INTERFACE) {
 
@@ -215,8 +234,10 @@ abstract class AbstractParser implements ParserInterface
      *
      * @return boolean|integer
      */
-    protected function getBracketCount($string, $bracket)
-    {
+    protected function getBracketCount(
+        $string,
+        $bracket
+    ) {
         $roundBrackets = array_flip(array('(', ')'));
         $curlyBrackets = array_flip(array('{', '}'));
 
@@ -246,8 +267,10 @@ abstract class AbstractParser implements ParserInterface
      *
      * @return string
      */
-    protected function getDocBlock($tokens, $structureToken)
-    {
+    protected function getDocBlock(
+        $tokens,
+        $structureToken
+    ) {
         // The general assumption is: if there is a doc block
         // before the class definition, and the class header follows after it within 6 tokens, then it
         // is the comment block for this class.
