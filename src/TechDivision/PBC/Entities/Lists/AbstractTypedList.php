@@ -156,7 +156,7 @@ abstract class AbstractTypedList implements TypedListInterface
      *
      * @throws \UnexpectedValueException
      *
-     * @return void
+     * @return boolean|null
      */
     public function add($value)
     {
@@ -173,6 +173,17 @@ abstract class AbstractTypedList implements TypedListInterface
 
             } else {
 
+                // Lets check if we already got this entry, nothing we want!
+                foreach ($this->container as $entry) {
+
+                    // Doe we have this entry already? If so we did our duty
+                    if ($value == $entry) {
+
+                        return true;
+                    }
+                }
+
+                // Still here? Then add the value to the container
                 $this->container[] = $value;
             }
         }

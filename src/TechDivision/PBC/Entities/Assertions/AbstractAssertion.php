@@ -17,7 +17,7 @@
 namespace TechDivision\PBC\Entities\Assertions;
 
 use TechDivision\PBC\Exceptions\ParserException;
-use TechDivision\PBC\Interfaces\Assertion;
+use TechDivision\PBC\Interfaces\AssertionInterface;
 use TechDivision\PBC\Utils\PhpLint;
 
 /**
@@ -34,7 +34,7 @@ use TechDivision\PBC\Utils\PhpLint;
  *             Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
  */
-abstract class AbstractAssertion implements Assertion
+abstract class AbstractAssertion implements AssertionInterface
 {
     /**
      * @var boolean $inverted If the logical meaning was inverted
@@ -42,11 +42,20 @@ abstract class AbstractAssertion implements Assertion
     protected $inverted;
 
     /**
+     * If the assertion is only used in a private context. This will be used for inheritance to determine which
+     * assertion has to be passed down to possible children.
+     *
+     * @var boolean $privateContext
+     */
+    protected $privateContext;
+
+    /**
      * Default constructor
      */
     public function __construct()
     {
         $this->inverted = false;
+        $this->privateContext = false;
 
         if (!$this->isValid()) {
 
@@ -73,7 +82,7 @@ abstract class AbstractAssertion implements Assertion
     /**
      * Will return true if the assertion is in an inverted state
      *
-     * @return bool
+     * @return boolean
      */
     public function isInverted()
     {
@@ -81,9 +90,19 @@ abstract class AbstractAssertion implements Assertion
     }
 
     /**
+     * Will return true if the assertion is only usable within a private context.
+     *
+     * @return boolean
+     */
+    public function isPrivateContext()
+    {
+        return $this->privateContext;
+    }
+
+    /**
      * Will test if the assertion will result in a valid PHP statement
      *
-     * @return bool
+     * @return boolean
      */
     public function isValid()
     {
@@ -92,5 +111,17 @@ abstract class AbstractAssertion implements Assertion
 
         // Wrap the code as a condition for an if clause
         return $lint->check('if(' . $this->getString() . '){}');
+    }
+
+    /**
+     * Setter for the $privateContext attribute
+     *
+     * @param boolean $privateContext The value to set the private context to
+     *
+     * @return void
+     */
+    public function setPrivateContext($privateContext)
+    {
+        $this->privateContext = $privateContext;
     }
 }

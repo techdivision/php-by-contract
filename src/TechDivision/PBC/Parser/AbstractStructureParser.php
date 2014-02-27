@@ -45,56 +45,25 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
     protected $structureMap;
 
     /**
-     * @var \TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy $structureDefinitionHierarchy The list
-     *                                                                                                        structures
-     *                                                                                                        we did
-     */
-    protected $structureDefinitionHierarchy;
-
-    /**
-     * @var string $file The path of the file we want to parse
-     */
-    protected $file;
-
-    /**
-     * @var array $tokens The token array representing the whole file
-     */
-    protected $tokens = array();
-
-    /**
-     * @var integer $tokenCount The count of our main token array, so we do not have to calculate it over and over again
-     */
-    protected $tokenCount;
-
-    /**
      * Default constructor
      *
      * @param string                         $file                          The path of the file we want to parse
      * @param \TechDivision\PBC\StructureMap $structureMap                  Our structure map instance
      * @param StructureDefinitionHierarchy   &$structureDefinitionHierarchy The list structures we did
-     *
-     * @throws ParserException
+     * @param array                          $tokens                        The array of tokens taken from the file
      */
     public function __construct(
         $file,
         StructureMap $structureMap,
-        StructureDefinitionHierarchy & $structureDefinitionHierarchy
+        StructureDefinitionHierarchy & $structureDefinitionHierarchy,
+        array $tokens = array()
     ) {
-        // Check if we can use the file
-        if (!is_readable($file)) {
-
-            throw new ParserException('Could not read input file ' . $file);
-        }
-
-        // We need the file saved
-        $this->file = $file;
-
-        // Get all the tokens and count them
-        $this->tokens = token_get_all(file_get_contents($file));
-        $this->tokenCount = count($this->tokens);
 
         $this->structureMap = $structureMap;
         $this->structureDefinitionHierarchy = $structureDefinitionHierarchy;
+
+        // We need the parent __construct process
+        parent::__construct($file, $tokens);
     }
 
     /**

@@ -22,7 +22,6 @@ use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
-use TechDivision\PBC\Entities\AbstractLockableEntity;
 use TechDivision\PBC\Parser\ClassParser;
 use TechDivision\PBC\Parser\InterfaceParser;
 use TechDivision\PBC\CacheMap;
@@ -43,7 +42,7 @@ use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
  *             Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
  */
-abstract class AbstractStructureDefinition extends AbstractLockableEntity implements StructureDefinitionInterface
+abstract class AbstractStructureDefinition extends AbstractDefinition implements StructureDefinitionInterface
 {
     /**
      * @var string $path File path to the class definition

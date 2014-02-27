@@ -124,28 +124,68 @@ class FunctionDefinition
     }
 
     /**
-     * Will return all preconditions. Native as well as ancestral.
+     * Will return all preconditions. Direct as well as ancestral.
+     *
+     * @param boolean $nonPrivateOnly Make this true if you only want conditions which do not have a private context
      *
      * @return \TechDivision\PBC\Entities\Lists\TypedListList
      */
-    public function getPreconditions()
+    public function getPreconditions($nonPrivateOnly = false)
     {
-        $preconditions = $this->ancestralPreconditions;
+        $preconditions = clone $this->ancestralPreconditions;
         $preconditions->add($this->preconditions);
 
+        // If we need to we will filter all the non private conditions from the lists
+        if ($nonPrivateOnly === true) {
+
+            $preconditionListIterator = $preconditions->getIterator();
+            foreach ($preconditionListIterator as $preconditionList) {
+
+                $preconditionIterator = $preconditionList->getIterator();
+                foreach ($preconditionIterator as $key => $precondition) {
+
+                    if ($precondition->isPrivateContext()) {
+
+                        $preconditionList->delete($key);
+                    }
+                }
+            }
+        }
+
+        // Return what is left
         return $preconditions;
     }
 
     /**
-     * Will return all postconditions. Native as well as ancestral.
+     * Will return all postconditions. Direct as well as ancestral.
+     *
+     * @param boolean $nonPrivateOnly Make this true if you only want conditions which do not have a private context
      *
      * @return \TechDivision\PBC\Entities\Lists\TypedListList
      */
-    public function getPostconditions()
+    public function getPostconditions($nonPrivateOnly = false)
     {
-        $postconditions = $this->ancestralPostconditions;
+        $postconditions = clone $this->ancestralPostconditions;
         $postconditions->add($this->postconditions);
 
+        // If we need to we will filter all the non private conditions from the lists
+        if ($nonPrivateOnly === true) {
+
+            $postconditionListIterator = $postconditions->getIterator();
+            foreach ($postconditionListIterator as $postconditionList) {
+
+                $postconditionIterator = $postconditionList->getIterator();
+                foreach ($postconditionIterator as $key => $postcondition) {
+
+                    if ($postcondition->isPrivateContext()) {
+
+                        $postconditionList->delete($key);
+                    }
+                }
+            }
+        }
+
+        // Return what is left
         return $postconditions;
     }
 

@@ -1,11 +1,11 @@
 <?php
 /**
- * File containing the AssertionList class
+ * File containing the abstract AbstractDefinition class
  *
  * PHP version 5
  *
  * @category   Php-by-contract
- * @package    TechDivision\PBC
+ * @package    TechDivision_PBC
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
  * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
@@ -14,17 +14,18 @@
  * @link       http://www.techdivision.com/
  */
 
-namespace TechDivision\PBC\Entities\Lists;
+namespace TechDivision\PBC\Entities\Definitions;
 
-use TechDivision\PBC\Interfaces\TypedListInterface;
+use TechDivision\PBC\Entities\AbstractLockableEntity;
 
 /**
- * TechDivision\PBC\Entities\Lists\AssertionList
+ * TechDivision\PBC\Entities\Definitions\AbstractDefinition
  *
- * A typed list for assertions
+ * This class is a combining parent class for all definition classes.
+ * Just to give them a known parent
  *
  * @category   Php-by-contract
- * @package    TechDivision\PBC
+ * @package    TechDivision_PBC
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
  * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
@@ -32,13 +33,7 @@ use TechDivision\PBC\Interfaces\TypedListInterface;
  *             Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
  */
-class AssertionList extends AbstractTypedList
+abstract class AbstractDefinition extends AbstractLockableEntity
 {
-    /**
-     * Default constructor
-     */
-    public function __construct()
-    {
-        $this->itemType = 'TechDivision\PBC\Interfaces\AssertionInterface';
-    }
+
 }

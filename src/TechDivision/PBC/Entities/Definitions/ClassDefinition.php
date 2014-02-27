@@ -347,17 +347,37 @@ class ClassDefinition extends AbstractStructureDefinition
     }
 
     /**
-     * Return all invariants, direct and introduced (by ancestral structures) alike
+     * Will return all invariants. direct and introduced (by ancestral structures) alike.
      *
-     * @return TypedListList
+     * @param boolean $nonPrivateOnly Make this true if you only want conditions which do not have a private context
+     *
+     * @return \TechDivision\PBC\Entities\Lists\TypedListList
      */
-    public function getInvariants()
+    public function getInvariants($nonPrivateOnly = false)
     {
         // We have to clone it here, otherwise we might have weird side effects, of having the "add()" operation
         // persistent on $this->ancestralInvariants
         $invariants = clone $this->ancestralInvariants;
         $invariants->add($this->invariantConditions);
 
+        // If we need to we will filter all the non private conditions from the lists
+        if ($nonPrivateOnly === true) {
+
+            $invariantListIterator = $invariants->getIterator();
+            foreach ($invariantListIterator as $invariantList) {
+
+                $invariantIterator = $invariantList->getIterator();
+                foreach ($invariantIterator as $key => $invariant) {
+
+                    if ($invariant->isPrivateContext()) {
+
+                        $invariantList->delete($key);
+                    }
+                }
+            }
+        }
+
+        // Return what is left
         return $invariants;
     }
 
@@ -384,5 +404,39 @@ class ClassDefinition extends AbstractStructureDefinition
         }
 
         return $result;
+    }
+
+    /**
+     * Will flatten all conditions available at the time of the call.
+     * That means this method will check which conditions make sense in an inheritance context and will drop the
+     * others.
+     * This method MUST be protected/private so it will run through \TechDivision\PBC\Entities\AbstractLockableEntity's
+     * __call() method which will check the lock status before doing anything.
+     *
+     * @return bool
+     */
+    protected function flattenConditions()
+    {
+        // As our lists only supports unique entries anyway, the only thing left is to check if the condition's
+        // assertions can be fulfilled (would be possible as direct assertions), and flatten the contained
+        // function definitions as well
+        $ancestralConditionIterator = $this->ancestralInvariants->getIterator();
+        foreach ($ancestralConditionIterator as $conditionList) {
+
+            $conditionListIterator = $conditionList->getIterator();
+            foreach ($conditionListIterator as $assertion) {
+
+
+            }
+        }
+
+        // No flatten all the function definitions we got
+        $functionDefinitionIterator = $this->functionDefinitions->getIterator();
+        foreach ($functionDefinitionIterator as $functionDefinition) {
+
+            $functionDefinition->flattenConditions();
+        }
+
+        return false;
     }
 }

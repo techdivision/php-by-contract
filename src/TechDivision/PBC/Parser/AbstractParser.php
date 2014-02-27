@@ -19,6 +19,8 @@ namespace TechDivision\PBC\Parser;
 use TechDivision\PBC\Interfaces\ParserInterface;
 use TechDivision\PBC\StructureMap;
 use TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy;
+use TechDivision\PBC\Exceptions\ParserException;
+use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
 
 /**
  * TechDivision\PBC\Parser\AbstractParser
@@ -36,6 +38,77 @@ use TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy;
  */
 abstract class AbstractParser implements ParserInterface
 {
+
+    /**
+     * @var string $file The path of the file we want to parse
+     */
+    protected $file;
+
+    /**
+     * @var array $tokens The token array representing the whole file
+     */
+    protected $tokens = array();
+
+    /**
+     * @var integer $tokenCount The count of our main token array, so we do not have to calculate it over and over again
+     */
+    protected $tokenCount;
+
+    /**
+     * The current definition we are working on.
+     * This should be filled during parsing and should be passed down to whatever parser we need so we know about
+     * the current "parent" definition parts.
+     *
+     * @var \TechDivision\PBC\Interfaces\StructureDefinitionInterface $currentDefinition
+     */
+    protected $currentDefinition;
+
+    /**
+     * The list of structures (within this hierarchy) which we already parsed.
+     *
+     * @var \TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy $structureDefinitionHierarchy
+     */
+    protected $structureDefinitionHierarchy;
+
+    /**
+     * Default constructor
+     *
+     * @param string                            $file              The path of the file we want to parse
+     * @param array                             $tokens            The array of tokens taken from the file
+     * @param StructureDefinitionHierarchy|null $currentDefinition The current definition we are working on
+     *
+     * @throws \TechDivision\PBC\Exceptions\ParserException
+     */
+    public function __construct(
+        $file,
+        array $tokens = array(),
+        StructureDefinitionInterface $currentDefinition = null
+    ) {
+        if (empty($tokens)) {
+
+            // Check if we can use the file
+            if (!is_readable($file)) {
+
+                throw new ParserException('Could not read input file ' . $file);
+            }
+
+            // Get all the tokens and count them
+            $this->tokens = token_get_all(file_get_contents($file));
+
+        } else {
+
+            $this->tokens = $tokens;
+        }
+
+        // We need the file saved
+        $this->file = $file;
+
+        // We also need the token count
+        $this->tokenCount = count($this->tokens);
+
+        $this->currentDefinition = $currentDefinition;
+    }
+
     /**
      * Does a certain block of code contain a certain keyword
      *

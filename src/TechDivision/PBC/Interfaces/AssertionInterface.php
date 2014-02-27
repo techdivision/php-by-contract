@@ -29,10 +29,8 @@ namespace TechDivision\PBC\Interfaces;
  * @license    http://opensource.org/licenses/osl-3.0.php
  *             Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
- *
- * TODO refactor to AssertionInterface
  */
-interface Assertion
+interface AssertionInterface
 {
     /**
      * Will return an inverted string representation.
@@ -52,21 +50,37 @@ interface Assertion
     /**
      * Invert the logical meaning of this assertion
      *
-     * @return bool
+     * @return boolean
      */
     public function invert();
 
     /**
      * Will return true if the assertion is in an inverted state
      *
-     * @return bool
+     * @return boolean
      */
     public function isInverted();
 
     /**
+     * Will return true if the assertion is only usable within a private context.
+     *
+     * @return boolean
+     */
+    public function isPrivateContext();
+
+    /**
      * Will test if the assertion will result in a valid PHP statement
      *
-     * @return bool
+     * @return boolean
      */
     public function isValid();
+
+    /**
+     * Setter for the $privateContext attribute
+     *
+     * @param boolean $privateContext The value to set the private context to
+     *
+     * @return void
+     */
+    public function setPrivateContext($privateContext);
 }

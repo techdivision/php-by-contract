@@ -70,6 +70,34 @@ abstract class AbstractLockableEntity
     }
 
     /**
+     * Will call the child's method with the passed arguments as long as the entity is not locked
+     *
+     * @param string $name      The name of the method we want to set
+     * @param array  $arguments The arguments to the method
+     *
+     * @return null
+     * @throws \IllegalArgumentException
+     * @throws \IllegalAccessException
+     */
+    public function __call($name, array $arguments)
+    {
+        // If we are locked tell them
+        if ($this->isLocked) {
+
+            throw new \IllegalAccessException('The entity ' . get_called_class() . ' is in a locked state');
+        }
+
+        // If we do not have this method we should tell them
+        if (!method_exists($this, $name)) {
+
+            throw new \IllegalArgumentException('There is no method called ' . $name);
+        }
+
+        // Still here? call the method then
+        call_user_func_array(array($this, $name), $arguments);
+    }
+
+    /**
      * Will lock the child entity and make it immutable (if there are no other means of access)
      *
      * @return null

@@ -18,10 +18,16 @@ namespace TechDivision\PBC\Parser;
 
 use TechDivision\PBC\Entities\Assertions\RawAssertion;
 use TechDivision\PBC\Entities\Assertions\TypedCollectionAssertion;
+use TechDivision\PBC\Entities\Definitions\AttributeDefinition;
+use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
+use TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy;
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Assertions\ChainedAssertion;
 use TechDivision\PBC\Config;
 use TechDivision\PBC\Exceptions\ParserException;
+use TechDivision\PBC\Interfaces\AssertionInterface;
+use TechDivision\PBC\StructureMap;
+use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
 
 /**
  * TechDivision\PBC\Parser\AnnotationParser
@@ -50,7 +56,7 @@ class AnnotationParser extends AbstractParser
      *
      * @var array $validSimpleTypes
      */
-    private $validSimpleTypes = array(
+    protected $validSimpleTypes = array(
         'array',
         'bool',
         'callable',
@@ -73,29 +79,40 @@ class AnnotationParser extends AbstractParser
      *
      * @var array $simpleTypeMappings
      */
-    private $simpleTypeMappings = array(
+    protected $simpleTypeMappings = array(
         'boolean' => 'bool',
         'void' => 'null'
     );
 
     /**
      * Default constructor
+     *
+     * @param string                            $file              The path of the file we want to parse
+     * @param array                             &$tokens           The array of tokens taken from the file
+     * @param StructureDefinitionHierarchy|null $currentDefinition The current definition we are working on
      */
-    public function __construct()
-    {
+    public function __construct(
+        $file,
+        array & $tokens = array(),
+        StructureDefinitionInterface $currentDefinition = null
+    ) {
         $config = Config::getInstance();
         $this->config = $config->getConfig('enforcement');
+
+        parent::__construct($file, $tokens, $currentDefinition);
     }
 
     /**
      * Will get the conditions for a certain assertion indicating keyword like @requires or, if configured, @param
      *
-     * @param string $docBlock         The DocBlock to search in
-     * @param string $conditionKeyword The keyword we are searching for, use assertion defining tags here!
+     * @param string       $docBlock         The DocBlock to search in
+     * @param string       $conditionKeyword The keyword we are searching for, use assertion defining tags here!
+     * @param boolean|null $privateContext   If we have to mark the parsed annotations as having a private context
+     *                                       as we would have trouble finding out for ourselves.
      *
      * @return boolean|\TechDivision\PBC\Entities\Lists\AssertionList
      */
-    public function getConditions($docBlock, $conditionKeyword)
+    public function getConditions($docBlock, $conditionKeyword, $privateContext = null)
     {
         // There are only 3 valid condition types
         if ($conditionKeyword !== PBC_KEYWORD_PRE && $conditionKeyword !== PBC_KEYWORD_POST
@@ -148,6 +165,18 @@ class AnnotationParser extends AbstractParser
                 $assertion = $this->parseAssertion($condition);
                 if ($assertion !== false) {
 
+                    // Do we already got a private context we can set? If not we have to find out four ourselves
+                    if ($privateContext !== null) {
+
+                        // Add the context (wether private or not)
+                        $assertion->setPrivateContext($privateContext);
+
+                    } else {
+
+                        // Add the context (private or not)
+                        $assertion = $this->determinePrivateContext($assertion);
+                    }
+
                     $result->add($assertion);
                 }
             }
@@ -168,7 +197,7 @@ class AnnotationParser extends AbstractParser
      *
      * TODO we need an assertion factory badly! This is way to long
      */
-    private function parseAssertion($docString, $usedAnnotation = null)
+    protected function parseAssertion($docString, $usedAnnotation = null)
     {
         if ($usedAnnotation === null) {
 
@@ -318,7 +347,7 @@ class AnnotationParser extends AbstractParser
      *
      * @return \TechDivision\PBC\Entities\Assertions\ChainedAssertion
      */
-    private function parseChainedAssertion($combinator, $docString)
+    protected function parseChainedAssertion($combinator, $docString)
     {
         // Get all the parts of the string
         $assertionArray = explode(' ', $docString);
@@ -374,7 +403,7 @@ class AnnotationParser extends AbstractParser
      *
      * @return boolean|string
      */
-    private function filterVariable($docString)
+    protected function filterVariable($docString)
     {
         // Explode the string to get the different pieces
         $explodedString = explode(' ', $docString);
@@ -401,13 +430,51 @@ class AnnotationParser extends AbstractParser
     }
 
     /**
+     * Will filter all method calls from within the assertion string
+     *
+     * @param string $docString The DocBlock piece to search in
+     *
+     * @return array
+     */
+    protected function filterMethodCalls($docString)
+    {
+        // We will be regex ninjas here
+        preg_match_all('/->(.*?)\(/', $docString, $results);
+
+        // Return the clean output
+        return $results[1];
+    }
+
+    /**
+     * Will filter all attributes which are used within an assertion string
+     *
+     * @param string $docString The DocBlock piece to search in
+     *
+     * @return array
+     */
+    protected function filterAttributes($docString)
+    {
+        // We will be regex ninjas here
+        preg_match_all('/(this->|self::)([a-zA-Z0-9_]*?)[=!\s<>,\)\[\]]/', $docString, $tmp);
+
+        $results = array();
+        foreach ($tmp[2] as $rawAttribute) {
+
+            $results[] = '$' . $rawAttribute;
+        }
+
+        // Return the clean output
+        return $results;
+    }
+
+    /**
      * Will filter any combinator defining a logical or-relation
      *
      * @param string $docString The DocBlock piece to search in
      *
      * @return boolean
      */
-    private function filterOrCombinator($docString)
+    protected function filterOrCombinator($docString)
     {
         if (strpos($docString, '|')) {
 
@@ -425,7 +492,7 @@ class AnnotationParser extends AbstractParser
      *
      * @return boolean|string
      */
-    private function filterTypedCollection($docString)
+    protected function filterTypedCollection($docString)
     {
         $tmp = strpos($docString, 'array<');
         if ($tmp !== false && strpos($docString, '>') > $tmp) {
@@ -449,7 +516,7 @@ class AnnotationParser extends AbstractParser
      *
      * @return boolean|string
      */
-    private function filterType($docString)
+    protected function filterType($docString)
     {
         // Explode the string to get the different pieces
         $explodedString = explode(' ', $docString);
@@ -493,7 +560,7 @@ class AnnotationParser extends AbstractParser
      *
      * @return boolean
      */
-    private function filterClass($docString)
+    protected function filterClass($docString)
     {
         // Explode the string to get the different pieces
         $explodedString = explode(' ', $docString);
@@ -518,5 +585,68 @@ class AnnotationParser extends AbstractParser
 
         // We found nothing; tell them.
         return false;
+    }
+
+    /**
+     * Will try to figure out if the passed assertion has a private context or not.
+     * This information will be entered into the assertion which will then be returned.
+     *
+     * @param \TechDivision\PBC\Interfaces\AssertionInterface $assertion The assertion we need the context for
+     *
+     * @return \TechDivision\PBC\Interfaces\AssertionInterface
+     */
+    protected function determinePrivateContext(AssertionInterface $assertion)
+    {
+        // Get the string to check for dynamic properties
+        $assertionString = $assertion->getString();
+
+        // Do we have method calls?
+        $methodCalls = $this->filterMethodCalls($assertionString);
+
+        if (!empty($methodCalls)) {
+
+            // Iterate over all method calls and check if they are private
+            foreach ($methodCalls as $methodCall) {
+
+                // Get the function definition, but do not get recursive conditions
+                $functionDefinition = $this->currentDefinition->getFunctionDefinitions()->get($methodCall);
+
+                // If we found something private we can end here
+                if ($functionDefinition instanceof FunctionDefinition &&
+                    $functionDefinition->visibility === 'private'
+                ) {
+
+                    // Set the private context to true and return it
+                    $assertion->setPrivateContext(true);
+
+                    return $assertion;
+                }
+            }
+        }
+
+        // Do we have any attributes?
+        $attributes = $this->filterAttributes($assertionString);
+
+        if (!empty($attributes)) {
+
+            // Iterate over all attributes and check if they are private
+            foreach ($attributes as $attribute) {
+
+                $attributeDefinition = $this->currentDefinition->getAttributeDefinitions()->get($attribute);
+
+                // If we found something private we can end here
+                if ($attributeDefinition instanceof AttributeDefinition &&
+                    $attributeDefinition->visibility === 'private'
+                ) {
+
+                    // Set the private context to true and return it
+                    $assertion->setPrivateContext(true);
+
+                    return $assertion;
+                }
+            }
+        }
+
+        return $assertion;
     }
 }

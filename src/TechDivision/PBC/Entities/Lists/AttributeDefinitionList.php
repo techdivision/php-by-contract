@@ -39,5 +39,6 @@ class AttributeDefinitionList extends AbstractTypedList
     public function __construct()
     {
         $this->itemType = 'TechDivision\PBC\Entities\Definitions\AttributeDefinition';
+        $this->defaultOffset = 'name';
     }
 }

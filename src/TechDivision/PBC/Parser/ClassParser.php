@@ -88,7 +88,7 @@ class ClassParser extends AbstractStructureParser
      * @param null|string $className    The name of the class we are searching for
      * @param bool        $getRecursive Do we have to get the ancestral conditions as well?
      *
-     * @return bool|StructureDefinitionInterface
+     * @return bool|\TechDivision\PBC\Interfaces\StructureDefinitionInterface
      */
     public function getDefinition($className = null, $getRecursive = true)
     {
@@ -101,7 +101,7 @@ class ClassParser extends AbstractStructureParser
         // First of all we need to get the class tokens
         $tokens = $this->getStructureTokens(T_CLASS);
 
-        // Did we get something valueable?
+        // Did we get something valuable?
         if ($tokens === false) {
 
             return false;
@@ -144,130 +144,156 @@ class ClassParser extends AbstractStructureParser
      * @param array $tokens       The token array containing structure tokens
      * @param bool  $getRecursive Do we have to get the ancestral conditions as well?
      *
-     * @return StructureDefinitionInterface
+     * @return \TechDivision\PBC\Interfaces\StructureDefinitionInterface
      */
     protected function getDefinitionFromTokens($tokens, $getRecursive = true)
     {
         // First of all we need a new ClassDefinition to fill
-        $classDefinition = new ClassDefinition();
+        $this->currentDefinition = new ClassDefinition();
 
         // Save the path of the original definition for later use
-        $classDefinition->path = $this->file;
+        $this->currentDefinition->path = $this->file;
 
         // File based namespaces do not make much sense, so hand it over here.
-        $classDefinition->namespace = $this->getNamespace();
-        $classDefinition->name = $this->getName($tokens);
-        $classDefinition->usedNamespaces = $this->getUsedNamespaces();
+        $this->currentDefinition->namespace = $this->getNamespace();
+        $this->currentDefinition->name = $this->getName($tokens);
+        $this->currentDefinition->usedNamespaces = $this->getUsedNamespaces();
 
         // For our next step we would like to get the doc comment (if any)
-        $classDefinition->docBlock = $this->getDocBlock($tokens, T_CLASS);
+        $this->currentDefinition->docBlock = $this->getDocBlock($tokens, T_CLASS);
+
+        // Lets get the attributes the class might have
+        $this->currentDefinition->attributeDefinitions = $this->getAttributes(
+            $tokens
+        );
 
         // So we got our docBlock, now we can parse the invariant annotations from it
-        $annotationParser = new AnnotationParser();
-        $classDefinition->invariantConditions = $annotationParser->getConditions(
-            $classDefinition->getDocBlock(),
+        $annotationParser = new AnnotationParser($this->file, $this->tokens, $this->currentDefinition);
+        $this->currentDefinition->invariantConditions = $annotationParser->getConditions(
+            $this->currentDefinition->getDocBlock(),
             PBC_KEYWORD_INVARIANT
         );
 
         // Get the class identity
-        $classDefinition->isFinal = $this->hasSignatureToken($this->tokens, T_FINAL, T_CLASS);
-        $classDefinition->isAbstract = $this->hasSignatureToken($this->tokens, T_ABSTRACT, T_CLASS);
+        $this->currentDefinition->isFinal = $this->hasSignatureToken($this->tokens, T_FINAL, T_CLASS);
+        $this->currentDefinition->isAbstract = $this->hasSignatureToken($this->tokens, T_ABSTRACT, T_CLASS);
 
         // Lets check if there is any inheritance, or if we implement any interfaces
-        $classDefinition->extends = trim(
+        $this->currentDefinition->extends = trim(
             $this->resolveUsedNamespace(
-                $classDefinition,
+                $this->currentDefinition,
                 $this->getParent($tokens)
             ),
             '\\'
         );
         // Get all the interfaces we have
-        $classDefinition->implements = $this->getInterfaces($classDefinition);
+        $this->currentDefinition->implements = $this->getInterfaces($this->currentDefinition);
 
         // Get all class constants
-        $classDefinition->constants = $this->getConstants($tokens);
+        $this->currentDefinition->constants = $this->getConstants($tokens);
 
         // Only thing still missing are the methods, so ramp up our FunctionParser
-        $functionParser = new FunctionParser($this->structureMap, $this->structureDefinitionHierarchy);
-        $classDefinition->functionDefinitions = $functionParser->getDefinitionListFromTokens($tokens, $getRecursive);
+        $functionParser = new FunctionParser($this->file, $this->tokens, $this->currentDefinition);
+        $this->currentDefinition->functionDefinitions = $functionParser->getDefinitionListFromTokens(
+            $tokens,
+            $getRecursive
+        );
 
         // If we have to parse the definition in a recursive manner, we have to get the parent invariants
         if ($getRecursive === true) {
 
-            $dependencies = $classDefinition->getDependencies();
-            foreach ($dependencies as $dependency) {
-
-                // freshly set the dependency definition to avoid side effects
-                $dependencyDefinition = null;
-
-                $fileEntry = $this->structureMap->getEntry($dependency);
-                if (!$fileEntry instanceof Structure) {
-
-                    // Continue, don't fail as we might have dependencies which are not under PBC surveillance
-                    continue;
-                }
-
-                // Get the needed parser
-                $structureParserFactory = new StructureParserFactory();
-                $parser = $structureParserFactory->getInstance(
-                    $fileEntry->getType(),
-                    $fileEntry->getPath(),
-                    $this->structureMap,
-                    $this->structureDefinitionHierarchy
-                );
-
-                // Get the definition
-                $dependencyDefinition = $parser->getDefinition(
-                    $dependency,
-                    $getRecursive
-                );
-
-                // Only classes and traits have invariants
-                if ($fileEntry->getType() === 'class') {
-
-                    $classDefinition->ancestralInvariants = $dependencyDefinition->getInvariants();
-                }
-
-                // Iterate over all dependencies and combine method conditions if method match
-                $functionIterator = $classDefinition->getFunctionDefinitions()->getIterator();
-                foreach ($functionIterator as $function) {
-
-                    // Get the ancestral function of the one we currently have a look at.
-                    // If we got it we have to get their conditions
-                    $ancestralFunction = $dependencyDefinition->getFunctionDefinitions()->get($function->name);
-                    if ($ancestralFunction instanceof FunctionDefinition) {
-
-                        // If the ancestral function uses the old keyword we have to do too
-                        if ($ancestralFunction->usesOld !== false) {
-
-                            $function->usesOld = true;
-                        }
-
-                        // Get the conditions
-                        $function->ancestralPreconditions = $ancestralFunction->getPreconditions();
-                        $function->ancestralPostconditions = $ancestralFunction->getPostconditions();
-
-                        // Save if back into the definition
-                        $classDefinition->getFunctionDefinitions()->set($function->name, $function);
-                    }
-                }
-
-                // Finally add the dependency definition to our structure definition hierachry to avoid
-                // redundant parsing
-                $this->structureDefinitionHierarchy->insert($dependencyDefinition);
-            }
+            // Add all the assertions we might get from ancestral dependencies
+            $this->addAncestralAssertions($this->currentDefinition);
         }
 
         // Lets get the attributes the class might have
-        $classDefinition->attributeDefinitions = $this->getAttributes($tokens, $classDefinition->getInvariants());
+        $this->currentDefinition->attributeDefinitions = $this->getAttributes(
+            $tokens,
+            $this->currentDefinition->getInvariants()
+        );
 
         // Lock the definition
-        $classDefinition->lock();
+        $this->currentDefinition->lock();
 
         // Before exiting we will add the entry to the current structure definition hierarchy
-        $this->structureDefinitionHierarchy->insert($classDefinition);
+        $this->structureDefinitionHierarchy->insert($this->currentDefinition);
 
-        return $classDefinition;
+        return $this->currentDefinition;
+    }
+
+    /**
+     * This method will add all assertions any ancestral structures (parent classes, implemented interfaces) might have
+     * to the passed class definition.
+     *
+     * @param \TechDivision\PBC\Entities\Definitions\ClassDefinition &$classDefinition The class definition we have to
+     *                                                                                 add the assertions to
+     *
+     * @return null
+     */
+    protected function addAncestralAssertions(ClassDefinition &$classDefinition)
+    {
+        $dependencies = $classDefinition->getDependencies();
+        foreach ($dependencies as $dependency) {
+
+            // freshly set the dependency definition to avoid side effects
+            $dependencyDefinition = null;
+
+            $fileEntry = $this->structureMap->getEntry($dependency);
+            if (!$fileEntry instanceof Structure) {
+
+                // Continue, don't fail as we might have dependencies which are not under PBC surveillance
+                continue;
+            }
+
+            // Get the needed parser
+            $structureParserFactory = new StructureParserFactory();
+            $parser = $structureParserFactory->getInstance(
+                $fileEntry->getType(),
+                $fileEntry->getPath(),
+                $this->structureMap,
+                $this->structureDefinitionHierarchy
+            );
+
+            // Get the definition
+            $dependencyDefinition = $parser->getDefinition(
+                $dependency,
+                true
+            );
+
+            // Only classes and traits have invariants
+            if ($fileEntry->getType() === 'class') {
+
+                $classDefinition->ancestralInvariants = $dependencyDefinition->getInvariants(true);
+            }
+
+            // Iterate over all dependencies and combine method conditions if method match
+            $functionIterator = $classDefinition->getFunctionDefinitions()->getIterator();
+            foreach ($functionIterator as $function) {
+
+                // Get the ancestral function of the one we currently have a look at.
+                // If we got it we have to get their conditions but just if they have matching signatures!
+                $ancestralFunction = $dependencyDefinition->getFunctionDefinitions()->get($function->name);
+                if ($ancestralFunction instanceof FunctionDefinition) {
+
+                    // If the ancestral function uses the old keyword we have to do too
+                    if ($ancestralFunction->usesOld !== false) {
+
+                        $function->usesOld = true;
+                    }
+
+                    // Get the conditions
+                    $function->ancestralPreconditions = $ancestralFunction->getPreconditions(true);
+                    $function->ancestralPostconditions = $ancestralFunction->getPostconditions(true);
+
+                    // Save if back into the definition
+                    $classDefinition->getFunctionDefinitions()->set($function->name, $function);
+                }
+            }
+
+            // Finally add the dependency definition to our structure definition hierarchy to avoid
+            // redundant parsing
+            $this->structureDefinitionHierarchy->insert($dependencyDefinition);
+        }
     }
 
     /**

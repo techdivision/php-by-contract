@@ -131,7 +131,7 @@ class InterfaceParser extends AbstractStructureParser
      *
      * TODO move this to the abstract parent parser
      */
-    private function getName($tokens)
+    protected function getName($tokens)
     {
         // Check the tokens
         $className = '';
@@ -162,7 +162,7 @@ class InterfaceParser extends AbstractStructureParser
      *
      * @return string|boolean
      */
-    private function getParents($tokens)
+    protected function getParents($tokens)
     {
         // Check the tokens
         $interfaceString = '';
@@ -222,7 +222,7 @@ class InterfaceParser extends AbstractStructureParser
      *
      * @return \TechDivision\PBC\Entities\Definitions\InterfaceDefinition
      */
-    private function getDefinitionFromTokens($tokens, $getRecursive = true)
+    protected function getDefinitionFromTokens($tokens, $getRecursive = true)
     {
         // First of all we need a new ClassDefinition to fill
         $interfaceDefinition = new InterfaceDefinition();
@@ -241,7 +241,7 @@ class InterfaceParser extends AbstractStructureParser
         $interfaceDefinition->name = $this->getName($tokens);
 
         // So we got our docBlock, now we can parse the invariant annotations from it
-        $annotationParser = new AnnotationParser();
+        $annotationParser = new AnnotationParser($this->file, $this->tokens);
         $interfaceDefinition->invariantConditions = $annotationParser->getConditions(
             $interfaceDefinition->docBlock,
             PBC_KEYWORD_INVARIANT
@@ -283,7 +283,7 @@ class InterfaceParser extends AbstractStructureParser
         $interfaceDefinition->constants = $this->getConstants($tokens);
 
         // Only thing still missing are the methods, so ramp up our FunctionParser
-        $functionParser = new FunctionParser();
+        $functionParser = new FunctionParser($this->file, $this->tokens);
         $interfaceDefinition->functionDefinitions = $functionParser->getDefinitionListFromTokens($tokens);
 
         return $interfaceDefinition;

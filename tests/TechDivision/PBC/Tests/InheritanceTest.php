@@ -56,4 +56,43 @@ class InheritanceTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
 
     }
+
+    /**
+     * Will test if inheritance works with overwritten methods having a different signature as the parent methods
+     *
+     * @return null
+     */
+    public function testChangedSignature()
+    {
+        $level = error_reporting();
+        error_reporting(0);
+
+        $testClass = new Data\BasicChildTestClass();
+
+        // Reset the error reporting level to the original value
+        error_reporting($level);
+        // These should not fail
+        $e = null;
+        try {
+
+            $testClass->concatSomeStuff(12, 'test');
+
+        } catch (\Exception $e) {
+        }
+
+        // Did we get null?
+        $this->assertNull($e);
+
+        // These should not fail as well
+        $e = null;
+        try {
+
+            $testClass->stringToArray('this is a ', 'test');
+
+        } catch (\Exception $e) {
+        }
+
+        // Did we get null?
+        $this->assertNull($e);
+    }
 }

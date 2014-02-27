@@ -87,6 +87,52 @@ class FunctionParser extends AbstractParser
     }
 
     /**
+     * Will return a function definition objects for a certain function
+     *
+     * @param string  $functionName The name of the function to parse
+     * @param boolean $getRecursive Do we have to get the ancestral contents as well?
+     *
+     * @return boolean|\TechDivision\PBC\Entities\Definitions\FunctionDefinition
+     */
+    public function getDefinition($functionName, $getRecursive = true)
+    {
+        // First of all we need to get the function tokens
+        $tokens = $this->getFunctionTokens($this->tokens);
+
+        // Did we get something valuable?
+        if ($tokens === false) {
+
+            return false;
+
+        } elseif (count($tokens) === 1) {
+            // We got what we came for, or did we?
+
+            if (isset($tokens[0])) {
+
+                return $this->getDefinitionFromTokens($tokens[0]);
+            }
+
+        } elseif (count($tokens) > 1) {
+            // We are still here, but got a function name to look for
+
+            foreach ($tokens as $token) {
+
+                // Now iterate over the array and search for the class we want
+                for ($i = 0; $i < count($token); $i++) {
+
+                    if (is_array($token[$i]) && $token[$i] === T_FUNCTION && $token[$i + 2] === $functionName) {
+
+                        return $this->getDefinitionFromTokens($token, $getRecursive);
+                    }
+                }
+            }
+        }
+
+        // Still here? That sounds bad
+        return false;
+    }
+
+    /**
      * Returns a FunctionDefinition from a token array.
      *
      * This method will use a set of other methods to parse a token array and retrieve any
@@ -96,7 +142,7 @@ class FunctionParser extends AbstractParser
      *
      * @return \TechDivision\PBC\Entities\Definitions\FunctionDefinition
      */
-    private function getDefinitionFromTokens(array $tokens)
+    protected function getDefinitionFromTokens(array $tokens)
     {
         // First of all we need a new FunctionDefinition to fill
         $functionDefinition = new FunctionDefinition();
@@ -114,11 +160,19 @@ class FunctionParser extends AbstractParser
         // Lets also get out parameters
         $functionDefinition->parameterDefinitions = $this->getParameterDefinitionList($tokens);
 
+        // Do we have a private context here? If so we have to tell the annotation parser
+        $privateContext = false;
+        if ($functionDefinition->visibility === 'private') {
+
+            $privateContext = true;
+        }
+
         // So we got our docBlock, now we can parse the precondition annotations from it
-        $annotationParser = new AnnotationParser();
+        $annotationParser = new AnnotationParser($this->file, $this->tokens, $this->currentDefinition);
         $functionDefinition->preconditions = $annotationParser->getConditions(
             $functionDefinition->docBlock,
-            PBC_KEYWORD_PRE
+            PBC_KEYWORD_PRE,
+            $privateContext
         );
 
         // Does this method require the use of our "old" mechanism?
@@ -130,7 +184,8 @@ class FunctionParser extends AbstractParser
         // So we got our docBlock, now we can parse the postcondition annotations from it
         $functionDefinition->postconditions = $annotationParser->getConditions(
             $functionDefinition->docBlock,
-            PBC_KEYWORD_POST
+            PBC_KEYWORD_POST,
+            $privateContext
         );
 
         return $functionDefinition;
@@ -145,7 +200,7 @@ class FunctionParser extends AbstractParser
      *
      * TODO Does this have to be this long?
      */
-    private function getParameterDefinitionList(array $tokens)
+    protected function getParameterDefinitionList(array $tokens)
     {
         // Check the tokens
         $parameterString = '';
@@ -249,7 +304,7 @@ class FunctionParser extends AbstractParser
      *
      * @return string
      */
-    private function getFunctionName(array $tokens)
+    protected function getFunctionName(array $tokens)
     {
         // Check the tokens
         $functionName = '';
@@ -273,7 +328,7 @@ class FunctionParser extends AbstractParser
      *
      * @return string
      */
-    private function getFunctionBody(array $tokens)
+    protected function getFunctionBody(array $tokens)
     {
         // We will iterate over the token array and collect everything
         // from the first opening curly bracket until the last
@@ -332,9 +387,8 @@ class FunctionParser extends AbstractParser
      * @param array $tokens The token array
      *
      * @return array|boolean
-     *s
      */
-    private function getFunctionTokens(array $tokens)
+    protected function getFunctionTokens(array $tokens)
     {
         // Iterate over all the tokens and filter the different function portions out
         $result = array();
@@ -421,7 +475,7 @@ class FunctionParser extends AbstractParser
      *
      * TODO I am sure this can be done more generally usable
      */
-    private function getFunctionVisibility(array $tokens)
+    protected function getFunctionVisibility(array $tokens)
     {
         // Check out all the tokens and look if we find the right thing. We can do that as these keywords are not valid
         // within a function definition. Public is default.
