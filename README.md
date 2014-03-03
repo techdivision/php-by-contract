@@ -82,6 +82,18 @@ This contains basic features as:
 - The above (not including type safety) will be inherited by every child structure, strengthening your object hierarchies
 - The library will warn you (exception or log message) on violation of these contracts
 
+A note on inheritance
+-----------------
+It says above that all conditions will get inherited by child structures, but this is only half true. To understand that
+we have to consider the PHP inheritance system which includes `private` visibility and a possible change of an
+overwriting method in comparison to the overwritten one.
+PBC takes these things into account and will therefore not pass down:
+
+- Invariants which use private members oder methods
+- Preconditions which refer to method parameters which do not exist in the child scope
+
+These exceptions are made **WITHOUT any warning** so please keep this in mind when relying on contract inheritance.
+
 How does it work?
 -----------------
 We use a system of autoloading and code creation to ensure our annotations will get enforced.
@@ -174,3 +186,6 @@ There currently is no version based roadmap or an order in which this features w
 - `phpDocumentor<http://www.phpdoc.org/>` support for custom annotations
 - Something like `@ignoreContract` to selectively ignore certain parts of your code
 - Exception mapping so you can globally specify the exceptions the library should throw on errors
+- Decoupling of autoloading and enforcement of contracts (load everything, enforce only certain structures)
+- `Trait` as a new structure type
+- `Script` as a new structure type
