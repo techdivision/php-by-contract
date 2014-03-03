@@ -93,6 +93,8 @@ class ChainedAssertion extends AbstractAssertion
 
             throw new \InvalidArgumentException();
         }
+
+        parent::__construct();
     }
 
     /**

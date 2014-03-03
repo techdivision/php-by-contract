@@ -52,6 +52,8 @@ class InstanceAssertion extends AbstractAssertion
     {
         $this->operand = $operand;
         $this->class = $class;
+
+        parent::__construct();
     }
 
     /**

@@ -174,8 +174,11 @@ class AnnotationParser extends AbstractParser
                     } else {
 
                         // Add the context (private or not)
-                        $assertion = $this->determinePrivateContext($assertion);
+                        $this->determinePrivateContext($assertion);
                     }
+
+                    // Determine the minimal scope of this assertion
+                    $this->determineMinimalScope($assertion);
 
                     $result->add($assertion);
                 }
@@ -593,7 +596,7 @@ class AnnotationParser extends AbstractParser
      *
      * @param \TechDivision\PBC\Interfaces\AssertionInterface $assertion The assertion we need the context for
      *
-     * @return \TechDivision\PBC\Interfaces\AssertionInterface
+     * @return void
      */
     protected function determinePrivateContext(AssertionInterface $assertion)
     {
@@ -619,7 +622,7 @@ class AnnotationParser extends AbstractParser
                     // Set the private context to true and return it
                     $assertion->setPrivateContext(true);
 
-                    return $assertion;
+                    return;
                 }
             }
         }
@@ -642,11 +645,37 @@ class AnnotationParser extends AbstractParser
                     // Set the private context to true and return it
                     $assertion->setPrivateContext(true);
 
-                    return $assertion;
+                    return;
                 }
             }
         }
+    }
 
-        return $assertion;
+    /**
+     * Will try to figure out if the passed assertion has a private context or not.
+     * This information will be entered into the assertion which will then be returned.
+     *
+     * @param \TechDivision\PBC\Interfaces\AssertionInterface $assertion The assertion we need the minimal scope for
+     *
+     * @return void
+     */
+    protected function determineMinimalScope(AssertionInterface $assertion)
+    {
+        // Get the string to check for dynamic properties
+        $assertionString = $assertion->getString();
+
+        // Do we have method calls? If so we have at least structure scope
+        $methodCalls = $this->filterMethodCalls($assertionString);
+        if (!empty($methodCalls)) {
+
+            $assertion->setMinScope('structure');
+        }
+
+        // Do we have any attributes? If so we have at least structure scope
+        $attributes = $this->filterAttributes($assertionString);
+        if (!empty($attributes)) {
+
+            $assertion->setMinScope('structure');
+        }
     }
 }

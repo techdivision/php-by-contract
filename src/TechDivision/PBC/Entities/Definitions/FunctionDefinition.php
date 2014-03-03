@@ -18,6 +18,7 @@ namespace TechDivision\PBC\Entities\Definitions;
 
 use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
+use TechDivision\PBC\Interfaces\AssertionInterface;
 
 /**
  * TechDivision\PBC\Entities\Definitions\FunctionDefinition
@@ -256,17 +257,23 @@ class FunctionDefinition extends AbstractDefinition
     /**
      * Will return all preconditions. Direct as well as ancestral.
      *
-     * @param boolean $nonPrivateOnly Make this true if you only want conditions which do not have a private context
+     * @param boolean $nonPrivateOnly   Make this true if you only want conditions which do not have a private context
+     * @param boolean $filterMismatches Do we have to filter condition mismatches due to signature changes
      *
      * @return \TechDivision\PBC\Entities\Lists\TypedListList
      */
-    public function getAllPreconditions($nonPrivateOnly = false)
+    public function getAllPreconditions($nonPrivateOnly = false, $filterMismatches = true)
     {
         $preconditions = clone $this->ancestralPreconditions;
         $preconditions->add($this->preconditions);
 
         // If we need to we will filter all the non private conditions from the lists
-        if ($nonPrivateOnly === true) {
+        // Preconditions have to be flattened as the signature of a function (and therefore it's parameter list)
+        // might change within a structure hierarchy.
+        // We have to do that here, as we cannot risk to delete conditions which use non existing parameters, as
+        // a potential child method might want to inherit grandparental conditions which do not make sense for us
+        // (but do for them).
+        if ($nonPrivateOnly === true || $filterMismatches === true) {
 
             $preconditionListIterator = $preconditions->getIterator();
             foreach ($preconditionListIterator as $preconditionList) {
@@ -274,7 +281,14 @@ class FunctionDefinition extends AbstractDefinition
                 $preconditionIterator = $preconditionList->getIterator();
                 foreach ($preconditionIterator as $key => $precondition) {
 
-                    if ($precondition->isPrivateContext()) {
+                    // The privacy issue
+                    if ($nonPrivateOnly === true && $precondition->isPrivateContext()) {
+
+                        $preconditionList->delete($key);
+                    }
+
+                    // The mismatch filter
+                    if ($filterMismatches === true && $this->conditionIsMismatch($precondition)) {
 
                         $preconditionList->delete($key);
                     }
@@ -378,7 +392,7 @@ class FunctionDefinition extends AbstractDefinition
         }
 
         // Function name + the suffix we might have gotten
-            $header .= $this->name . $suffix;
+        $header .= $this->name . $suffix;
 
         // Iterate over all parameters and create the parameter string.
         // We will create the string we need, either for calling the function or for defining it.
@@ -410,5 +424,38 @@ class FunctionDefinition extends AbstractDefinition
         }
 
         return $header;
+    }
+
+    /**
+     * This method will check if a certain assertion mismatches the scope of this function.
+     *
+     * @param \TechDivision\PBC\Interfaces\AssertionInterface $assertion The assertion to check for a possible mismatch
+     *          within this function context
+     *
+     * @return boolean
+     */
+    protected function conditionIsMismatch(AssertionInterface $assertion)
+    {
+        // If the minimal scope is above or below function scope we cannot determine if this is a mismatch in
+        // function scope.
+        if ($assertion->getMinScope() !== 'function') {
+
+            return false;
+        }
+
+        // We will get all parameters and check if we can find any of it in the assertion string.
+        // If not then we have a mismatch as the condition is only function scoped
+        $assertionString = $assertion->getString();
+        $parameterIterator = $this->parameterDefinitions->getIterator();
+        foreach ($parameterIterator as $parameter) {
+
+            if (strpos($assertionString, $parameter->name) !== false) {
+
+                return false;
+            }
+        }
+
+        // Still here, that does not sound good
+        return true;
     }
 }

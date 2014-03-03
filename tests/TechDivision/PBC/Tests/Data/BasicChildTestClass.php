@@ -34,14 +34,14 @@ namespace TechDivision\PBC\Tests\Data;
 final class BasicChildTestClass extends BasicTestClass
 {
     /**
-     * @param integer $param1
+     * @param integer $param17
      * @param string  $param2
      *
      * @return string
      */
-    public function concatSomeStuff($param1, $param2)
+    public function concatSomeStuff($param17, $param2)
     {
-        return (string)$param1 . $param2;
+        return (string)$param17 . $param2;
     }
 
     /**

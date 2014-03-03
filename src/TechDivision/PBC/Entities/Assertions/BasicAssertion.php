@@ -79,6 +79,8 @@ class BasicAssertion extends AbstractAssertion
             '!=' => '==',
             '!==' => '==='
         );
+
+        parent::__construct();
     }
 
     /**

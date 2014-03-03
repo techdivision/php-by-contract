@@ -37,6 +37,13 @@ use TechDivision\PBC\Utils\PhpLint;
 abstract class AbstractAssertion implements AssertionInterface
 {
     /**
+     * Minimal scope is "function" per default as we don't have DbC checks right know (would be body)
+     *
+     * @const string DEFAULT_MIN_SCOPE
+     */
+    const DEFAULT_MIN_SCOPE = 'function';
+
+    /**
      * @var boolean $inverted If the logical meaning was inverted
      */
     protected $inverted;
@@ -50,12 +57,23 @@ abstract class AbstractAssertion implements AssertionInterface
     protected $privateContext;
 
     /**
+     * The minimal scope range we need so we are able to fulfill this assertion. E.g. if this assertion contains
+     * a member variable our minimal scope will be "structure", if we compare parameters it will be "function".
+     * Possible values are "structure", "function" and "body".
+     *
+     * @var string $minScope
+     */
+    protected $minScope;
+
+    /**
      * Default constructor
      */
     public function __construct()
     {
         $this->inverted = false;
         $this->privateContext = false;
+
+        $this->minScope = self::DEFAULT_MIN_SCOPE;
 
         if (!$this->isValid()) {
 
@@ -77,6 +95,40 @@ abstract class AbstractAssertion implements AssertionInterface
 
         // Return the string of the inverted instance
         return $self->getString();
+    }
+
+    /**
+     * Will return the minimal scope
+     *
+     * @return string
+     */
+    public function getMinScope()
+    {
+        return $this->minScope;
+    }
+
+    /**
+     * Will set the minimal scope if you pass an allowed value ("structure", "function" and "body")
+     *
+     * @param string $minScope The value to set
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return void
+     */
+    public function setMinScope($minScope)
+    {
+        // If we did not get an allowed value we will throw an exception
+        $tmp = array_flip(array("structure", "function", "body"));
+        if (!isset($tmp[$minScope])) {
+
+            throw new \InvalidArgumentException(
+                'The minimal scope ' . $minScope . ' is not allowed. It may only be "structure", "function" or "body"'
+            );
+        }
+
+        // Set the new minimal scope
+        $this->minScope = $minScope;
     }
 
     /**
