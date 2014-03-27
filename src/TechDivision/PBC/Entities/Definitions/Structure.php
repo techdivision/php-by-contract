@@ -63,6 +63,11 @@ class Structure
     protected $hasContracts;
 
     /**
+     * @var boolean $enforced Do we have to enforce contracts (if any) within this structure?
+     */
+    protected $enforced;
+
+    /**
      * Default constructor
      *
      * @param int     $cTime        The manipulation time of the structure file
@@ -70,16 +75,18 @@ class Structure
      * @param string  $path         Path to the file containing the structure definition
      * @param string  $type         Type of the structure e.g. "class"
      * @param boolean $hasContracts Does the structure even have contracts
+     * @param boolean $enforced     Do we have to enforce contracts (if any) within this structure?
      *
      * @throws \InvalidArgumentException
      */
-    public function __construct($cTime, $identifier, $path, $type, $hasContracts = true)
+    public function __construct($cTime, $identifier, $path, $type, $hasContracts = false, $enforced = false)
     {
         // Set the attributes.
         $this->cTime = $cTime;
         $this->identifier = $identifier;
         $this->path = $path;
         $this->hasContracts = $hasContracts;
+        $this->enforced = $enforced;
         $this->allowedTypes = array('class', 'interface', 'trait');
 
         // Check if we got an allowed value for the type.
@@ -140,5 +147,15 @@ class Structure
     public function hasContracts()
     {
         return (bool)$this->hasContracts;
+    }
+
+    /**
+     * Is this structure enforced?
+     *
+     * @return bool
+     */
+    public function isEnforced()
+    {
+        return (bool)$this->enforced;
     }
 }

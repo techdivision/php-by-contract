@@ -1,5 +1,10 @@
 {
-    "project-dirs": [
-        "./Tests/Data"
-    ]
+    "enforcement": {
+
+        "dirs": [
+            "./Tests/Data"
+        ]
+    }
+
+
 }

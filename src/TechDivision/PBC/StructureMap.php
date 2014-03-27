@@ -49,19 +49,24 @@ class StructureMap implements MapInterface
     protected $map = array();
 
     /**
-     * @var array $rootPathes Which paths do we like to include in our map?
+     * @var array $rootPaths The $autoloaderPaths and $enforcementPaths combined to build up paths we have to index
      */
-    protected $rootPathes;
+    protected $rootPaths;
+
+    /**
+     * @var array $enforcementPaths Which paths do we like to include in our map?
+     */
+    protected $autoloaderPaths;
+
+    /**
+     * @var array $enforcementPaths Which paths do we have to enforce
+     */
+    protected $enforcementPaths;
 
     /**
      * @var string $mapPath Where will the map be stored?
      */
     protected $mapPath;
-
-    /**
-     * @var array $omittedPathes Paths that will not be included in our map
-     */
-    protected $omittedPathes;
 
     /**
      * @var \TechDivision\PBC\Config $config Configuration
@@ -81,25 +86,20 @@ class StructureMap implements MapInterface
     /**
      * Default constructor
      *
-     * @param array                    $rootPathes    Which paths do we like to include in our map?
-     * @param \TechDivision\PBC\Config $config        Configuration
-     * @param array                    $omittedPathes Paths that will not be included in our map
+     * @param array                         $autoloaderPaths  Which paths do we like to include in our map?
+     * @param array                         $enforcementPaths Which paths do we have to enforce
+     * @param \TechDivision\PBC\Config|null $config           Configuration
      */
-    public function __construct($rootPathes, Config $config = null, $omittedPathes = array())
+    public function __construct($autoloaderPaths, $enforcementPaths, Config $config = null)
     {
         // As we do accept arrays we have to be sure that we got one. If not we convert it.
-        if (!is_array($rootPathes)) {
+        if (!is_array($enforcementPaths)) {
 
-            $rootPathes = array($rootPathes);
+            $enforcementPaths = array($enforcementPaths);
         }
+        if (!is_array($autoloaderPaths)) {
 
-        // We might have further configuration within the directory configurations
-        foreach ($rootPathes as $key => $rootPath) {
-
-            if (is_array($rootPath) && isset($rootPath['dir'])) {
-
-                $rootPathes[$key] = realpath($rootPath['dir']);
-            }
+            $autoloaderPaths = array($autoloaderPaths);
         }
 
         // Save the config for later use.
@@ -108,19 +108,24 @@ class StructureMap implements MapInterface
             $this->config = $config;
 
         } else {
+            // If we did not get a config we get the current one and save it
 
             $this->config = Config::getInstance();
         }
 
-        // Set the rootPath and calculate the path to the map file
-        $this->rootPathes = $rootPathes;
+        // Set the enforcementPaths and autoloaderPaths and calculate the path to the map file
+        $this->enforcementPaths = $enforcementPaths;
+        $this->autoloaderPaths = $autoloaderPaths;
+
+        // The rootPaths member holds the other path members combined to build up the root paths we have to create
+        // an index for
+        $this->rootPaths = array_merge($autoloaderPaths, $enforcementPaths);
 
         // Build up the path of the serialized map.
         $cacheConfig = $this->config->getConfig('cache');
-        $this->mapPath = $cacheConfig['dir'] . DIRECTORY_SEPARATOR . md5(implode('', $rootPathes));
-
-        // Set the omitted pathes
-        $this->omittedPathes = $omittedPathes;
+        $this->mapPath = $cacheConfig['dir'] . DIRECTORY_SEPARATOR . md5(
+            implode('', $autoloaderPaths) . implode('', $enforcementPaths)
+        );
 
         // Load the serialized map.
         // If there is none or it isn't current we will generate it anew.
@@ -137,6 +142,9 @@ class StructureMap implements MapInterface
      * @param boolean $contracted Do we only want entries containing contracts?
      *
      * @return mixed
+     *
+     * @TODO hasContracts AND enforced makes no sense! enforced should be a mix of enforced and hasContracts then we
+     *       can skip hasContracts
      */
     public function getEntries($contracted = false)
     {
@@ -156,7 +164,8 @@ class StructureMap implements MapInterface
                 $entry['identifier'],
                 $entry['path'],
                 $entry['type'],
-                $entry['hasContracts']
+                $entry['hasContracts'],
+                $entry['enforced']
             );
         }
 
@@ -179,7 +188,8 @@ class StructureMap implements MapInterface
             'identifier' => $structure->getIdentifier(),
             'path' => $structure->getPath(),
             'type' => $structure->getType(),
-            'hasContracts' => $structure->hasContracts()
+            'hasContracts' => $structure->hasContracts(),
+            'enforced' => $structure->isEnforced()
         );
 
         // Persist the map
@@ -232,7 +242,8 @@ class StructureMap implements MapInterface
                 $entry['identifier'],
                 $entry['path'],
                 $entry['type'],
-                $entry['hasContracts']
+                $entry['hasContracts'],
+                $entry['enforced']
             );
 
             // Return the structure DTO
@@ -388,7 +399,7 @@ class StructureMap implements MapInterface
             // If there was a specific path give, we have to check it for compatibility with $this.
             // First thing: is it contained in one of $this root pathes, if not it is no REindexing
             $isContained = false;
-            foreach ($this->rootPathes as $rootPath) {
+            foreach ($this->rootPaths as $rootPath) {
 
                 if (strpos($specificPath, $rootPath) === 0) {
 
@@ -410,7 +421,7 @@ class StructureMap implements MapInterface
             }
 
             // Everything fine, set the root path to our specific path
-            $this->rootPathes = array($specificPath);
+            $this->rootPaths = array($specificPath);
         }
 
         // Generate the map, all needed details have been altered above
@@ -452,12 +463,33 @@ class StructureMap implements MapInterface
             return $this->projectIterator;
         }
 
-        // As we might have several rootPathes we have to create several RecursiveDirectoryIterators.
+        // Save our result for later reuse
+        $this->projectIterator = $this->getDirectoryIterator($this->rootPaths);
+
+        return $this->projectIterator;
+    }
+
+    /**
+     * Will Return an iterator over a set of files determined by a list of directories to iterate over
+     *
+     * @param array $paths List of directories to iterate over
+     *
+     * @return \Iterator
+     */
+    protected function getDirectoryIterator(array $paths)
+    {
+        // If we already got it we can return it directly
+        if (isset($this->projectIterator)) {
+
+            return $this->projectIterator;
+        }
+
+        // As we might have several rootPaths we have to create several RecursiveDirectoryIterators.
         $directoryIterators = array();
-        foreach ($this->rootPathes as $rootPath) {
+        foreach ($paths as $path) {
 
             $directoryIterators[] = new \RecursiveDirectoryIterator(
-                $rootPath,
+                $path,
                 \RecursiveDirectoryIterator::SKIP_DOTS
             );
         }
@@ -482,6 +514,7 @@ class StructureMap implements MapInterface
         return $recursiveIterator;
     }
 
+
     /**
      * Will generate the structure map within the specified root path.
      *
@@ -492,21 +525,27 @@ class StructureMap implements MapInterface
         // First of all we will get the version, so we will later know about changes made DURING indexing
         $this->version = $this->findVersion();
 
-        // Get the iterator over our project files
+        // Get the iterator over our project files and create a regex iterator to filter what we got
         $recursiveIterator = $this->getProjectIterator();
+        $regexIterator = new \RegexIterator($recursiveIterator, '/^.+\.php$/i', \RecursiveRegexIterator::GET_MATCH);
 
-        // Lets prepare the patter based on the existence of omitted pathes.
-        if (!empty($this->omittedPathes)) {
+        // Also get an iterator over all files we have to enforce so we can compare the files
+        $recursiveEnforcementIterator = $this->getDirectoryIterator($this->enforcementPaths);
+        $regexEnforcementIterator = new \RegexIterator(
+            $recursiveEnforcementIterator,
+            '/^.+\.php$/i',
+            \RecursiveRegexIterator::GET_MATCH
+        );
 
-            $pattern = '/[^' . str_replace('/', '\/', implode($this->omittedPathes, '|')) . ']\.php$/i';
+        // Iterator over our enforcement iterators and build up an array for later checks
+        $enforcedFiles = array();
+        foreach ($regexEnforcementIterator as $file) {
 
-        } else {
-
-            $pattern = '/^.+\.php$/i';
+            // Collect what we got in a way we can search it fast
+            $enforcedFiles[$file[0]] = '';
         }
 
-        $regexIterator = new \RegexIterator($recursiveIterator, $pattern, \RecursiveRegexIterator::GET_MATCH);
-
+        // Iterator over our project files and add array based structure representations
         foreach ($regexIterator as $file) {
 
             // Get the identifiers if any.
@@ -519,7 +558,8 @@ class StructureMap implements MapInterface
                     'identifier' => $identifier[1],
                     'path' => $file[0],
                     'type' => $identifier[0],
-                    'hasContracts' => $this->findContracts($file[0])
+                    'hasContracts' => $this->findContracts($file[0]),
+                    'enforced' => isset($enforcedFiles[$file[0]])
                 );
             }
         }

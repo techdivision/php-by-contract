@@ -141,25 +141,53 @@ class Config implements ConfigInterface
             }
         }
 
-        // Same for project-dirs
-        if (isset($configCandidate['project-dirs'])) {
-            foreach ($configCandidate['project-dirs'] as $key => $projectDir) {
+        // Same for enforcement dirs
+        if (isset($configCandidate['enforcement']['dirs'])) {
+            foreach ($configCandidate['enforcement']['dirs'] as $key => $projectDir) {
 
                 $tmp = $formattingUtil->normalizePath($projectDir);
 
                 if (is_readable($tmp)) {
 
-                    $configCandidate['project-dirs'][$key] = $tmp;
+                    $configCandidate['enforcement']['dirs'][$key] = $tmp;
 
                 } elseif (preg_match('/\[|\]|\*|\+|\.|\(|\)|\?|\^/', $tmp)) {
 
                     // Kill the original path entry so the iterators wont give us a bad time
-                    unset($configCandidate['project-dirs'][$key]);
+                    unset($configCandidate['enforcement']['dirs'][$key]);
 
                     // We will open up the paths with glob
                     foreach (glob($tmp, GLOB_ERR) as $regexlessPath) {
 
-                        $configCandidate['project-dirs'][] = $regexlessPath;
+                        $configCandidate['enforcement']['dirs'][] = $regexlessPath;
+                    }
+
+                } else {
+
+                    return false;
+                }
+            }
+        }
+
+        // Same for autoloader dirs
+        if (isset($configCandidate['autoloader']['dirs'])) {
+            foreach ($configCandidate['autoloader']['dirs'] as $key => $projectDir) {
+
+                $tmp = $formattingUtil->normalizePath($projectDir);
+
+                if (is_readable($tmp)) {
+
+                    $configCandidate['autoloader']['dirs'][$key] = $tmp;
+
+                } elseif (preg_match('/\[|\]|\*|\+|\.|\(|\)|\?|\^/', $tmp)) {
+
+                    // Kill the original path entry so the iterators wont give us a bad time
+                    unset($configCandidate['autoloader']['dirs'][$key]);
+
+                    // We will open up the paths with glob
+                    foreach (glob($tmp, GLOB_ERR) as $regexlessPath) {
+
+                        $configCandidate['autoloader']['dirs'][] = $regexlessPath;
                     }
 
                 } else {

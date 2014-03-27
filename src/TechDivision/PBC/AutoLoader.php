@@ -37,17 +37,24 @@ class AutoLoader
     /**
      * @var \TechDivision\PBC\Config $config The configuration we base our actions on
      */
-    private $config;
+    protected $config;
 
     /**
      * @var \TechDivision\PBC\CacheMap $cache Cache map to keep track of already processed files
      */
-    private $cache;
+    protected $cache;
 
     /**
      * @var \TechDivision\PBC\Generator $generator Generator instance if we need to create a new definition
      */
-    private $generator;
+    protected $generator;
+
+    /**
+     * In some cases the autoloader instance is not thrown away, saving the structure map might be a benefit here
+     *
+     * @var \TechDivision\PBC\StructureMap $structureMap
+     */
+    protected $structureMap;
 
     /**
      * @const string OUR_LOADER Name of our class loading method as we will register it
@@ -136,8 +143,12 @@ class AutoLoader
         }
 
         // We also require the classes of our maps as we do not have proper autoloading in place
-        $structureMap = new StructureMap($this->config->getConfig('project-dirs'), $this->config);
-        $file = $structureMap->getEntry($className);
+        if (!isset($this->structureMap)) {
+            $this->structureMap = new StructureMap($this->config->getConfig(
+                'autoloader'
+            )['dirs'], $this->config->getConfig('enforcement')['dirs'], $this->config);
+        }
+        $file = $this->structureMap->getEntry($className);
 
         // Did we get something? If not return false.
         if ($file === false) {
@@ -146,7 +157,7 @@ class AutoLoader
         }
 
         // We are still here, so we know the class and it is not omitted. Does it contain contracts then?
-        if ($file->hasContracts() === false) {
+        if (!$file->hasContracts() || !$file->isEnforced()) {
 
             require $file->getPath();
 
@@ -158,9 +169,9 @@ class AutoLoader
         if ($this->cache === null) {
 
             // We also require the classes of our maps as we do not have proper autoloading in place
-            $this->cache = new CacheMap($cacheConfig['dir'], $this->config);
+            $this->cache = new CacheMap($cacheConfig['dir'], array(), $this->config);
         }
-        $this->generator = new Generator($structureMap, $this->cache);
+        $this->generator = new Generator($this->structureMap, $this->cache);
 
         // Create the new class definition
         if ($this->generator->create($file) === true) {

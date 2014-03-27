@@ -65,7 +65,7 @@ class Exporter
         // Check if we got a valid target directory
         if (!is_dir($target) || !is_writeable($target)) {
 
-            throw new \InvalidArgumentException('Target folder missing or not writeable.');
+            throw new \InvalidArgumentException('Target folder missing or not writable.');
         }
 
         // We are still here so everything seems to be according to plan
@@ -73,8 +73,8 @@ class Exporter
         $this->cache = new CacheMap('PBC_CACHE_DIR');
 
         $config = Config::getInstance();
-        $this->config = $config->getConfig('autoloader');
-        $this->structureMap = new StructureMap($config['project-dirs']);
+        $this->config = $config->getConfig();
+        $this->structureMap = new StructureMap($config['autoloader']['dirs'], $config['enforcement']['dirs']);
 
         // Get all files within this dir
         $tmpFiles = $this->cache->getFiles();

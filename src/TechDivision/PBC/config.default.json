@@ -8,6 +8,10 @@
 
     "autoloader": {
 
+        "dirs": [
+            "."
+        ],
+
         "omit": [
             "PHPUnit",
             "Psr\\Log",
