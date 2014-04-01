@@ -478,11 +478,6 @@ class StructureMap implements MapInterface
      */
     protected function getDirectoryIterator(array $paths)
     {
-        // If we already got it we can return it directly
-        if (isset($this->projectIterator)) {
-
-            return $this->projectIterator;
-        }
 
         // As we might have several rootPaths we have to create several RecursiveDirectoryIterators.
         $directoryIterators = array();
@@ -507,9 +502,6 @@ class StructureMap implements MapInterface
                 )
             );
         }
-
-        // Save our result for later reuse
-        $this->projectIterator = $recursiveIterator;
 
         return $recursiveIterator;
     }

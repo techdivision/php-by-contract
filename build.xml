@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="TechDivision_ApplicationServer" default="run-tests" basedir=".">
+<project name="TechDivision_DesignByContract" default="run-tests" basedir=".">
 
 	<property file="${basedir}/build.properties"/>
 	<property file="${basedir}/build.default.properties"/>
