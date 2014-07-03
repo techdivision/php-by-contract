@@ -1,6 +1,6 @@
 <?php
 /**
- * File containing the StreamFilter interface
+ * File containing the StreamFilterInterface interface
  *
  * PHP version 5
  *
@@ -9,15 +9,14 @@
  * @subpackage Interfaces
  * @author     Bernhard Wick <b.wick@techdivision.com>
  * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
- * @license    http://opensource.org/licenses/osl-3.0.php
- *             Open Software License (OSL 3.0)
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\Interfaces;
 
 /**
- * TechDivision\PBC\Interfaces\StreamFilter
+ * TechDivision\PBC\Interfaces\StreamFilterInterface
  *
  * An interface defining the functionality of any possible stream filter class
  *
@@ -26,13 +25,10 @@ namespace TechDivision\PBC\Interfaces;
  * @subpackage Interfaces
  * @author     Bernhard Wick <b.wick@techdivision.com>
  * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
- * @license    http://opensource.org/licenses/osl-3.0.php
- *             Open Software License (OSL 3.0)
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
- *
- * TODO enforce naming conventions to make this StreamFilterInterface
  */
-interface StreamFilter
+interface StreamFilterInterface
 {
     /**
      * Will return the order number the concrete filter has been constantly assigned

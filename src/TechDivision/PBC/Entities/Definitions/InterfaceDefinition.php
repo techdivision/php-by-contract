@@ -9,8 +9,7 @@
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
  * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
- * @license    http://opensource.org/licenses/osl-3.0.php
- *             Open Software License (OSL 3.0)
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
  */
 
@@ -32,8 +31,7 @@ use TechDivision\PBC\Entities\Lists\TypedListList;
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
  * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
- * @license    http://opensource.org/licenses/osl-3.0.php
- *             Open Software License (OSL 3.0)
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
  *
  * TODO make us of the lockable entity features
@@ -111,8 +109,6 @@ class InterfaceDefinition extends AbstractStructureDefinition
      * @param AssertionList|null          $invariantConditions Invariant conditions
      * @param TypedListList|null          $ancestralInvariants Ancestral invariants
      * @param FunctionDefinitionList|null $functionDefinitions List of functions defined within the interface
-     *
-     * @return null
      */
     public function __construct(
         $docBlock = '',

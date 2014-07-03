@@ -9,8 +9,7 @@
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
  * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
- * @license    http://opensource.org/licenses/osl-3.0.php
- *             Open Software License (OSL 3.0)
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
  */
 
@@ -32,8 +31,7 @@ use TechDivision\PBC\Entities\Lists\TypedListList;
  * @subpackage Entities
  * @author     Bernhard Wick <b.wick@techdivision.com>
  * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
- * @license    http://opensource.org/licenses/osl-3.0.php
- *             Open Software License (OSL 3.0)
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
  */
 class ClassDefinition extends AbstractStructureDefinition
@@ -130,8 +128,6 @@ class ClassDefinition extends AbstractStructureDefinition
      * @param null   $invariantConditions  List of directly defined invariant conditions
      * @param null   $ancestralInvariants  List of lists of any ancestral invariants
      * @param null   $functionDefinitions  List of methods this class defines
-     *
-     * @return null
      */
     public function __construct(
         $path = '',

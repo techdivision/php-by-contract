@@ -9,15 +9,14 @@
  * @subpackage StreamFilters
  * @author     Bernhard Wick <b.wick@techdivision.com>
  * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
- * @license    http://opensource.org/licenses/osl-3.0.php
- *             Open Software License (OSL 3.0)
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
  */
 
 namespace TechDivision\PBC\StreamFilters;
 
 use TechDivision\PBC\Exceptions\GeneratorException;
-use TechDivision\PBC\Interfaces\StreamFilter;
+use TechDivision\PBC\Interfaces\StreamFilterInterface;
 
 /**
  * TechDivision\PBC\StreamFilters\AbstractFilter
@@ -29,11 +28,10 @@ use TechDivision\PBC\Interfaces\StreamFilter;
  * @subpackage StreamFilters
  * @author     Bernhard Wick <b.wick@techdivision.com>
  * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
- * @license    http://opensource.org/licenses/osl-3.0.php
- *             Open Software License (OSL 3.0)
+ * @license    http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
  */
-abstract class AbstractFilter extends \php_user_filter implements StreamFilter
+abstract class AbstractFilter extends \php_user_filter implements StreamFilterInterface
 {
     /**
      * @var string $filtername Name of the filter (done as seen in \php_user_filter class)
