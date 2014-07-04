@@ -94,6 +94,7 @@ class Config implements ConfigInterface
      * @param array  $array       The array to flatten
      * @param string $parentKey   The key of the parent array, used within recursion
      * @param bool   $initialCall Is this the initial call or recursion?
+     *
      * @return array
      */
     protected function flattenArray(array $array, $parentKey = '', $initialCall = true)
@@ -331,6 +332,7 @@ class Config implements ConfigInterface
      *
      * @param string $configAspect The aspect to check for non-normal dirs
      * @param array  $configArray  The array to check within
+     *
      * @return array|bool
      */
     protected function normalizeConfigDirs($configAspect, array $configArray)

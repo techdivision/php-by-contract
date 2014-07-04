@@ -62,10 +62,21 @@ class AutoLoader
 
     /**
      * Default constructor
+     *
+     * @param \TechDivision\PBC\Config|null $config An already existing config instance
      */
-    public function __construct()
+    public function __construct($config = null)
     {
-        $this->config = Config::getInstance();
+        // If we got a config we can use it, if not we will get a context less config instance
+        if (is_null($config)) {
+
+            $this->config = Config::getInstance();
+
+        } else {
+
+            $this->config = $config;
+        }
+
         $this->cache = null;
     }
 
