@@ -17,12 +17,9 @@ namespace TechDivision\PBC;
 use TechDivision\PBC\CacheMap;
 use TechDivision\PBC\StructureMap;
 use TechDivision\PBC\Exceptions\GeneratorException;
-use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
 use TechDivision\PBC\Entities\Definitions\InterfaceDefinition;
 use TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy;
-use TechDivision\PBC\Entities\Lists\TypedListList;
-use TechDivision\PBC\Interfaces\Assertion;
 use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
 use TechDivision\PBC\Entities\Definitions\Structure;
 use TechDivision\PBC\Parser\StructureParserFactory;
@@ -288,7 +285,7 @@ class Generator
     /**
      * Will append all needed filters based on the enforcement level stated in the configuration file.
      *
-     * @param resource                                                  &$res                The resource we will append
+     * @param resource                                                  $res                 The resource we will append
      *                                                                                       the filters to
      * @param \TechDivision\PBC\Interfaces\StructureDefinitionInterface $structureDefinition Structure definition
      *                                                                                       providing needed
@@ -398,7 +395,7 @@ class Generator
      *
      * @param string $className The structure we want the cache path for
      *
-     * @return mixed
+     * @return boolean|string
      */
     public function getFileName($className)
     {

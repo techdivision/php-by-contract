@@ -15,8 +15,6 @@
 
 namespace TechDivision\PBC\Entities\Assertions;
 
-use TechDivision\PBC\Interfaces\TypedListInterface;
-
 /**
  * TechDivision\PBC\Entities\Assertions\BasicAssertion
  *

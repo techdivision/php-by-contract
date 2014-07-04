@@ -14,8 +14,6 @@
 
 namespace TechDivision\PBC;
 
-use TechDivision\PBC\Entities\Definitions\Structure;
-
 /**
  * TechDivision\PBC\CacheMap
  *

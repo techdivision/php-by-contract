@@ -56,7 +56,7 @@ class ChainedAssertion extends AbstractAssertion
      * Default constructor
      *
      * @param \TechDivision\PBC\Entities\Lists\AssertionList $assertionList List of assertion to chain together
-     * @param array                                          $combinators   The combinating operators we have to use
+     * @param array|string                                   $combinators   The combinating operators we have to use
      *
      * @throws  \InvalidArgumentException
      */

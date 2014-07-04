@@ -227,7 +227,7 @@ class StructureMap implements MapInterface
      *
      * @param string $identifier The identifier of the entry we try to find
      *
-     * @return bool|Structure
+     * @return boolean|\TechDivision\PBC\Entities\Definitions\Structure
      */
     public function getEntry($identifier)
     {
@@ -259,7 +259,7 @@ class StructureMap implements MapInterface
      *
      * @param null|string $identifier The identifier of the entry we try to find
      *
-     * @return  bool
+     * @return  boolean
      */
     public function isRecent($identifier = null)
     {
@@ -378,7 +378,7 @@ class StructureMap implements MapInterface
      *
      * @param string|null $specificPath A certain path which will be reindexed
      *
-     * @return bool
+     * @return boolean
      */
     public function reIndex($specificPath = null)
     {
@@ -423,7 +423,8 @@ class StructureMap implements MapInterface
         }
 
         // Generate the map, all needed details have been altered above
-        return $this->generate();
+        $this->generate();
+        return true;
     }
 
     /**
@@ -508,7 +509,7 @@ class StructureMap implements MapInterface
     /**
      * Will generate the structure map within the specified root path.
      *
-     * @return  bool
+     * @return void
      */
     protected function generate()
     {

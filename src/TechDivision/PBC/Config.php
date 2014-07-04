@@ -17,7 +17,6 @@ namespace TechDivision\PBC;
 use TechDivision\PBC\Interfaces\ConfigInterface;
 use TechDivision\PBC\Exceptions\ConfigException;
 use TechDivision\PBC\Utils\Formatting;
-use Psr\Log\LoggerInterface;
 
 /**
  * TechDivision\PBC\Config
@@ -237,7 +236,7 @@ class Config implements ConfigInterface
      *
      * @param string $file The path of the configuration file we should load
      *
-     * @return null
+     * @return \TechDivision\PBC\Config
      *
      * @throws \TechDivision\PBC\Exceptions\ConfigException
      */
@@ -261,7 +260,7 @@ class Config implements ConfigInterface
      *
      * @param string $file Path of the potential configuration file
      *
-     * @return array|bool
+     * @return boolean
      * @throws \TechDivision\PBC\Exceptions\ConfigException
      */
     public function isValidConfigFile($file)
@@ -275,7 +274,7 @@ class Config implements ConfigInterface
      *
      * @param string $file Path of the potential configuration file
      *
-     * @return array|bool
+     * @return array|boolean
      * @throws \TechDivision\PBC\Exceptions\ConfigException
      */
     protected function validate($file)

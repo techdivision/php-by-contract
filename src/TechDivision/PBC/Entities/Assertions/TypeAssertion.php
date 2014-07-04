@@ -63,7 +63,7 @@ class TypeAssertion extends AbstractAssertion
     /**
      * Will return a string representation of this assertion. Will return false if the type is unknown.
      *
-     * @return bool|string
+     * @return boolean|string
      */
     public function getString()
     {
@@ -87,7 +87,7 @@ class TypeAssertion extends AbstractAssertion
     /**
      * Invert the logical meaning of this assertion
      *
-     * @return bool
+     * @return boolean
      */
     public function invert()
     {

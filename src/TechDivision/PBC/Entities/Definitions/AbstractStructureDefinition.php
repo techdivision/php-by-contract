@@ -15,15 +15,7 @@
 
 namespace TechDivision\PBC\Entities\Definitions;
 
-use TechDivision\PBC\StructureMap;
-use TechDivision\PBC\Config;
-use TechDivision\PBC\Entities\Lists\AssertionList;
-use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
-use TechDivision\PBC\Entities\Lists\TypedListList;
-use TechDivision\PBC\Parser\ClassParser;
-use TechDivision\PBC\Parser\InterfaceParser;
-use TechDivision\PBC\CacheMap;
 use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
 
 /**
@@ -78,7 +70,8 @@ abstract class AbstractStructureDefinition extends AbstractDefinition implements
     protected $constants;
 
     /**
-     * @var FunctionDefinitionList $functionDefinitions List of methods this class defines
+     * @var \TechDivision\PBC\Entities\Lists\FunctionDefinitionList $functionDefinitions List of methods this class
+     *          defines
      */
     protected $functionDefinitions;
 
@@ -115,7 +108,7 @@ abstract class AbstractStructureDefinition extends AbstractDefinition implements
     /**
      * Getter method for attribute $functionDefinitions
      *
-     * @return null|FunctionDefinitionList
+     * @return null|\TechDivision\PBC\Entities\Lists\FunctionDefinitionList
      */
     public function getFunctionDefinitions()
     {
