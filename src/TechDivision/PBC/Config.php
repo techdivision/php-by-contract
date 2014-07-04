@@ -61,8 +61,6 @@ class Config implements ConfigInterface
      */
     protected $config = array();
 
-
-
     /**
      * Default constructor
      */
@@ -213,17 +211,7 @@ class Config implements ConfigInterface
             return $this->config[$value];
         }
         // throw exception
-        throw new ConfigException("Config value '$value'' does not exist.");
-    }
-
-    /**
-     * Returns all the values as array key value pair format
-     *
-     * @return array The values as array
-     */
-    public function getValues()
-    {
-        return $this->config;
+        throw new ConfigException("Config value '$value' does not exist.");
     }
 
     /**
