@@ -15,8 +15,6 @@
 
 namespace TechDivision\PBC\Interfaces;
 
-use TechDivision\PBC\Entities\Lists\TypedListList;
-
 /**
  * TechDivision\PBC\Interfaces\TypedListInterface
  *

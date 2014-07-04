@@ -269,7 +269,7 @@ class SkeletonFilter extends AbstractFilter
      * @param bool               $injectNeeded       Determine if we have to use a try...catch block
      * @param FunctionDefinition $functionDefinition The function definition object
      *
-     * @return null
+     * @return string
      */
     protected function generateBeforeCode($injectNeeded, FunctionDefinition $functionDefinition)
     {
