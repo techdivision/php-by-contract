@@ -18,7 +18,6 @@ namespace TechDivision\PBC\StreamFilters;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Exceptions\GeneratorException;
-use TechDivision\PBC\Interfaces\StructureDefinition;
 
 /**
  * TechDivision\PBC\StreamFilters\InvariantFilter

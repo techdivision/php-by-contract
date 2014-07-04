@@ -16,7 +16,6 @@
 namespace TechDivision\PBC\StreamFilters;
 
 use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
-use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 
 /**

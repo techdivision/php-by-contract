@@ -20,7 +20,6 @@ use TechDivision\PBC\Entities\Definitions\Structure;
 use TechDivision\PBC\Entities\Lists\FunctionDefinitionList;
 use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
 use TechDivision\PBC\Entities\Lists\ParameterDefinitionList;
-use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
 
 /**
  * TechDivision\PBC\Parser\FunctionParser

@@ -16,17 +16,14 @@
 namespace TechDivision\PBC\Parser;
 
 use TechDivision\PBC\Entities\Definitions\ClassDefinition;
-use TechDivision\PBC\Entities\Definitions\FunctionDefinition;
 use TechDivision\PBC\Entities\Definitions\FileDefinition;
 use TechDivision\PBC\Entities\Definitions\Structure;
 use TechDivision\PBC\Entities\Definitions\AttributeDefinition;
-use TechDivision\PBC\Entities\Lists\AssertionList;
 use TechDivision\PBC\Entities\Lists\StructureDefinitionList;
 use TechDivision\PBC\Entities\Lists\AttributeDefinitionList;
 use TechDivision\PBC\Entities\Lists\TypedListList;
 use TechDivision\PBC\Interfaces\StructureParserInterface;
 use TechDivision\PBC\Interfaces\StructureDefinitionInterface;
-use TechDivision\PBC\Exceptions\ParserException;
 
 /**
  * TechDivision\PBC\Parser\ClassParser
