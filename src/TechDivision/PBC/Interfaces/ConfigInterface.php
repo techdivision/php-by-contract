@@ -51,12 +51,12 @@ interface ConfigInterface
     public function load($file);
 
     /**
-     * Will validate a potential configuration file. Returns false if file is no valid PBC configuration
+     * Will validate a potential configuration file. Returns false if file is no valid PBC configuration, true otherwise
      *
      * @param string $file Path of the potential configuration file
      *
      * @return bool
      * @throws \Exception
      */
-    public function validate($file);
+    public function isValidConfigFile($file);
 }
