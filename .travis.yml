@@ -7,7 +7,9 @@ php:
 before_script:
   - pear install PHP_CodeSniffer
   - phpenv rehash
+  - wget https://scrutinizer-ci.com/ocular.phar
 
 script:
-  - phpcs --report=summary --standard=PSR2 -pn .
+  - ant phpcs
   - ant run-tests
+  - php ocular.phar code-coverage:upload --format=php-clover clover.xml

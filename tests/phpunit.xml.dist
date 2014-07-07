@@ -1,6 +1,6 @@
 <phpunit bootstrap="${php-target.dir}/${unique.name}/src/bootstrap.php">
     <testsuites>
-	    <testsuite name="ApplicationServer Unit Tests">
+	    <testsuite name="php-by-contract Unit Tests">
 	        <directory suffix="Test.php">${php-target.dir}/${unique.name}/src</directory>
 	    </testsuite>
 	</testsuites>
@@ -11,9 +11,7 @@
     </filter>
     <!-- Code coverage report, optional -->
     <logging>
-        <log type="coverage-html" target="${php-target.dir}/reports/unit/coverage"/>
-        <log type="coverage-clover" target="${php-target.dir}/reports/unit/clover.xml"/>
-        <log type="junit" target="${php-target.dir}/reports/unit/junit.xml" logIncompleteSkipped="false"/>
+        <log type="coverage-clover" target="${php-target.dir}/reports/unit/coverage/clover.xml"/>
     </logging>
     <php>
         <ini name="date.timezone" value="Europe/Berlin"/>
