@@ -13,4 +13,5 @@ before_script:
 script:
   - ant phpcs
   - ant run-tests
+  - pwd
   - php ocular.phar code-coverage:upload --format=php-clover reports/unit/coverage/clover.xml
