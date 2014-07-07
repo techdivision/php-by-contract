@@ -6,10 +6,11 @@ php:
 
 before_script:
   - pear install PHP_CodeSniffer
+  - pear install PHP_CodeCoverage
   - phpenv rehash
   - wget https://scrutinizer-ci.com/ocular.phar
 
 script:
   - ant phpcs
   - ant run-tests
-  - php ocular.phar code-coverage:upload --format=php-clover clover.xml
+  - php ocular.phar code-coverage:upload --format=php-clover reports/unit/coverage/clover.xml

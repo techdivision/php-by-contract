@@ -285,7 +285,7 @@ class Generator
     /**
      * Will append all needed filters based on the enforcement level stated in the configuration file.
      *
-     * @param resource                                                  $res                 The resource we will append
+     * @param resource                                                  &$res                The resource we will append
      *                                                                                       the filters to
      * @param \TechDivision\PBC\Interfaces\StructureDefinitionInterface $structureDefinition Structure definition
      *                                                                                       providing needed
