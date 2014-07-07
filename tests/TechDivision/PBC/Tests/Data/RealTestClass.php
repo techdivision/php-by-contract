@@ -18,7 +18,7 @@ namespace TechDivision\PBC\Tests\Data;
  *              Open Software License (OSL 3.0)
  * @author          Tim Wagner <tw@techdivision.com>
  */
-class IndexServlet extends AbstractServlet
+class RealTestClass extends AbstractServlet
 {
 
     /**

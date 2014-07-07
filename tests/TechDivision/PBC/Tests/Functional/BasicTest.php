@@ -14,10 +14,12 @@
  * @link       http://www.techdivision.com/
  */
 
-namespace TechDivision\PBC\Tests;
+namespace TechDivision\PBC\Tests\Functional;
+
+use TechDivision\PBC\Tests\Data\BasicTestClass;
 
 /**
- * TechDivision\PBC\Tests\BasicTest
+ * TechDivision\PBC\Tests\Functional\BasicTest
  *
  * This test is for basic problems like broken type safety or invariant support
  *
@@ -40,7 +42,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     public function testInvariantBreaks()
     {
         // Get the object to test
-        $test = new Data\BasicTestClass();
+        $test = new BasicTestClass();
 
         // This one should not break
         $test->iDontBreakTheInvariant();
@@ -65,7 +67,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     public function testParamTyping()
     {
         // Get the object to test
-        $test = new Data\BasicTestClass();
+        $test = new BasicTestClass();
 
         // These tests should all be successful
         $test->stringToArray("null");

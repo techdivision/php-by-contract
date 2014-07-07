@@ -14,10 +14,12 @@
  * @link       http://www.techdivision.com/
  */
 
-namespace TechDivision\PBC\Tests;
+namespace TechDivision\PBC\Tests\Functional;
+
+use TechDivision\PBC\Tests\Data\PropertyTestClass;
 
 /**
- * TechDivision\PBC\Tests\PropertyTest
+ * TechDivision\PBC\Tests\Functional\PropertyTest
  *
  * Will test the invariant enforced attribute access
  *
@@ -33,18 +35,16 @@ namespace TechDivision\PBC\Tests;
 class PropertyTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var Data\PropertyTestClass $propertyTestClass Our test class
+     * @var \TechDivision\PBC\Tests\Data\PropertyTestClass $propertyTestClass Our test class
      */
     private $propertyTestClass;
 
     /**
      * We need the test class from the beginning
-     *
-     * @return null
      */
     public function __construct()
     {
-        $this->propertyTestClass = new Data\PropertyTestClass();
+        $this->propertyTestClass = new PropertyTestClass();
     }
 
     /**

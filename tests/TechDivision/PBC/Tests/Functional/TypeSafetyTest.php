@@ -14,10 +14,12 @@
  * @link       http://www.techdivision.com/
  */
 
-namespace TechDivision\PBC\Tests;
+namespace TechDivision\PBC\Tests\Functional;
+
+use TechDivision\PBC\Tests\Data\TypeSafetyTestClass;
 
 /**
- * TechDivision\PBC\Tests\TypeSafetyTest
+ * TechDivision\PBC\Tests\Functional\TypeSafetyTest
  *
  * Will test basic type safety
  *
@@ -33,18 +35,16 @@ namespace TechDivision\PBC\Tests;
 class TypeSafetyTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var Data\TypeSafetyTestClass $typeSafetyTestClass Our test class
+     * @var \TechDivision\PBC\Tests\Data\TypeSafetyTestClass $typeSafetyTestClass Our test class
      */
     private $typeSafetyTestClass;
 
     /**
      * Get our class
-     *
-     * @return null
      */
     public function __construct()
     {
-        $this->typeSafetyTestClass = new Data\TypeSafetyTestClass();
+        $this->typeSafetyTestClass = new TypeSafetyTestClass();
     }
 
     /**

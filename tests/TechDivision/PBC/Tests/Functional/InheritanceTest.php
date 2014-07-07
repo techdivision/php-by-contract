@@ -14,10 +14,13 @@
  * @link       http://www.techdivision.com/
  */
 
-namespace TechDivision\PBC\Tests;
+namespace TechDivision\PBC\Tests\Functional;
+
+use TechDivision\PBC\Tests\Data\ChildTestClass;
+use TechDivision\PBC\Tests\Data\BasicChildTestClass;
 
 /**
- * TechDivision\PBC\Tests\InheritanceTest
+ * TechDivision\PBC\Tests\Functional\InheritanceTest
  *
  * This test covers issues with inheritance of contracts
  *
@@ -40,7 +43,7 @@ class InheritanceTest extends \PHPUnit_Framework_TestCase
      */
     public function testInheritance()
     {
-        $testClass = new Data\ChildTestClass();
+        $testClass = new ChildTestClass();
 
 
         // These should fail
@@ -67,7 +70,7 @@ class InheritanceTest extends \PHPUnit_Framework_TestCase
         $level = error_reporting();
         error_reporting(0);
 
-        $testClass = new Data\BasicChildTestClass();
+        $testClass = new BasicChildTestClass();
 
         // Reset the error reporting level to the original value
         error_reporting($level);

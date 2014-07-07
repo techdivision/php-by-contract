@@ -14,10 +14,12 @@
  * @link       http://www.techdivision.com/
  */
 
-namespace TechDivision\PBC\Tests;
+namespace TechDivision\PBC\Tests\Functional;
+
+use TechDivision\PBC\Tests\Data\Stack\StackSale;
 
 /**
- * TechDivision\PBC\Tests\StackTest
+ * TechDivision\PBC\Tests\Functional\StackTest
  *
  * Will test with the well known stack example
  *
@@ -41,7 +43,7 @@ class StackTest extends \PHPUnit_Framework_TestCase
     public function testBuild()
     {
         // Get the object to test
-        $stackSale = new Data\Stack\StackSale();
+        $stackSale = new StackSale();
         $stackSale->sell();
     }
 }

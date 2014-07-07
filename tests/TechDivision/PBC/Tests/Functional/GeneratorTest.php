@@ -1,6 +1,6 @@
 <?php
 /**
- * File containing the RealTest class
+ * File containing the GeneratorTest class
  *
  * PHP version 5
  *
@@ -14,14 +14,14 @@
  * @link       http://www.techdivision.com/
  */
 
-namespace TechDivision\PBC\Tests;
+namespace TechDivision\PBC\Tests\Functional;
 
-use TechDivision\Example\Servlets\IndexServlet;
+use TechDivision\PBC\Tests\Data\TagPlacementTestClass;
 
 /**
- * TechDivision\PBC\Tests\RealTest
+ * TechDivision\PBC\Tests\Functional\GeneratorTest
  *
- * Will test with a real class taken from a random project
+ * This test covers known generator problems
  *
  * @category   Php-by-contract
  * @package    TechDivision\PBC
@@ -32,17 +32,25 @@ use TechDivision\Example\Servlets\IndexServlet;
  *             Open Software License (OSL 3.0)
  * @link       http://www.techdivision.com/
  */
-class RealTest extends \PHPUnit_Framework_TestCase
+class GeneratorTest extends \PHPUnit_Framework_TestCase
 {
 
     /**
-     * Test if we can instantiate the class
+     * Will test if a randomly placed php tag will throw of the generator
      *
      * @return null
      */
-    public function testInstantiation()
+    public function testPhpTag()
     {
-        // Get the object to test
-        new Data\IndexServlet();
+        $e = null;
+        try {
+
+            $tagPlacementTestClass = new TagPlacementTestClass();
+
+        } catch (\Exception $e) {
+        }
+
+        // Did we get the right $e?
+        $this->assertNull($e);
     }
 }

@@ -14,10 +14,12 @@
  * @link       http://www.techdivision.com/
  */
 
-namespace TechDivision\PBC\Tests;
+namespace TechDivision\PBC\Tests\Functional;
+
+use TechDivision\PBC\Tests\Data\InterfaceClass;
 
 /**
- * TechDivision\PBC\Tests\InterfaceTest
+ * TechDivision\PBC\Tests\Functional\InterfaceTest
  *
  * Will test basic interface usage
  *
@@ -39,7 +41,7 @@ class InterfaceTest extends \PHPUnit_Framework_TestCase
      */
     public function testInstantiation()
     {
-        $interfaceClass = new Data\InterfaceClass();
+        $interfaceClass = new InterfaceClass();
     }
 
     /**
@@ -49,7 +51,7 @@ class InterfaceTest extends \PHPUnit_Framework_TestCase
      */
     public function testStackUsage()
     {
-        $interfaceClass = new Data\InterfaceClass();
+        $interfaceClass = new InterfaceClass();
 
         $someStrings = array('sdfsafsf', 'rzutrzutfzj', 'OUHuISGZduisd0', 'skfse', 'd', 'fdghdfg', 'srfxcf');
 

@@ -14,12 +14,17 @@
  * @link       http://www.techdivision.com/
  */
 
-namespace TechDivision\PBC\Tests;
+namespace TechDivision\PBC\Tests\Functional;
 
 use TechDivision\PBC\Config;
+use TechDivision\PBC\Tests\Data\AnnotationTestClass;
+use TechDivision\PBC\Tests\Data\MethodTestClass;
+use TechDivision\PBC\Tests\Data\MultiRegex\A\Data\RegexTestClass1;
+use TechDivision\PBC\Tests\Data\MultiRegex\B\Data\RegexTestClass2;
+use TechDivision\PBC\Tests\Data\RegexTest1\RegexTestClass;
 
 /**
- * TechDivision\PBC\Tests\ParserTest
+ * TechDivision\PBC\Tests\Functional\ParserTest
  *
  * Will test basic parser usage
  *
@@ -42,7 +47,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     public function testAnnotationParsing()
     {
         // Get the object to test
-        $annotationTestClass = new Data\AnnotationTestClass();
+        $annotationTestClass = new AnnotationTestClass();
 
         $e = null;
         try {
@@ -67,7 +72,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf("TechDivision\\PBC\\Exceptions\\BrokenPreconditionException", $e);
 
         // Get the object to test
-        $annotationTestClass = new Data\AnnotationTestClass();
+        $annotationTestClass = new AnnotationTestClass();
 
         $e = null;
         try {
@@ -125,7 +130,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $e = null;
         try {
 
-            $methodTestClass = new Data\MethodTestClass();
+            $methodTestClass = new MethodTestClass();
 
         } catch (\Exception $e) {
         }
@@ -144,14 +149,14 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         // We have to load the config for regular expressions in the project dirs
         $config = Config::getInstance();
         $config = $config->load(
-            __DIR__ . DIRECTORY_SEPARATOR . 'Data' . DIRECTORY_SEPARATOR . 'RegexTest' .
+            str_replace(DIRECTORY_SEPARATOR . 'Functional', '', __DIR__) . DIRECTORY_SEPARATOR . 'Data' . DIRECTORY_SEPARATOR . 'RegexTest' .
             DIRECTORY_SEPARATOR . 'regextest.conf.json'
         );
 
         $e = null;
         try {
 
-            $regexTestClass1 = new Data\MultiRegex\A\Data\RegexTestClass1();
+            $regexTestClass1 = new RegexTestClass1();
 
         } catch (Exception $e) {
         }
@@ -162,7 +167,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $e = null;
         try {
 
-            $regexTestClass2 = new Data\MultiRegex\B\Data\RegexTestClass2();
+            $regexTestClass2 = new RegexTestClass2();
 
         } catch (\Exception $e) {
         }
@@ -173,7 +178,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $e = null;
         try {
 
-            $regexTestClass = new Data\RegexTest1\RegexTestClass();
+            $regexTestClass = new RegexTestClass();
 
         } catch (\Exception $e) {
         }

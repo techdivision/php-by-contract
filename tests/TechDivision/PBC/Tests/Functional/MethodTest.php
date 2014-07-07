@@ -14,10 +14,13 @@
  * @link       http://www.techdivision.com/
  */
 
-namespace TechDivision\PBC\Tests;
+namespace TechDivision\PBC\Tests\Functional;
+
+use TechDivision\PBC\Tests\Data\MagicMethodTestClass;
+use TechDivision\PBC\Tests\Data\MethodTestClass;
 
 /**
- * TechDivision\PBC\Tests\MethodTest
+ * TechDivision\PBC\Tests\Functional\MethodTest
  *
  * Will test proper usage of magic functionality
  *
@@ -45,7 +48,7 @@ class MethodTest extends \PHPUnit_Framework_TestCase
     public function testMagicMethod()
     {
         $this->magicMethodTestClass =
-            new Data\MagicMethodTestClass();
+            new MagicMethodTestClass();
     }
 
     /**
@@ -55,7 +58,7 @@ class MethodTest extends \PHPUnit_Framework_TestCase
      */
     public function testMagicConstantSubstitution()
     {
-        $methodTestClass = new Data\MethodTestClass();
+        $methodTestClass = new MethodTestClass();
 
         $e = null;
         try {
@@ -67,7 +70,7 @@ class MethodTest extends \PHPUnit_Framework_TestCase
 
         // Did we get the right $e and right dir?
         $this->assertNull($e);
-        $this->assertEquals($dir, __DIR__ . DIRECTORY_SEPARATOR . 'Data');
+        $this->assertEquals($dir, str_replace(DIRECTORY_SEPARATOR . 'Functional', '', __DIR__ . DIRECTORY_SEPARATOR . 'Data'));
 
         $e = null;
         try {
@@ -81,7 +84,8 @@ class MethodTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($e);
         $this->assertEquals(
             $file,
-            __DIR__ . DIRECTORY_SEPARATOR . 'Data' . DIRECTORY_SEPARATOR . 'MethodTestClass.php'
+            str_replace(DIRECTORY_SEPARATOR . 'Functional', '', __DIR__)
+                . DIRECTORY_SEPARATOR . 'Data' . DIRECTORY_SEPARATOR . 'MethodTestClass.php'
         );
     }
 }
