@@ -6,7 +6,7 @@ php:
 
 before_script:
   - pear install PHP_CodeSniffer
-  - pear install PHP_CodeCoverage
+  - pecl install xdebug
   - phpenv rehash
   - wget https://scrutinizer-ci.com/ocular.phar
 
