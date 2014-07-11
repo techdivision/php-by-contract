@@ -1,6 +1,5 @@
 {
     "name": "techdivision/php-by-contract",
-    "type": "library",
     "description": "A lightweight Design-by-Contract library for PHP",
     "keywords": ["Design-by-Contract", "library", "DbC", "contract", "precondition", "postcondition", "invariant"],
     "license": "OSL 3.0",
@@ -17,8 +16,7 @@
     },
     "autoload": {
         "psr-0": {
-            "TechDivision": "src/"
+            "TechDivision\\PBC": [ "src/", "tests/" ]
         }
-    },
-    "minimum-stability": "dev"
+    }
 }
