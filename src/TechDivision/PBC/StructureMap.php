@@ -257,7 +257,7 @@ class StructureMap implements MapInterface
     {
         if (is_string($identifier) && isset($this->map[$identifier])) {
 
-            // We got it, lets biuld a structure object
+            // We got it, lets build a structure object
             $entry = $this->map[$identifier];
             $structure = new Structure(
                 $entry['cTime'],
