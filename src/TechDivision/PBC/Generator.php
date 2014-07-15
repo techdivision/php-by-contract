@@ -66,15 +66,15 @@ class Generator
      *
      * @param \TechDivision\PBC\StructureMap $structureMap A structureMap instance to organize the known structures
      * @param \TechDivision\PBC\CacheMap     $cache        A cacheMap instance to organize our cache
+     * @param \TechDivision\PBC\Config       $config       Configuration
      */
-    public function __construct(StructureMap $structureMap, CacheMap $cache)
+    public function __construct(StructureMap $structureMap, CacheMap $cache, Config $config)
     {
         $this->cache = $cache;
 
         $this->structureMap = $structureMap;
 
-        $config = Config::getInstance();
-        $this->config = $config->getConfig('enforcement');
+        $this->config = $config;
 
         $this->structureDefinitionHierarchy = new StructureDefinitionHierarchy();
     }
@@ -109,6 +109,7 @@ class Generator
         $parser = $structureParserFactory->getInstance(
             $mapEntry->getType(),
             $mapEntry->getPath(),
+            $this->config,
             $this->structureMap,
             $this->structureDefinitionHierarchy
         );
@@ -160,10 +161,8 @@ class Generator
     {
         // As a file can contain multiple classes we will substitute the filename with the class name
         $tmpFileName = ltrim(str_replace('\\', '_', $className), '_');
-        $this->config = Config::getInstance();
-        $cacheConfig = $this->config->getConfig('cache');
 
-        return $cacheConfig['dir'] . DIRECTORY_SEPARATOR . $tmpFileName . '.php';
+        return $this->config->getValue('cache/dir') . DIRECTORY_SEPARATOR . $tmpFileName . '.php';
     }
 
     /**
@@ -300,11 +299,10 @@ class Generator
         StructureDefinitionInterface $structureDefinition
     ) {
         // Lets get the enforcement level
-        $enforcementConfig = $this->config->getConfig('enforcement');
         $levelArray = array();
-        if (isset($enforcementConfig['level'])) {
+        if ($this->config->hasValue('enforcement/level')) {
 
-            $levelArray = array_reverse(str_split(decbin($enforcementConfig['level'])));
+            $levelArray = array_reverse(str_split(decbin($this->config->getValue('enforcement/level'))));
         }
 
         // Whatever the enforcement level is, we will always need the skeleton filter.

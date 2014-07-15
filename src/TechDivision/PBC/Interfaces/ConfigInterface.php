@@ -31,15 +31,6 @@ namespace TechDivision\PBC\Interfaces;
 interface ConfigInterface
 {
     /**
-     * Will return a singleton instance based on the context we are in
-     *
-     * @param string $context The context for this instance e.g. app based configurations
-     *
-     * @return \TechDivision\PBC\Config
-     */
-    public static function getInstance($context = '');
-
-    /**
      * Will load a certain configuration file into this instance. Might throw an exception if the file is not valid
      *
      * @param string $file The path of the configuration file we should load

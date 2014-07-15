@@ -168,7 +168,7 @@ class FunctionParser extends AbstractParser
         }
 
         // So we got our docBlock, now we can parse the precondition annotations from it
-        $annotationParser = new AnnotationParser($this->file, $this->tokens, $this->currentDefinition);
+        $annotationParser = new AnnotationParser($this->file, $this->config, $this->tokens, $this->currentDefinition);
         $functionDefinition->preconditions = $annotationParser->getConditions(
             $functionDefinition->getDocBlock(),
             PBC_KEYWORD_PRE,
@@ -230,6 +230,7 @@ class FunctionParser extends AbstractParser
             $parser = $structureParserFactory->getInstance(
                 $fileEntry->getType(),
                 $fileEntry->getPath(),
+                $this->config,
                 $this->structureMap,
                 $this->structureDefinitionHierarchy
             );

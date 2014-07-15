@@ -239,7 +239,7 @@ class InterfaceParser extends AbstractStructureParser
         $this->currentDefinition->name = $this->getName($tokens);
 
         // So we got our docBlock, now we can parse the invariant annotations from it
-        $annotationParser = new AnnotationParser($this->file, $this->tokens);
+        $annotationParser = new AnnotationParser($this->file, $this->config, $this->tokens);
         $this->currentDefinition->invariantConditions = $annotationParser->getConditions(
             $this->currentDefinition->docBlock,
             PBC_KEYWORD_INVARIANT
@@ -283,6 +283,7 @@ class InterfaceParser extends AbstractStructureParser
         // Only thing still missing are the methods, so ramp up our FunctionParser
         $functionParser = new FunctionParser(
             $this->file,
+            $this->config,
             $this->structureDefinitionHierarchy,
             $this->structureMap,
             $this->currentDefinition,

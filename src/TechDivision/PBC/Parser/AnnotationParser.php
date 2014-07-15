@@ -86,18 +86,19 @@ class AnnotationParser extends AbstractParser
      * Default constructor
      *
      * @param string                            $file              The path of the file we want to parse
+     * @param \TechDivision\PBC\Config          $config            Configuration
      * @param array                             &$tokens           The array of tokens taken from the file
      * @param StructureDefinitionHierarchy|null $currentDefinition The current definition we are working on
      */
     public function __construct(
         $file,
+        Config $config,
         array & $tokens = array(),
         StructureDefinitionInterface $currentDefinition = null
     ) {
-        $config = Config::getInstance();
-        $this->config = $config->getConfig('enforcement');
+        $this->config = $config;
 
-        parent::__construct($file, null, null, $currentDefinition, $tokens);
+        parent::__construct($file, $config, null, null, $currentDefinition, $tokens);
     }
 
     /**
@@ -125,7 +126,7 @@ class AnnotationParser extends AbstractParser
         if ($conditionKeyword === PBC_KEYWORD_POST) {
 
             // Check if we need @return as well
-            if ($this->config['enforce-default-type-safety'] === true) {
+            if ($this->config->getValue('enforcement/enforce-default-type-safety') === true) {
 
                 $regex = '/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n|' . '@return' . '.+?\n/s';
 
@@ -139,7 +140,7 @@ class AnnotationParser extends AbstractParser
         } elseif ($conditionKeyword === PBC_KEYWORD_PRE) {
 
             // Check if we need @return as well
-            if ($this->config['enforce-default-type-safety'] === true) {
+            if ($this->config->getValue('enforcement/enforce-default-type-safety') === true) {
 
                 $regex = '/' . str_replace('\\', '\\\\', $conditionKeyword) . '.+?\n|' . '@param' . '.+?\n/s';
 

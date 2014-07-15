@@ -34,20 +34,6 @@ use TechDivision\PBC\Config;
  */
 class ConfigTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * The config instance
-     *
-     * @var \TechDivision\PBC\Config $config
-     */
-    protected $config = array();
-
-    /**
-     * Set up the test
-     */
-    public function setUp()
-    {
-        $this->config = Config::getInstance();
-    }
 
     /**
      * Test the static getInstance() method
@@ -56,7 +42,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetInstance()
     {
-        $this->assertInstanceOf('\TechDivision\PBC\Config', Config::getInstance());
+        $this->assertInstanceOf('\TechDivision\PBC\Config', new Config());
     }
 
     /**
@@ -66,17 +52,15 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
      */
     public function testSetValue()
     {
+        // Get our config
+        $config = new Config();
+
         // Set a simple value and test if it got set
-        $this->config->setValue('environment', 'testing');
-        $this->assertEquals('testing', $this->config->getValue('environment'));
+        $config->setValue('environment', 'testing');
+        $this->assertEquals('testing', $config->getValue('environment'));
 
         // Set a more complex value and test if it got set
-        $this->config->setValue('autoloader/dirs', array(1, 2, 3));
-        $this->assertEquals(array(1, 2, 3), $this->config->getValue('autoloader/dirs'));
-
-        // Test if both values got stored in the singleton
-        $tmpConfig = Config::getInstance();
-        $this->assertEquals('testing', $tmpConfig->getValue('environment'));
-        $this->assertEquals(array(1, 2, 3), $tmpConfig->getValue('autoloader/dirs'));
+        $config->setValue('autoloader/dirs', array(1, 2, 3));
+        $this->assertEquals(array(1, 2, 3), $config->getValue('autoloader/dirs'));
     }
 }

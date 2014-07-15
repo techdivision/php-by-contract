@@ -15,6 +15,7 @@
 
 namespace TechDivision\PBC\Parser;
 
+use TechDivision\PBC\Config;
 use TechDivision\PBC\Interfaces\ParserInterface;
 use TechDivision\PBC\StructureMap;
 use TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy;
@@ -77,6 +78,7 @@ abstract class AbstractParser implements ParserInterface
      * Default constructor
      *
      * @param string                              $file                         The path of the file we want to parse
+     * @param \TechDivision\PBC\Config            $config                       Configuration
      * @param StructureDefinitionHierarchy        $structureDefinitionHierarchy List of already parsed structures
      * @param \TechDivision\PBC\StructureMap|null $structureMap                 Our structure map instance
      * @param StructureDefinitionInterface|null   $currentDefinition            The current definition we are working on
@@ -86,11 +88,14 @@ abstract class AbstractParser implements ParserInterface
      */
     public function __construct(
         $file,
+        Config $config,
         StructureDefinitionHierarchy $structureDefinitionHierarchy = null,
         StructureMap $structureMap = null,
         StructureDefinitionInterface $currentDefinition = null,
         array $tokens = array()
     ) {
+        $this->config = $config;
+
         if (empty($tokens)) {
 
             // Check if we can use the file

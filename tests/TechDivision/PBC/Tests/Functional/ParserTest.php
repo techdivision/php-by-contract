@@ -147,8 +147,8 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     public function testRegexMapping()
     {
         // We have to load the config for regular expressions in the project dirs
-        $config = Config::getInstance();
-        $config = $config->load(
+        $config = new Config();
+        $config->load(
             str_replace(DIRECTORY_SEPARATOR . 'Functional', '', __DIR__) . DIRECTORY_SEPARATOR . 'Data' . DIRECTORY_SEPARATOR . 'RegexTest' .
             DIRECTORY_SEPARATOR . 'regextest.conf.json'
         );

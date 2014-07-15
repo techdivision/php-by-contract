@@ -23,7 +23,6 @@
         "dirs": [],
         "enforce-default-type-safety": true,
         "processing": "exception",
-        "level": 7,
-        "max-nesting": 15
+        "level": 7
     }
 }

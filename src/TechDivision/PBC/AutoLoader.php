@@ -69,7 +69,7 @@ class AutoLoader
         // If we got a config we can use it, if not we will get a context less config instance
         if (is_null($config)) {
 
-            $this->config = Config::getInstance();
+            $this->config = new Config();
 
         } else {
 
@@ -195,7 +195,7 @@ class AutoLoader
             // We also require the classes of our maps as we do not have proper autoloading in place
             $this->cache = new CacheMap($cacheConfig['dir'], array(), $this->config);
         }
-        $this->generator = new Generator($this->structureMap, $this->cache);
+        $this->generator = new Generator($this->structureMap, $this->cache, $this->config);
 
         // Create the new class definition
         if ($this->generator->create($file) === true) {

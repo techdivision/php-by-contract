@@ -32,12 +32,6 @@ use TechDivision\PBC\Utils\Formatting;
  */
 class Config implements ConfigInterface
 {
-
-    /**
-     * @var array $instances Will contain the instances of this class
-     */
-    private static $instances = array();
-
     /**
      * @const string DEFAULT_CONFIG Name of the default configuration file
      */
@@ -63,28 +57,9 @@ class Config implements ConfigInterface
     /**
      * Default constructor
      */
-    private function __construct()
+    public function __construct()
     {
         $this->load(__DIR__ . DIRECTORY_SEPARATOR . self::DEFAULT_CONFIG);
-    }
-
-    /**
-     * Will return a singleton instance based on the context we are in
-     *
-     * @param string $context The context for this instance e.g. app based configurations
-     *
-     * @return \TechDivision\PBC\Config
-     */
-    public static function getInstance($context = '')
-    {
-        if (!isset(self::$instances[$context])) {
-
-            self::$instances[$context] = new self();
-        }
-
-        self::$instances[$context]->context = $context;
-
-        return self::$instances[$context];
     }
 
     /**
@@ -250,9 +225,8 @@ class Config implements ConfigInterface
         }
 
         $this->config = array_replace_recursive($this->config, $configCandidate);
-        self::$instances[$this->context] = $this;
 
-        return self::$instances[$this->context];
+        return $this;
     }
 
     /**

@@ -12,6 +12,9 @@
  * @link       http://www.techdivision.com/
  */
 
+use \TechDivision\PBC\Config;
+
+// Get the vendor dir
 $vendorDir = '';
 if (realpath(__DIR__ . "/../../../../vendor")) {
 
@@ -27,12 +30,12 @@ $loader = require $vendorDir . DIRECTORY_SEPARATOR . 'autoload.php';
 $loader->add('TechDivision\\PBC\\', $vendorDir . DIRECTORY_SEPARATOR . 'techdivision/php-by-contract/src');
 
 // Load the test config file
-$config = TechDivision\PBC\Config::getInstance();
+$config = new Config();
 $config->load(
     __DIR__ . DIRECTORY_SEPARATOR . 'TechDivision' . DIRECTORY_SEPARATOR . 'PBC' .
     DIRECTORY_SEPARATOR . 'Tests' . DIRECTORY_SEPARATOR . 'Data' . DIRECTORY_SEPARATOR . 'tests.conf.json'
 );
 
 // We have to register our autoLoader to put our proxies in place
-$autoLoader = new TechDivision\PBC\AutoLoader();
+$autoLoader = new TechDivision\PBC\AutoLoader($config);
 $autoLoader->register();

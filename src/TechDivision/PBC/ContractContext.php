@@ -36,10 +36,10 @@ class ContractContext
     private static $contractDepth = 0;
 
     /**
-     * @var int $maxDepth The maximum depth we allow. This will be set from configuration at first call
+     * @const int MAX_NESTING_DEPTH The maximum depth we allow.
      */
-    private static $maxDepth;
-
+    const MAX_NESTING_DEPTH = 20;
+    
     /**
      * Will open a contract context for any current ongoing verification.
      * Will return true if successful (you are the only ongoing contract) and
@@ -49,13 +49,7 @@ class ContractContext
      */
     public static function open()
     {
-        // If the max contract depth is not set we have to get it from configuration
-        if (!isset(self::$maxDepth)) {
-
-            self::fetchMaxDepth();
-        }
-
-        if (self::$contractDepth < self::$maxDepth) {
+        if (self::$contractDepth < self::MAX_NESTING_DEPTH) {
 
             self::$contractDepth++;
 
@@ -74,7 +68,7 @@ class ContractContext
      */
     public static function isOngoing()
     {
-        return !(self::$contractDepth <= self::$maxDepth);
+        return !(self::$contractDepth <= self::MAX_NESTING_DEPTH);
     }
 
     /**
@@ -88,7 +82,7 @@ class ContractContext
      */
     public static function close()
     {
-        if (self::$contractDepth <= self::$maxDepth && self::$contractDepth > 0) {
+        if (self::$contractDepth <= self::MAX_NESTING_DEPTH && self::$contractDepth > 0) {
 
             // Decrement the used depth
             self::$contractDepth--;
@@ -107,45 +101,5 @@ class ContractContext
 
             return false;
         }
-    }
-
-    /**
-     * This will set the maximum depth to which contracts can be nested.
-     * Default should be 15 which should be fine for most applications.
-     *
-     * @throws \Exception
-     *
-     * @return null
-     */
-    public static function fetchMaxDepth()
-    {
-        // Get the config instance
-        $config = Config::getInstance();
-        $config = $config->getConfig('enforcement');
-
-        if (isset($config['max-nesting'])) {
-
-            self::$maxDepth = $config['max-nesting'];
-
-        } else {
-
-            // Reset the used up contract depth and fail
-            self::$contractDepth = 0;
-            throw new \Exception('We got not max-nesting configuration! Consult documentation and change this.');
-        }
-    }
-
-    /**
-     * This will set the maximum depth to which contracts can be nested.
-     * CAUTION: DO NOT SET THIS TOO HIGH!
-     * Default is 15 which should be fine for most applications
-     *
-     * @param int $maxDepth The maximum depth we allow
-     *
-     * @return null
-     */
-    public static function setMaxDepth($maxDepth)
-    {
-        self::$maxDepth = $maxDepth;
     }
 }

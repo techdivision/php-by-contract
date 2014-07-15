@@ -15,6 +15,7 @@
 
 namespace TechDivision\PBC\Parser;
 
+use TechDivision\PBC\Config;
 use TechDivision\PBC\StructureMap;
 use TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy;
 use TechDivision\PBC\Exceptions\ParserException;
@@ -53,6 +54,7 @@ class StructureParserFactory
      *      structure type we need a parser for
      * @param string                                                              $file                          The
      *      file we want to parse
+     * @param \TechDivision\PBC\Config                                            $config                        Config
      * @param \TechDivision\PBC\StructureMap                                      $structureMap                  Struct-
      *      ure map to pass to the parser
      * @param \TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy &$structureDefinitionHierarchy The
@@ -63,12 +65,13 @@ class StructureParserFactory
     public function getInstance(
         $type,
         $file,
+        Config $config,
         StructureMap $structureMap,
         StructureDefinitionHierarchy & $structureDefinitionHierarchy
     ) {
         $name = $this->getName($type);
 
-        return new $name($file, $structureDefinitionHierarchy, $structureMap);
+        return new $name($file, $config, $structureDefinitionHierarchy, $structureMap);
     }
 
     /**

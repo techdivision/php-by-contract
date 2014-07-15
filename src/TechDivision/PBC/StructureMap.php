@@ -84,11 +84,11 @@ class StructureMap implements MapInterface
     /**
      * Default constructor
      *
-     * @param array                         $autoloaderPaths  Which paths do we like to include in our map?
-     * @param array                         $enforcementPaths Which paths do we have to enforce
-     * @param \TechDivision\PBC\Config|null $config           Configuration
+     * @param array                    $autoloaderPaths  Which paths do we like to include in our map?
+     * @param array                    $enforcementPaths Which paths do we have to enforce
+     * @param \TechDivision\PBC\Config $config           Configuration
      */
-    public function __construct($autoloaderPaths, $enforcementPaths, Config $config = null)
+    public function __construct($autoloaderPaths, $enforcementPaths, Config $config)
     {
         // Init as empty map
         $this->map = array();
@@ -104,15 +104,7 @@ class StructureMap implements MapInterface
         }
 
         // Save the config for later use.
-        if ($config !== null) {
-
-            $this->config = $config;
-
-        } else {
-            // If we did not get a config we get the current one and save it
-
-            $this->config = Config::getInstance();
-        }
+        $this->config = $config;
 
         // Set the enforcementPaths and autoloaderPaths and calculate the path to the map file
         $this->enforcementPaths = $enforcementPaths;
