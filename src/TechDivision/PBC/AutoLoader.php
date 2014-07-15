@@ -221,15 +221,16 @@ class AutoLoader
     /**
      * Will register our autoloading method at the beginning of the spl autoloader stack
      *
-     * @param bool $throw Should we throw an exception on error?
+     * @param boolean $throw   Should we throw an exception on error?
+     * @param boolean $prepend If you want to NOT prepend you might, but you should not
      *
      * @return null
      */
-    public function register($throw = true)
+    public function register($throw = true, $prepend = true)
     {
         // We want to let our autoloader be the first in line so we can react on loads
         // and create/return our contracted definitions.
         // So lets use the prepend parameter here.
-        spl_autoload_register(array($this, self::OUR_LOADER), $throw, true);
+        spl_autoload_register(array($this, self::OUR_LOADER), $throw, $prepend);
     }
 }
