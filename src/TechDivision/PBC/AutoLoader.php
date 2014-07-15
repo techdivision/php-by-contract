@@ -31,7 +31,6 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'Constants.php';
  */
 class AutoLoader
 {
-
     /**
      * @var \TechDivision\PBC\Config $config The configuration we base our actions on
      */
@@ -77,7 +76,22 @@ class AutoLoader
             $this->config = $config;
         }
 
+        // Now that we got the config we can create a structure map to load from
+        $this->structureMap = new StructureMap($this->config->getConfig(
+            'autoloader'
+        )['dirs'], $this->config->getConfig('enforcement')['dirs'], $this->config);
+
         $this->cache = null;
+    }
+
+    /**
+     * Getter for the structureMap member
+     *
+     * @return \TechDivision\PBC\StructureMap
+     */
+    public function getStructureMap()
+    {
+        return $this->structureMap;
     }
 
     /**
@@ -151,12 +165,13 @@ class AutoLoader
             return false;
         }
 
-        // We also require the classes of our maps as we do not have proper autoloading in place
-        if (!isset($this->structureMap)) {
-            $this->structureMap = new StructureMap($this->config->getConfig(
-                'autoloader'
-            )['dirs'], $this->config->getConfig('enforcement')['dirs'], $this->config);
+        // If the structure map did not get filled by now we will do so here
+        if ($this->structureMap->isEmpty()) {
+
+            $this->structureMap->fill();
         }
+
+        // Get the file from the map
         $file = $this->structureMap->getEntry($className);
 
         // Did we get something? If not return false.

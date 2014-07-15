@@ -20,7 +20,7 @@
     },
 
     "enforcement": {
-
+        "dirs": [],
         "enforce-default-type-safety": true,
         "processing": "exception",
         "level": 7,

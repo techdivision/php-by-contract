@@ -102,7 +102,7 @@ class Config implements ConfigInterface
         foreach ($array as $key => $value) {
 
             // If it is an array not containing integer keys (so no nested config element) we have to get recursive
-            if (is_array($value) && !is_int(array_keys($value)[0])) {
+            if (is_array($value) && @!is_int(array_keys($value)[0])) {
 
                 $value = $this->flattenArray($value, $key, false);
             }
