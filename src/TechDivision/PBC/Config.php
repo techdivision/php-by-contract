@@ -17,6 +17,7 @@ namespace TechDivision\PBC;
 use TechDivision\PBC\Interfaces\ConfigInterface;
 use TechDivision\PBC\Exceptions\ConfigException;
 use TechDivision\PBC\Utils\Formatting;
+use TechDivision\PBC\Utils\InstanceContainer;
 
 /**
  * TechDivision\PBC\Config
@@ -120,6 +121,28 @@ class Config implements ConfigInterface
     }
 
     /**
+     * Might be called after the all config data has been loaded.
+     * Will store all config object instances which might be needed later in the instance container util.
+     *
+     * @return void
+     */
+    public function storeInstances()
+    {
+        $instanceContainer = new InstanceContainer();
+
+        // One thing we need is the logger instance (if any)
+        if ($this->hasValue('enforcement/logger')) {
+
+            $logger = $this->extractLoggerInstance($this->config);
+
+            if ($logger !== false) {
+
+                $instanceContainer[PBC_LOGGER_CONTAINER_ENTRY] = $logger;
+            }
+        }
+    }
+
+    /**
      * Extends a value by specific content. If the value is an array it will be merged, otherwise it will be
      * string-concatinated to the end of the current value
      *
@@ -152,6 +175,34 @@ class Config implements ConfigInterface
 
         // Finally set the new value
         $this->setValue($valueName, $newValue);
+    }
+
+    /**
+     * Will extract an logger instance from the configuration array.
+     * Returns false on error.
+     *
+     * @param array $configArray The config to extract the logger instance from
+     *
+     * @return object|boolean
+     */
+    protected function extractLoggerInstance(array $configArray)
+    {
+        if (isset($configArray['enforcement/logger'])) {
+
+            // Get the logger
+            $logger = $configArray['enforcement/logger'];
+            if (is_string($logger)) {
+
+                $logger = new $logger;
+            }
+
+            // Return the logger
+            return $logger;
+
+        } else {
+
+            return false;
+        }
     }
 
     /**
@@ -243,62 +294,6 @@ class Config implements ConfigInterface
     }
 
     /**
-     * Will validate a potential configuration file. Returns false if file is no valid PBC configuration.
-     * Will return the validated configuration on success
-     *
-     * @param string $file Path of the potential configuration file
-     *
-     * @return array|boolean
-     * @throws \TechDivision\PBC\Exceptions\ConfigException
-     */
-    protected function validate($file)
-    {
-        $configCandidate = json_decode(file_get_contents($file), true);
-
-        // Did we even get an array?
-        if (!is_array($configCandidate)) {
-
-            throw new ConfigException('Could not parse configuration file ' . $file);
-
-        } else {
-
-            $configCandidate = $this->flattenArray($configCandidate);
-        }
-
-        // We need some formatting utilities
-        $formattingUtil = new Formatting();
-
-        // We will normalize the paths we got and check if they are valid
-        if (isset($configCandidate['cache' . self::VALUE_NAME_DELIMETER . 'dir'])) {
-            $tmp = $formattingUtil->normalizePath($configCandidate['cache' . self::VALUE_NAME_DELIMETER . 'dir']);
-
-            if (is_writable($tmp)) {
-
-                $configCandidate['cache' . self::VALUE_NAME_DELIMETER . 'dir'] = $tmp;
-
-            } else {
-
-                return false;
-            }
-        }
-
-        // Same for enforcement dirs
-        $configCandidate = $this->normalizeConfigDirs('enforcement', $configCandidate);
-
-        // Do we still have an array here?
-        if (!is_array($configCandidate)) {
-
-            return false;
-        }
-
-        // Do the same for the autoloader dirs
-        $configCandidate = $this->normalizeConfigDirs('autoloader', $configCandidate);
-
-        // Return what we got
-        return $configCandidate;
-    }
-
-    /**
      * Will normalize directories mentioned within a configuration aspect.
      * If there is an error false will be returned. If not we will return the given configuration array containing only
      * normalized paths.
@@ -379,5 +374,106 @@ class Config implements ConfigInterface
 
             return $this->config;
         }
+    }
+
+    /**
+     * Will validate a potential configuration file. Returns false if file is no valid PBC configuration.
+     * Will return the validated configuration on success
+     *
+     * @param string $file Path of the potential configuration file
+     *
+     * @return array|boolean
+     * @throws \TechDivision\PBC\Exceptions\ConfigException
+     */
+    protected function validate($file)
+    {
+        $configCandidate = json_decode(file_get_contents($file), true);
+
+        // Did we even get an array?
+        if (!is_array($configCandidate)) {
+
+            throw new ConfigException('Could not parse configuration file "' . $file . '".');
+
+        } else {
+
+            $configCandidate = $this->flattenArray($configCandidate);
+        }
+
+        // We need some formatting utilities
+        $formattingUtil = new Formatting();
+
+        // We will normalize the paths we got and check if they are valid
+        if (isset($configCandidate['cache' . self::VALUE_NAME_DELIMETER . 'dir'])) {
+            $tmp = $formattingUtil->normalizePath($configCandidate['cache' . self::VALUE_NAME_DELIMETER . 'dir']);
+
+            if (is_writable($tmp)) {
+
+                $configCandidate['cache' . self::VALUE_NAME_DELIMETER . 'dir'] = $tmp;
+
+            } else {
+
+                throw new ConfigException('The configured cache directory "' . $tmp . '" is not writable.');
+            }
+        }
+
+        // Same for enforcement dirs
+        $configCandidate = $this->normalizeConfigDirs('enforcement', $configCandidate);
+
+        // Do we still have an array here?
+        if (!is_array($configCandidate)) {
+
+            return false;
+        }
+
+        // Do the same for the autoloader dirs
+        $configCandidate = $this->normalizeConfigDirs('autoloader', $configCandidate);
+
+        // Lets check if there is a valid processing in place
+        if (!$this->validateProcessing($configCandidate)) {
+
+            return false;
+        }
+
+        // Return what we got
+        return $configCandidate;
+    }
+
+    /**
+     * Will return true if the processing part of the config candidate array is valid. Will return false if not
+     *
+     * @param array $configCandidate The config candidate we want to validate in terms of processing
+     *
+     * @return boolean
+     *
+     * @todo move everything other than logger check to JSON scheme validation
+     */
+    protected function validateProcessing(array $configCandidate)
+    {
+        // Merge it with the current config as a standalone config might not be valid at all
+        $configCandidate = array_replace_recursive($this->config, $configCandidate);
+
+        $validEntries = array_flip(array('none', 'exception', 'logging'));
+
+        // Do we have an entry at all?
+        if (!isset($configCandidate['enforcement/processing'])) {
+
+            return false;
+        }
+
+        // Did we even get something useful?
+        if (!isset($validEntries[$configCandidate['enforcement/processing']])) {
+
+            return false;
+        }
+
+        // If we got the option "logger" we have to check if there is a logger. If not, we fail, if yes
+        // we have to check if we got something PSR-3 compatible
+        if ($configCandidate['enforcement/processing'] === 'logging') {
+
+            return $this->extractLoggerInstance($configCandidate) instanceof \Psr\Log\LoggerInterface;
+        }
+
+        // Still here? Sounds good
+        return true;
     }
 }

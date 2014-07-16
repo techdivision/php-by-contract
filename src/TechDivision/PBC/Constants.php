@@ -31,6 +31,7 @@ define('PBC_FILE_SUBSTITUTE', 'PBC_FILE_SUBSTITUTE');
 
 define('PBC_CLASS_INVARIANT_NAME', 'pbcClassInvariant');
 define('PBC_ORIGINAL_FUNCTION_SUFFIX', 'PBCOriginal');
+define('PBC_LOGGER_CONTAINER_ENTRY', 'PBC_LOGGER_CONTAINER_ENTRY');
 
 // Will be used as placeholder for code procession
 define('PBC_PROCESSING_PLACEHOLDER', '/* PBC_PROCESSING_PLACEHOLDER ');

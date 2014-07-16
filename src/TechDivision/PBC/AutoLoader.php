@@ -95,6 +95,16 @@ class AutoLoader
     }
 
     /**
+     * Getter for the config member
+     *
+     * @return \TechDivision\PBC\Config
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
      * Will load any given structure based on it's availability in our structure map which depends on the configured
      * project directories.
      * If the structure cannot be found we will redirect to the composer autoloader which we registered as a fallback
@@ -228,6 +238,9 @@ class AutoLoader
      */
     public function register($throw = true, $prepend = true)
     {
+        // Now we have a config no matter what, we can store any instance we might need
+        $this->config->storeInstances();
+
         // We want to let our autoloader be the first in line so we can react on loads
         // and create/return our contracted definitions.
         // So lets use the prepend parameter here.

@@ -177,9 +177,10 @@ class ProcessingFilter extends AbstractFilter
             case 'logging':
 
                 // Create the code
-                $code .= '$logger = new \\' . $config['logger'] . '();
-                $logger->error("Encountered Problem with ' . $for . ' with message: ' .
-                    PBC_FAILURE_VARIABLE . ' in ' . $place . '");';
+                $code .= '$container = new \TechDivision\PBC\Utils\InstanceContainer();
+                $logger = $container[PBC_LOGGER_CONTAINER_ENTRY];
+                $logger->error("Failed ' . $for .
+                    PBC_FAILURE_VARIABLE . ' in " . ' . $place . ');';
                 break;
 
             default:
