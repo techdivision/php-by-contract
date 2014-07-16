@@ -140,8 +140,7 @@ Default config looks like this:
 
         "enforce-default-type-safety": true,
         "processing": "exception",
-        "level": 7,
-        "max-nesting": 10
+        "level": 7
     }
 }
 ```
@@ -155,9 +154,13 @@ Configuration files can contain the following options:
     * *dir* : Entry which specifies the directory used as cache. This directory must be **writeable**
 
 - *autoloader* :
+    * *dirs* : List of directories which should be included into autoloading only. You can us
+                  [`glob`](<http://php.net/manual/en/function.glob.php>) regex here.
     * *omit* : Namespaces (or their beginning) which will be ignored by the autoloading/enforcement mechanism
 
 - *enforcement* :
+    * *dirs* : List of directories which should be included into autoloading and enforcement mechanics. You can us
+                  [`glob`](<http://php.net/manual/en/function.glob.php>) regex here.
     * *enforce-default-type-safety* : If `true` the library will consider `@param` and `@return` as contract conditions
     specifying a parameter/return-value type hinting
     * *processing* : Can be either *exception*, *none* or *logging* and will specify how the library will reaction on a
@@ -169,11 +172,6 @@ Configuration files can contain the following options:
         - 1 : Preconditions will be enforced
         - 2 : Postconditions will be enforced
         - 4 : Invariants will be enforced
-    * *max-nesting* : Contracts CAN use any function within their assertions, this option prevents a last line of defence
-        against unintended endless loops
-
-- *project-dirs* : List of directories which should be included into autoloading and enforcement mechanics. You can us
-    [`glob`](<http://php.net/manual/en/function.glob.php>) regex here.
 
 ROADMAP
 ===============
