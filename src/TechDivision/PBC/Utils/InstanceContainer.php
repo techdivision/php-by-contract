@@ -43,11 +43,12 @@ class InstanceContainer implements \ArrayAccess
 
     /**
      * Will check if an offset exists within the container
-     * @link http://php.net/manual/en/arrayaccess.offsetexists.php
      *
      * @param mixed $offset The offset to check for
      *
      * @return boolean
+     *
+     * @link http://php.net/manual/en/arrayaccess.offsetexists.php
      */
     public function offsetExists($offset)
     {
@@ -56,11 +57,12 @@ class InstanceContainer implements \ArrayAccess
 
     /**
      * Returns a value at a certain offset
-     * @link http://php.net/manual/en/arrayaccess.offsetget.php
      *
      * @param mixed $offset The offset to get
      *
      * @return mixed
+     *
+     * @link http://php.net/manual/en/arrayaccess.offsetget.php
      */
     public function offsetGet($offset)
     {
@@ -83,11 +85,12 @@ class InstanceContainer implements \ArrayAccess
 
     /**
      * Unsets the value at the given offset
-     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
      *
      * @param mixed $offset The offset at which to unset
      *
      * @return void
+     *
+     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
      */
     public function offsetUnset($offset)
     {
