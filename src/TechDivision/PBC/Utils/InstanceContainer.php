@@ -71,12 +71,13 @@ class InstanceContainer implements \ArrayAccess
 
     /**
      * Sets a value at a certain offset
-     * @link http://php.net/manual/en/arrayaccess.offsetset.php
      *
      * @param mixed $offset Offset to save the value at
      * @param mixed $value  The value to set at the given offset
      *
      * @return void
+     *
+     * @link http://php.net/manual/en/arrayaccess.offsetset.php
      */
     public function offsetSet($offset, $value)
     {
