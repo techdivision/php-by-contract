@@ -58,13 +58,12 @@ class AutoLoader
      */
     const OUR_LOADER = 'loadClass';
 
-
     /**
      * Default constructor
      *
      * @param \TechDivision\PBC\Config|null $config An already existing config instance
      */
-    public function __construct($config = null)
+    public function __construct(Config $config = null)
     {
         // If we got a config we can use it, if not we will get a context less config instance
         if (is_null($config)) {
@@ -77,9 +76,11 @@ class AutoLoader
         }
 
         // Now that we got the config we can create a structure map to load from
-        $this->structureMap = new StructureMap($this->config->getConfig(
-            'autoloader'
-        )['dirs'], $this->config->getConfig('enforcement')['dirs'], $this->config);
+        $this->structureMap = new StructureMap(
+            $this->config->getValue('autoloader/dirs'),
+            $this->config->getValue('enforcement/dirs'),
+            $this->config
+        );
 
         $this->cache = null;
     }
@@ -208,7 +209,7 @@ class AutoLoader
         $this->generator = new Generator($this->structureMap, $this->cache, $this->config);
 
         // Create the new class definition
-        if ($this->generator->create($file) === true) {
+        if ($this->generator->create($file, $this->config->getValue('enforcement/contract-inheritance')) === true) {
 
             // Require the new class, it should have been created now
             $file = $this->generator->getFileName($className);
@@ -245,5 +246,15 @@ class AutoLoader
         // and create/return our contracted definitions.
         // So lets use the prepend parameter here.
         spl_autoload_register(array($this, self::OUR_LOADER), $throw, $prepend);
+    }
+
+    /**
+     * Uninstalls this class loader from the SPL autoloader stack.
+     *
+     * @return void
+     */
+    public function unregister()
+    {
+        spl_autoload_unregister(array($this, self::OUR_LOADER));
     }
 }

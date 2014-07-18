@@ -5,7 +5,7 @@
  * PHP version 5
  *
  * @category   Php-by-contract
- * @package    TechDivision\PBC
+ * @package    PBC
  * @subpackage Tests
  * @author     Bernhard Wick <b.wick@techdivision.com>
  * @copyright  2014 TechDivision GmbH - <info@techdivision.com>
@@ -24,7 +24,7 @@ use TechDivision\PBC\Utils\InstanceContainer;
  * This test will test the configuration class TechDivision\PBC\Config
  *
  * @category   Php-by-contract
- * @package    TechDivision\PBC
+ * @package    PBC
  * @subpackage Tests
  * @author     Bernhard Wick <b.wick@techdivision.com>
  * @copyright  2014 TechDivision GmbH - <info@techdivision.com>

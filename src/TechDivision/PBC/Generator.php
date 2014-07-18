@@ -95,14 +95,14 @@ class Generator
      * Will create an altered definition of the structure defined in the $mapEntry variable.
      * Will also add it to the cache map
      *
-     * @param \TechDivision\PBC\Entities\Definitions\Structure $mapEntry Entry of a StructureMap we want to create
-     * @param bool                                             $update   Should we make an update instead?
+     * @param \TechDivision\PBC\Entities\Definitions\Structure $mapEntry        Entry of a StructureMap we want created
+     * @param boolean                                          $createRecursive If contract inheritance is enabled
      *
      * @throws \TechDivision\PBC\Exceptions\GeneratorException
      *
      * @return boolean
      */
-    public function create(Structure $mapEntry, $update = false)
+    public function create(Structure $mapEntry, $createRecursive = false)
     {
         // We know what we are searching for and we got a fine factory so lets get us a parser
         $structureParserFactory = new StructureParserFactory();
@@ -115,7 +115,7 @@ class Generator
         );
 
         // Lets get the definition we are looking for
-        $structureDefinition = $parser->getDefinition($mapEntry->getIdentifier(), true);
+        $structureDefinition = $parser->getDefinition($mapEntry->getIdentifier(), $createRecursive);
 
         if (!$structureDefinition instanceof StructureDefinitionInterface) {
 

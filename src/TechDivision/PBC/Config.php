@@ -39,11 +39,11 @@ class Config implements ConfigInterface
     const DEFAULT_CONFIG = 'config.default.json';
 
     /**
-     * The delimeter for values names as they are used externally
+     * The delimiter for values names as they are used externally
      *
-     * @const string VALUE_NAME_DELIMETER
+     * @const string VALUE_NAME_DELIMITER
      */
-    const VALUE_NAME_DELIMETER = '/';
+    const VALUE_NAME_DELIMITER = '/';
 
     /**
      * @var string $context The context for this instance e.g. app based configurations
@@ -84,7 +84,7 @@ class Config implements ConfigInterface
             }
 
             // Save the result with a newly combined key
-            $result[trim($parentKey . self::VALUE_NAME_DELIMETER . $key, self::VALUE_NAME_DELIMETER)] = $value;
+            $result[trim($parentKey . self::VALUE_NAME_DELIMITER . $key, self::VALUE_NAME_DELIMITER)] = $value;
         }
 
         // If we are within the initial call we would like to do a final flattening and sorting process
@@ -306,30 +306,30 @@ class Config implements ConfigInterface
     protected function normalizeConfigDirs($configAspect, array $configArray)
     {
         // Are there dirs within this config aspect?
-        if (isset($configArray[$configAspect . self::VALUE_NAME_DELIMETER . 'dirs'])) {
+        if (isset($configArray[$configAspect . self::VALUE_NAME_DELIMITER . 'dirs'])) {
 
             // Get ourselves a format utility
             $formattingUtil = new Formatting();
 
             // Iterate over all dir entries and normalize the paths
-            foreach ($configArray[$configAspect . self::VALUE_NAME_DELIMETER . 'dirs'] as $key => $projectDir) {
+            foreach ($configArray[$configAspect . self::VALUE_NAME_DELIMITER . 'dirs'] as $key => $projectDir) {
 
                 // Do the normalization
                 $tmp = $formattingUtil->normalizePath($projectDir);
 
                 if (is_readable($tmp)) {
 
-                    $configArray[$configAspect . self::VALUE_NAME_DELIMETER . 'dirs'][$key] = $tmp;
+                    $configArray[$configAspect . self::VALUE_NAME_DELIMITER . 'dirs'][$key] = $tmp;
 
                 } elseif (preg_match('/\[|\]|\*|\+|\.|\(|\)|\?|\^/', $tmp)) {
 
                     // Kill the original path entry so the iterators wont give us a bad time
-                    unset($configArray[$configAspect . self::VALUE_NAME_DELIMETER . 'dirs'][$key]);
+                    unset($configArray[$configAspect . self::VALUE_NAME_DELIMITER . 'dirs'][$key]);
 
                     // We will open up the paths with glob
                     foreach (glob($tmp, GLOB_ERR) as $regexlessPath) {
 
-                        $configArray[$configAspect . self::VALUE_NAME_DELIMETER . 'dirs'][] = $regexlessPath;
+                        $configArray[$configAspect . self::VALUE_NAME_DELIMITER . 'dirs'][] = $regexlessPath;
                     }
 
                 } else {
@@ -361,9 +361,9 @@ class Config implements ConfigInterface
             foreach ($this->config as $key => $value) {
 
                 // Do we have an entry belonging to the certain aspect? If so filter it and cut the aspect key part
-                if (strpos($key, $aspect . self::VALUE_NAME_DELIMETER) === 0) {
+                if (strpos($key, $aspect . self::VALUE_NAME_DELIMITER) === 0) {
 
-                    $tmp[str_replace($aspect . self::VALUE_NAME_DELIMETER, '', $key)] = $value;
+                    $tmp[str_replace($aspect . self::VALUE_NAME_DELIMITER, '', $key)] = $value;
                 }
             }
 
@@ -403,12 +403,12 @@ class Config implements ConfigInterface
         $formattingUtil = new Formatting();
 
         // We will normalize the paths we got and check if they are valid
-        if (isset($configCandidate['cache' . self::VALUE_NAME_DELIMETER . 'dir'])) {
-            $tmp = $formattingUtil->normalizePath($configCandidate['cache' . self::VALUE_NAME_DELIMETER . 'dir']);
+        if (isset($configCandidate['cache' . self::VALUE_NAME_DELIMITER . 'dir'])) {
+            $tmp = $formattingUtil->normalizePath($configCandidate['cache' . self::VALUE_NAME_DELIMITER . 'dir']);
 
             if (is_writable($tmp)) {
 
-                $configCandidate['cache' . self::VALUE_NAME_DELIMETER . 'dir'] = $tmp;
+                $configCandidate['cache' . self::VALUE_NAME_DELIMITER . 'dir'] = $tmp;
 
             } else {
 

@@ -23,6 +23,7 @@
         "dirs": [],
         "enforce-default-type-safety": true,
         "processing": "exception",
-        "level": 7
+        "level": 7,
+        "contract-inheritance": false
     }
 }
