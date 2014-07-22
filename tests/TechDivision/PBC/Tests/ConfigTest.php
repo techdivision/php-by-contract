@@ -97,8 +97,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('productiontest', $config->getValue('environment'));
 
         // Test array extension
-        $config->extendValue('autoloader/omit', array('Tests'));
-        $this->assertEquals(array('PHPUnit', 'Psr\Log', 'PHP', 'Tests'), $config->getValue('autoloader/omit'));
+        $config->extendValue('enforcement/omit', array('Tests'));
+        $this->assertEquals(array('PHPUnit', 'Psr\Log', 'PHP', 'Tests'), $config->getValue('enforcement/omit'));
     }
 
     /**

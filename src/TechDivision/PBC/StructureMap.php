@@ -122,17 +122,41 @@ class StructureMap implements MapInterface
     }
 
     /**
+     * Will return a list of files which are within the enforcementPaths
+     *
+     * @return array
+     */
+    protected function getEnforcedFiles()
+    {
+        // get an iterator over all files we have to enforce so we can compare the files
+        $recursiveEnforcementIterator = $this->getDirectoryIterator($this->enforcementPaths);
+        $regexEnforcementIterator = new \RegexIterator(
+            $recursiveEnforcementIterator,
+            '/^.+\.php$/i',
+            \RecursiveRegexIterator::GET_MATCH
+        );
+
+        // iterator over our enforcement iterators and build up an array for later checks
+        $enforcedFiles = array();
+        foreach ($regexEnforcementIterator as $file) {
+
+            // collect what we got in a way we can search it fast
+            $enforcedFiles[$file[0]] = '';
+        }
+
+        return $enforcedFiles;
+    }
+
+    /**
      * Will return all entries within a map. If needed only entries of contracted
      * structures will be returned.
      *
      * @param boolean $contracted Do we only want entries containing contracts?
+     * @param boolean $enforced   Do we only want entries which are enforced?
      *
      * @return mixed
-     *
-     * @TODO hasContracts AND enforced makes no sense! enforced should be a mix of enforced and hasContracts then we
-     *       can skip hasContracts
      */
-    public function getEntries($contracted = false)
+    public function getEntries($contracted = false, $enforced = false)
     {
         // Our structures
         $structures = array();
@@ -141,6 +165,12 @@ class StructureMap implements MapInterface
 
             // If we only need contracted only
             if (($contracted === true && $entry['hasContracts'] === false)) {
+
+                continue;
+            }
+
+            // If we only need enforced only
+            if (($enforced === true && $entry['enforced'] === false)) {
 
                 continue;
             }
@@ -529,50 +559,92 @@ class StructureMap implements MapInterface
      */
     protected function generate()
     {
-        // First of all we will get the version, so we will later know about changes made DURING indexing
+        // first of all we will get the version, so we will later know about changes made DURING indexing
         $this->version = $this->findVersion();
 
-        // Get the iterator over our project files and create a regex iterator to filter what we got
+        // get the iterator over our project files and create a regex iterator to filter what we got
         $recursiveIterator = $this->getProjectIterator();
         $regexIterator = new \RegexIterator($recursiveIterator, '/^.+\.php$/i', \RecursiveRegexIterator::GET_MATCH);
 
-        // Also get an iterator over all files we have to enforce so we can compare the files
-        $recursiveEnforcementIterator = $this->getDirectoryIterator($this->enforcementPaths);
-        $regexEnforcementIterator = new \RegexIterator(
-            $recursiveEnforcementIterator,
-            '/^.+\.php$/i',
-            \RecursiveRegexIterator::GET_MATCH
-        );
+        // get the list of enforced files
+        $enforcedFiles= $this->getEnforcedFiles();
 
-        // Iterator over our enforcement iterators and build up an array for later checks
-        $enforcedFiles = array();
-        foreach ($regexEnforcementIterator as $file) {
+        // if we got namespaces which are omitted from enforcement we have to mark them as such
+        $omittedNamespaces = array();
+        if ($this->config->hasValue('enforcement/omit')) {
 
-            // Collect what we got in a way we can search it fast
-            $enforcedFiles[$file[0]] = '';
+            $omittedNamespaces = $this->config->getValue('enforcement/omit');
         }
 
-        // Iterator over our project files and add array based structure representations
+        // iterator over our project files and add array based structure representations
         foreach ($regexIterator as $file) {
 
-            // Get the identifiers if any.
+            // get the identifiers if any.
             $identifier = $this->findIdentifier($file[0]);
 
+            // if we got an identifier we can build up a new map entry
             if ($identifier !== false) {
 
+                // check if the file has contracts and if it should be enforced
+                $hasContracts = $this->findContracts($file[0]);
+
+                // create the entry
                 $this->map[$identifier[1]] = array(
                     'cTime' => filectime($file[0]),
                     'identifier' => $identifier[1],
                     'path' => $file[0],
                     'type' => $identifier[0],
-                    'hasContracts' => $this->findContracts($file[0]),
-                    'enforced' => isset($enforcedFiles[$file[0]])
+                    'hasContracts' => $hasContracts,
+                    'enforced' => $this->isFileEnforced(
+                        $file[0],
+                        $identifier[1],
+                        $hasContracts,
+                        $enforcedFiles,
+                        $omittedNamespaces
+                    )
                 );
             }
         }
 
-        // Save for later reuse.
+        // save for later reuse.
         $this->save();
+    }
+
+    /**
+     * Check if the file should be enforced by considering three factors:
+     *  1. does it have contracts?
+     *  2. is it within the list of enforced files?
+     *  3. is it within the namespaces omitted of enforcement?
+     *
+     * @param string  $file              The path of the file to be tested
+     * @param string  $fileIdentifier    The qualified name of the file's structure
+     * @param boolean $hasContracts      Does this file contain contracts (as epr current configuration)
+     * @param array   $enforcedFiles     Array of files which need to be enforced
+     * @param array   $omittedNamespaces Array of namespaces which are omitted from the enforcement
+     *
+     * @return boolean
+     */
+    protected function isFileEnforced($file, $fileIdentifier, $hasContracts, $enforcedFiles, $omittedNamespaces)
+    {
+        // if the file is within an omitted namespace it most certainly is not
+        foreach ($omittedNamespaces as $omittedNamespace) {
+
+            if (strpos($fileIdentifier, ltrim($omittedNamespace, '\\')) === 0) {
+
+                return false;
+            }
+        }
+
+        // as we are still here we are not within an omitted namespace.
+        // if both of the below is true the file needs to be enforced
+        if ($hasContracts === true && isset($enforcedFiles[$file])) {
+
+            return true;
+
+        } else {
+
+            return false;
+        }
     }
 
     /**
@@ -588,8 +660,7 @@ class StructureMap implements MapInterface
         $needles = array(PBC_KEYWORD_INVARIANT, PBC_KEYWORD_POST, PBC_KEYWORD_PRE);
 
         // If we have to enforce things like @param or @returns, we have to be more sensitive
-        $enforcementConfig = $this->config->getConfig('enforcement');
-        if ($enforcementConfig['enforce-default-type-safety'] === true) {
+        if ($this->config->getValue('enforcement/enforce-default-type-safety') === true) {
 
             $needles[] = '@var';
             $needles[] = '@param';

@@ -125,7 +125,7 @@ class AutoLoader
             foreach ($autoLoaderConfig['omit'] as $omitted) {
 
                 // If our class name begins with the omitted part e.g. it's namespace
-                if (strpos($className, $omitted) === 0) {
+                if (strpos($className, str_replace('\\\\', '\\', $omitted)) === 0) {
 
                     return false;
                 }
