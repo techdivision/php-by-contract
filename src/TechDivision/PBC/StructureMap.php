@@ -16,6 +16,7 @@ namespace TechDivision\PBC;
 
 use TechDivision\PBC\Entities\Definitions\Structure;
 use TechDivision\PBC\Exceptions\CacheException;
+use TechDivision\PBC\Exceptions\ParserException;
 use TechDivision\PBC\Interfaces\MapInterface;
 use TechDivision\PBC\Utils\Formatting;
 
@@ -702,32 +703,44 @@ class StructureMap implements MapInterface
      * @param string $file The file to check
      *
      * @return array|boolean
-     * @throws Exceptions\CacheException
+     * @throws \Exceptions|\TechDivision\PBC\Exceptions\ParserException
      */
     protected function findIdentifier($file)
     {
 
         $rsc = fopen($file, 'r');
 
+        // if we could not open the file tell them
         if ($rsc === false) {
 
-            throw new CacheException();
+            throw new ParserException('Could not open file ' . $file . ' for type inspection.');
         }
 
-        $stuctureName = $namespace = $code = $type = '';
+        // some variables we will need
+        $buffer = '';
+        $type = '';
+        $stuctureName = '';
 
+        // get the buffer step by step
         for ($k = 0; $k < 5; $k++) {
 
+            // clear collected things on every iteration, so we will not chain them on in case of several needed loops
+            $namespace = '';
+
+            // break if we reached the end of the file
             if (feof($rsc)) {
 
                 break;
             }
 
-            $code .= fread($rsc, 2048);
+            // fill the buffer piece by piece
+            $buffer .= fread($rsc, 2048);
 
-            $tokens = @token_get_all($code);
+            // get the tokens and their count
+            $tokens = @token_get_all($buffer);
             $count = count($tokens);
 
+            // iterate over the current set of tokens and filter out what we found
             for ($i = 2; $i < $count; $i++) {
                 if ($tokens[$i][0] == T_NAMESPACE) {
 
@@ -771,7 +784,6 @@ class StructureMap implements MapInterface
                     $type = 'interface';
                     $stuctureName = $tokens[$i][1];
                     break 2;
-
                 }
             }
         }

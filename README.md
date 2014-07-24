@@ -129,49 +129,65 @@ Default config looks like this:
 
     "autoloader": {
 
+        "dirs": [
+            "."
+        ]
+    },
+
+    "enforcement": {
+        "dirs": [],
+        "enforce-default-type-safety": true,
+        "processing": "exception",
+        "level": 7,
+        "contract-inheritance": false,
+
         "omit": [
             "PHPUnit",
             "Psr\\Log",
             "PHP"
         ]
-    },
-
-    "enforcement": {
-
-        "enforce-default-type-safety": true,
-        "processing": "exception",
-        "level": 7
     }
 }
 ```
 
 Configuration files can contain the following options:
 
-- *environment* : Can be either *production* or *development*. *development* lets you ignore the caching mechanism for
+- *environment* : `string`|Can be either *production* or *development*. *development* lets you ignore the caching mechanism for
     for easier testing but comes with a severe performance hit
 
 - *cache* :
-    * *dir* : Entry which specifies the directory used as cache. This directory must be **writeable**
+    * *dir* : `string`|Entry which specifies the directory used as cache. This directory must be **writeable**
 
 - *autoloader* :
-    * *dirs* : List of directories which should be included into autoloading only. You can us
+    * *dirs* : `array`|List of directories which should be included into autoloading only. You can us
                   [`glob`](<http://php.net/manual/en/function.glob.php>) regex here.
-    * *omit* : Namespaces (or their beginning) which will be ignored by the autoloading/enforcement mechanism
+    * *omit* : `array`|Namespaces (or their beginning) which will be ignored by the autoloading/enforcement mechanism
 
 - *enforcement* :
-    * *dirs* : List of directories which should be included into autoloading and enforcement mechanics. You can us
+    * *dirs* : `array`|List of directories which should be included into autoloading and enforcement mechanics. You can us
                   [`glob`](<http://php.net/manual/en/function.glob.php>) regex here.
-    * *enforce-default-type-safety* : If `true` the library will consider `@param` and `@return` as contract conditions
+    * *enforce-default-type-safety* : `boolean`|If `true` the library will consider `@param` and `@return` as contract conditions
     specifying a parameter/return-value type hinting
-    * *processing* : Can be either *exception*, *none* or *logging* and will specify how the library will reaction on a
+    * *processing* : `string`|Can be either *exception*, *none* or *logging* and will specify how the library will reaction on a
     broken contract. If *logging* is used, the *logger* option **has to be set** as well
-    * *logger*(optional) : Needed if *processing* is set to *logging*. Specify a [`PSR-3`](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md)
+    * *logger*(optional) : `string`|Needed if *processing* is set to *logging*. Specify a [`PSR-3`](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md)
     compatible logger class which does not need any parameters on construction
-    * *level* : You can specify a level of enforcement here. This is similar to Linux user right notation and will be used
+    * *level* : `integer`|You can specify a level of enforcement here. This is similar to Linux user right notation and will be used
     as a bitmask to switch on enforcement features
         - 1 : Preconditions will be enforced
         - 2 : Postconditions will be enforced
         - 4 : Invariants will be enforced
+    * *contract-inheritance* : `boolean`|Switch which will en-/disable the inheritance of contracts over structure hierarchies
+    * *omit* : `array`|Namespaces (or their beginning) which will be ignored by the enforcement, but will still be autoloaded
+
+Any of the above values can also be set programmatically in the `Config` class by using the `setValue()` method like shown below.
+
+```php
+    $config->setValue('enforcement/enforce-default-type-safety', false);
+```
+
+This also allow to pass more complex values to the configuration. So you might pass an already configured instance of a `PSR-3`
+compatible logger into `enforcement/logger` to make use of any integrated logging mechanism your application might have.
 
 ROADMAP
 ===============
