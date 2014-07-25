@@ -1,11 +1,11 @@
 {
-    "enforcement": {
+	"enforcement": 
+	{
+		"dirs": 
+		[
+			"./../../../tests/TechDivision/PBC/Tests/Data"
+		],
 
-        "dirs": [
-            "./Tests/Data"
-        ],
-        "contract-inheritance": true
-    }
-
-
+		"contract-inheritance": true
+	}
 }
