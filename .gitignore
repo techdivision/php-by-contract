@@ -1,8 +1,9 @@
 # vendor folder
 vendor/
 
-# composer.lock
+# composer files
 composer.lock
+composer.phar
 
 # the apple directory description
 .DS_Store

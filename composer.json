@@ -1,22 +1,36 @@
 {
-    "name": "techdivision/php-by-contract",
-    "description": "A lightweight Design-by-Contract library for PHP",
-    "keywords": ["Design-by-Contract", "library", "DbC", "contract", "precondition", "postcondition", "invariant"],
-    "license": "OSL 3.0",
-    "authors": [
-        {
-            "name": "Bernhard Wick",
-            "email": "b.wick@techdivision.com"
-        }
-    ],
-    "require": {
-        "php": ">=5.4.0",
-        "nikic/php-parser": "0.9.*@dev",
-        "psr/log": "*"
-    },
-    "autoload": {
-        "psr-0": {
-            "TechDivision\\PBC": [ "src/", "tests/" ]
-        }
-    }
+	"name" : "techdivision/php-by-contract",
+	"description" : "A lightweight Design-by-Contract library for PHP",
+	"keywords" : [
+		"Design-by-Contract",
+		"library",
+		"DbC",
+		"contract",
+		"precondition",
+		"postcondition",
+		"invariant"
+	],
+	"license" : "OSL 3.0",
+	"authors" : [{
+			"name" : "Bernhard Wick",
+			"email" : "b.wick@techdivision.com"
+		}
+	],
+	"require" : {
+		"php" : ">=5.4.0",
+		"nikic/php-parser" : "0.9.*@dev",
+		"psr/log" : "*"
+	},
+	"require-dev" : {
+		"phpunit/phpunit" : "3.7.*",
+		"appserver-io/build" : "0.1.*"
+	},
+	"autoload" : {
+		"psr-0" : {
+			"TechDivision\\PBC" : [
+				"src/",
+				"tests/"
+			]
+		}
+	}
 }
