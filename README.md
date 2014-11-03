@@ -1,5 +1,10 @@
-INTRODUCTION
-===============
+# php-by-contract
+
+A lightweight design by contract library for PHP 
+
+[![Latest Stable Version](https://poser.pugx.org/techdivision/php-by-contract/v/stable.png)](https://packagist.org/packages/techdivision/php-by-contract) [![Total Downloads](https://poser.pugx.org/techdivision/php-by-contract/downloads.png)](https://packagist.org/packages/techdivision/php-by-contract) [![License](https://poser.pugx.org/techdivision/php-by-contract/license.png)](https://packagist.org/packages/techdivision/php-by-contract) [![Build Status](https://travis-ci.org/techdivision/php-by-contract.png)](https://travis-ci.org/techdivision/php-by-contract) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/techdivision/php-by-contract/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/techdivision/php-by-contract/?branch=master) [![Code Coverage](https://scrutinizer-ci.com/g/techdivision/php-by-contract/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/techdivision/php-by-contract/?branch=master)
+
+# Introduction
 
 What is php-by-contract?
 -----------------
@@ -67,8 +72,8 @@ Have fun testing! :)
 Feel free to come back to me with any bugs you might encounter.
 
 
-DOCUMENTATION
-===============
+# Documentation
+
 What can be done?
 -----------------
 As stated above this library aims to bring you the power of [`Design by Contract`](<http://en.wikipedia.org/wiki/Design_by_contract>),
@@ -189,8 +194,8 @@ Any of the above values can also be set programmatically in the `Config` class b
 This also allow to pass more complex values to the configuration. So you might pass an already configured instance of a `PSR-3`
 compatible logger into `enforcement/logger` to make use of any integrated logging mechanism your application might have.
 
-ROADMAP
-===============
+# Roadmap
+
 I have a lot more in mind to come but my current state of thought includes the following ideas which will be available
 within future commits.
 There currently is no version based roadmap or an order in which this features will be available.
