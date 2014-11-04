@@ -1,3 +1,14 @@
+# Version 0.3.6
+
+## Bugfixes
+
+* Clearing PHPCS and PHPCPD problems
+* Minor cleanups
+
+## Features
+
+* None
+
 # Version 0.3.5
 
 ## Bugfixes
