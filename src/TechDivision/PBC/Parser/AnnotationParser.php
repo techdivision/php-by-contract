@@ -87,7 +87,7 @@ class AnnotationParser extends AbstractParser
      *
      * @param string                            $file              The path of the file we want to parse
      * @param \TechDivision\PBC\Config          $config            Configuration
-     * @param array                             &$tokens           The array of tokens taken from the file
+     * @param array                             $tokens            The array of tokens taken from the file
      * @param StructureDefinitionHierarchy|null $currentDefinition The current definition we are working on
      */
     public function __construct(

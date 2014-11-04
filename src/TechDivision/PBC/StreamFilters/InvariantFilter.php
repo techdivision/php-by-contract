@@ -44,55 +44,17 @@ class InvariantFilter extends AbstractFilter
     /**
      * @var array $dependencies Other filters on which we depend
      */
-    private $dependencies = array('SkeletonFilter');
-
-    /**
-     * @var mixed $params The parameter(s) we get passed when appending the filter to a stream
-     * @link http://www.php.net/manual/en/class.php-user-filter.php
-     */
-    public $params;
-
-    /**
-     * Will return the dependency array
-     *
-     * @return array
-     */
-    public function getDependencies()
-    {
-        return $this->dependencies;
-    }
-
-    /**
-     * Will return the order number the concrete filter has been constantly assigned
-     *
-     * @return integer
-     */
-    public function getFilterOrder()
-    {
-        return self::FILTER_ORDER;
-    }
-
-    /**
-     * Not implemented yet
-     *
-     * @throws \Exception
-     *
-     * @return void
-     */
-    public function dependenciesMet()
-    {
-        throw new \Exception();
-    }
+    protected $dependencies = array('SkeletonFilter');
 
     /**
      * The main filter method.
      * Implemented according to \php_user_filter class. Will loop over all stream buckets, buffer them and perform
      * the needed actions.
      *
-     * @param resource $in        Incoming bucket brigade we need to filter
-     * @param resource $out       Outgoing bucket brigade with already filtered content
-     * @param integer  &$consumed The count of altered characters as buckets pass the filter
-     * @param boolean  $closing   Is the stream about to close?
+     * @param resource $in       Incoming bucket brigade we need to filter
+     * @param resource $out      Outgoing bucket brigade with already filtered content
+     * @param integer  $consumed The count of altered characters as buckets pass the filter
+     * @param boolean  $closing  Is the stream about to close?
      *
      * @throws \TechDivision\PBC\Exceptions\GeneratorException
      *
@@ -455,7 +417,7 @@ class InvariantFilter extends AbstractFilter
      * Will inject the call to the invariant checking method at encountered placeholder strings within the passed
      * bucket data
      *
-     * @param string &$bucketData Payload of the currently filtered bucket
+     * @param string $bucketData Payload of the currently filtered bucket
      *
      * @return boolean
      */

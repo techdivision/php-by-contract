@@ -43,45 +43,19 @@ class SkeletonFilter extends AbstractFilter
     const FILTER_ORDER = 0;
 
     /**
-     * @var mixed $params The parameter(s) we get passed when appending the filter to a stream
-     * @link http://www.php.net/manual/en/class.php-user-filter.php
-     */
-    public $params;
-
-    /**
      * @var array $neededActions Some steps only have to be taken a certain amount of times. We specify that here
      */
     protected $neededActions = array('injectMagicConstants' => 1, 'injectOriginalPathHint' => 1);
-
-    /**
-     * Will return the order number the concrete filter has been constantly assigned
-     *
-     * @return integer
-     */
-    public function getFilterOrder()
-    {
-        return self::FILTER_ORDER;
-    }
-
-    /**
-     * We do not have any dependencies here. So we will always return true.
-     *
-     * @return bool
-     */
-    public function dependenciesMet()
-    {
-        return true;
-    }
 
     /**
      * The main filter method.
      * Implemented according to \php_user_filter class. Will loop over all stream buckets, buffer them and perform
      * the needed actions.
      *
-     * @param resource $in        Incoming bucket brigade we need to filter
-     * @param resource $out       Outgoing bucket brigade with already filtered content
-     * @param integer  &$consumed The count of altered characters as buckets pass the filter
-     * @param boolean  $closing   Is the stream about to close?
+     * @param resource $in       Incoming bucket brigade we need to filter
+     * @param resource $out      Outgoing bucket brigade with already filtered content
+     * @param integer  $consumed The count of altered characters as buckets pass the filter
+     * @param boolean  $closing  Is the stream about to close?
      *
      * @throws \TechDivision\PBC\Exceptions\GeneratorException
      *
@@ -199,7 +173,7 @@ class SkeletonFilter extends AbstractFilter
     /**
      * Will inject condition checking code in front and behind the functions body.
      *
-     * @param string             &$bucketData        Payload of the currently filtered bucket
+     * @param string             $bucketData         Payload of the currently filtered bucket
      * @param array              $tokens             The tokens for the current bucket data
      * @param int                $indexStart         The index of the token array at which we found the function head
      * @param FunctionDefinition $functionDefinition The function definition object
@@ -326,7 +300,7 @@ class SkeletonFilter extends AbstractFilter
      * Will substitute all magic __DIR__ and __FILE__ constants with our prepared substitutes to
      * emulate original original filesystem context when in cache folder.
      *
-     * @param string &$bucketData Payload of the currently filtered bucket
+     * @param string $bucketData Payload of the currently filtered bucket
      *
      * @return bool
      */
@@ -347,8 +321,8 @@ class SkeletonFilter extends AbstractFilter
      * Will inject the code to declare our local constants PBC_FILE_SUBSTITUTE and PBC_DIR_SUBSTITUTE
      * which are used for substitution of __FILE__ and __DIR__.
      *
-     * @param string &$bucketData Payload of the currently filtered bucket
-     * @param string $file        The original file path we have to inject
+     * @param string $bucketData Payload of the currently filtered bucket
+     * @param string $file       The original file path we have to inject
      *
      * @return bool
      */
@@ -380,8 +354,8 @@ class SkeletonFilter extends AbstractFilter
      * Will inject the code to declare our local constants PBC_FILE_SUBSTITUTE and PBC_DIR_SUBSTITUTE
      * which are used for substitution of __FILE__ and __DIR__.
      *
-     * @param string &$bucketData Payload of the currently filtered bucket
-     * @param string $file        The original path we have to place as our constants
+     * @param string $bucketData Payload of the currently filtered bucket
+     * @param string $file       The original path we have to place as our constants
      *
      * @return bool
      */

@@ -50,14 +50,14 @@ class StructureParserFactory
     /**
      * Will return an instance of the parser fitting the structure type we specified
      *
-     * @param string                                                              $type                          The
+     * @param string                                                              $type                         The
      *      structure type we need a parser for
-     * @param string                                                              $file                          The
+     * @param string                                                              $file                         The
      *      file we want to parse
-     * @param \TechDivision\PBC\Config                                            $config                        Config
-     * @param \TechDivision\PBC\StructureMap                                      $structureMap                  Struct-
+     * @param \TechDivision\PBC\Config                                            $config                       Config
+     * @param \TechDivision\PBC\StructureMap                                      $structureMap                 Struct-
      *      ure map to pass to the parser
-     * @param \TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy &$structureDefinitionHierarchy The
+     * @param \TechDivision\PBC\Entities\Definitions\StructureDefinitionHierarchy $structureDefinitionHierarchy The
      *      list of already parsed definitions from the structure's hierarchy
      *
      * @return mixed

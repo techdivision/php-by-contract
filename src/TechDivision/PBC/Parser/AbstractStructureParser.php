@@ -77,9 +77,9 @@ abstract class AbstractStructureParser extends AbstractParser implements Structu
     /**
      * Will check if a certain structure was mentioned in one(!) use statement.
      *
-     * @param StructureDefinitionInterface &$structureDefinition The structure $structureName is compared against
-     * @param string                       $structureName        The name of the structure we have to check against the
-     *                                                           use statements of the definition
+     * @param StructureDefinitionInterface $structureDefinition The structure $structureName is compared against
+     * @param string                       $structureName       The name of the structure we have to check against the
+     *                                                          use statements of the definition
      *
      * @return bool|string
      */
