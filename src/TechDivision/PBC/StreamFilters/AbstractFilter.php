@@ -33,8 +33,59 @@ use TechDivision\PBC\Interfaces\StreamFilterInterface;
 abstract class AbstractFilter extends \php_user_filter implements StreamFilterInterface
 {
     /**
-     * @var string $filtername Name of the filter (done as seen in \php_user_filter class)
+     * Other filters on which we depend
+     *
+     * @var array $dependencies
+     */
+    protected $dependencies = array();
+
+    /**
+     * Name of the filter (done as seen in \php_user_filter class)
+     *
+     * @var string $filtername
+     *
      * @link http://www.php.net/manual/en/class.php-user-filter.php
      */
     public $filtername = __CLASS__;
+
+    /**
+     * The parameter(s) we get passed when appending the filter to a stream
+     *
+     * @var mixed $params
+     *
+     * @link http://www.php.net/manual/en/class.php-user-filter.php
+     */
+    public $params;
+
+    /**
+     * Not implemented yet
+     *
+     * @throws \Exception
+     *
+     * @return void
+     */
+    public function dependenciesMet()
+    {
+        throw new \Exception();
+    }
+
+    /**
+     * Will return the dependency array
+     *
+     * @return array
+     */
+    public function getDependencies()
+    {
+        return $this->dependencies;
+    }
+
+    /**
+     * Will return the order number the concrete filter has been constantly assigned
+     *
+     * @return integer
+     */
+    public function getFilterOrder()
+    {
+        return self::FILTER_ORDER;
+    }
 }

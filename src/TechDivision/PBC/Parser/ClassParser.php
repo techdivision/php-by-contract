@@ -343,7 +343,7 @@ class ClassParser extends AbstractStructureParser
     /**
      * Will return an array containing all interfaces this class implements
      *
-     * @param ClassDefinition &$classDefinition Reference of class definition so we can resolve the namespaces
+     * @param ClassDefinition $classDefinition Reference of class definition so we can resolve the namespaces
      *
      * @return array
      */

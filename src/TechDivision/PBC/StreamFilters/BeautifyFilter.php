@@ -33,45 +33,19 @@ class BeautifyFilter extends AbstractFilter
 {
 
     /**
-     * @const   integer FILTER_ORDER Order number if filters are used as a stack, higher means below others
+     * @const integer FILTER_ORDER Order number if filters are used as a stack, higher means below others
      */
     const FILTER_ORDER = 99;
-
-    /**
-     * @var mixed $params The parameter(s) we get passed when appending the filter to a stream
-     * @link http://www.php.net/manual/en/class.php-user-filter.php
-     */
-    public $params;
-
-    /**
-     * Will return the oder number for this filer
-     *
-     * @return integer
-     */
-    public function getFilterOrder()
-    {
-        return self::FILTER_ORDER;
-    }
-
-    /**
-     * We got no dependencies here.
-     *
-     * @return boolean
-     */
-    public function dependenciesMet()
-    {
-        return true;
-    }
 
     /**
      * The main filter method.
      * Implemented according to \php_user_filter class. Will loop over all stream buckets, buffer them and perform
      * the needed actions.
      *
-     * @param resource $in        Incoming bucket brigade we need to filter
-     * @param resource $out       Outgoing bucket brigade with already filtered content
-     * @param integer  &$consumed The count of altered characters as buckets pass the filter
-     * @param boolean  $closing   Is the stream about to close?
+     * @param resource $in       Incoming bucket brigade we need to filter
+     * @param resource $out      Outgoing bucket brigade with already filtered content
+     * @param integer  $consumed The count of altered characters as buckets pass the filter
+     * @param boolean  $closing  Is the stream about to close?
      *
      * @throws \Exception
      * @throws \PHPParser_Error

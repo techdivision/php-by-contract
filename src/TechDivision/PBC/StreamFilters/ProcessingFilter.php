@@ -36,60 +36,28 @@ class ProcessingFilter extends AbstractFilter
 {
 
     /**
-     * @const integer FILTER_ORDER Order number if filters are used as a stack, higher means below others
+     * Order number if filters are used as a stack, higher means below others
+     *
+     * @const integer FILTER_ORDER
      */
     const FILTER_ORDER = 4;
 
     /**
-     * @var array $dependencies Other filters on which we depend
-     */
-    private $dependencies = array(array('PreconditionFilter', 'PostconditionFilter', 'InvariantFilter'));
-
-    /**
-     * @var mixed $params The parameter(s) we get passed when appending the filter to a stream
-     * @link http://www.php.net/manual/en/class.php-user-filter.php
-     */
-    public $params;
-
-    /**
-     * Will return the dependency array
+     * Other filters on which we depend
      *
-     * @return array
+     * @var array $dependencies
      */
-    public function getDependencies()
-    {
-        return $this->dependencies;
-    }
-
-    /**
-     * Will return the order number the concrete filter has been constantly assigned
-     *
-     * @return integer
-     */
-    public function getFilterOrder()
-    {
-        return self::FILTER_ORDER;
-    }
-
-    /**
-     * Not implemented yet
-     *
-     * @return boolean
-     */
-    public function dependenciesMet()
-    {
-        return true;
-    }
+    protected $dependencies = array('PreconditionFilter', 'PostconditionFilter', 'InvariantFilter');
 
     /**
      * The main filter method.
      * Implemented according to \php_user_filter class. Will loop over all stream buckets, buffer them and perform
      * the needed actions.
      *
-     * @param resource $in        Incoming bucket brigade we need to filter
-     * @param resource $out       Outgoing bucket brigade with already filtered content
-     * @param integer  &$consumed The count of altered characters as buckets pass the filter
-     * @param boolean  $closing   Is the stream about to close?
+     * @param resource $in       Incoming bucket brigade we need to filter
+     * @param resource $out      Outgoing bucket brigade with already filtered content
+     * @param integer  $consumed The count of altered characters as buckets pass the filter
+     * @param boolean  $closing  Is the stream about to close?
      *
      * @throws \TechDivision\PBC\Exceptions\GeneratorException
      *

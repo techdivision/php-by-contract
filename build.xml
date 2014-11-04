@@ -57,14 +57,4 @@
         <antcall target="composer-update"/>
     </target>
 
-    <!-- ==================================================================== -->
-    <!-- Will deploy our git hooks if any ant target gets executed            -->
-    <!-- ==================================================================== -->
-    <copy todir=".git/hooks">
-        <fileset dir="hooks">
-            <include name="**/*" />
-        </fileset>
-    </copy>
-    <chmod dir=".git/hooks" perm="755" includes="**/*"/>
-
 </project>
